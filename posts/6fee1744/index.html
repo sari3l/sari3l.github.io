@@ -1,0 +1,2637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="Sariel.D">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Sariel.D">
+    
+    <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="">
+    <meta name="description" content="无论是 Red Teamers 或是 Pentester 都已经习惯进入域内环境后对 AD 进行探测、侦查，以便能更高效的对内网域环境进行针对性的攻击 这篇文章原本是为了想分析 BloodHound 的原理，仔细看了后，觉得饭还是一口一口吃 尤其在User Rights Assignment一节，真的是一段话一种攻击方式 (-^-)，感觉与之前的知识点结合一下顺畅了不少">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Active Directory Recon 初步学习">
+<meta property="og:url" content="https://blog.sari3l.com/posts/6fee1744/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="无论是 Red Teamers 或是 Pentester 都已经习惯进入域内环境后对 AD 进行探测、侦查，以便能更高效的对内网域环境进行针对性的攻击 这篇文章原本是为了想分析 BloodHound 的原理，仔细看了后，觉得饭还是一口一口吃 尤其在User Rights Assignment一节，真的是一段话一种攻击方式 (-^-)，感觉与之前的知识点结合一下顺畅了不少">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="article:published_time" content="2019-06-15T14:59:36.000Z">
+<meta property="article:modified_time" content="2020-07-06T09:44:56.811Z">
+<meta property="article:author" content="Sariel.D">
+<meta property="article:tag" content="内网">
+<meta property="article:tag" content="RedTeam">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    
+    <link rel="alternate" href="/atom.xml" title="Learning Man&#39;s Blog" type="application/atom+xml">
+    
+    <title>Active Directory Recon 初步学习 · Learning Man</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/css/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/favicon.ico" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/scripts/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-129685149-2', 'auto');
+        ga('send', 'pageview');
+    </script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="stylesheet" href="/css/prism-funky.css" type="text/css"></head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Learning Man&#39;s Blog</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">Active Directory Recon 初步学习</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Learning Man's Blog</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            Active Directory Recon 初步学习
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "内网">内网</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "RedTeam">RedTeam</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">2.9k</span>阅读时长: <span class="post-count reading-time">12 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/06/15</span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <!--<img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        -->
+        <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <h2 id="0x00-Tools"><a href="#0x00-Tools" class="headerlink" title="0x00 Tools"></a>0x00 Tools</h2><ul>
+<li><a href="https://github.com/BloodHoundAD/BloodHound" target="_blank" rel="noopener">BloodHound</a></li>
+<li><a href="https://github.com/PowerShellMafia/PowerSploit" target="_blank" rel="noopener">PowerSploit - PowerView</a></li>
+<li><a href="https://github.com/sense-of-security/ADRecon" target="_blank" rel="noopener">ADRecon</a></li>
+<li><a href="https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer" target="_blank" rel="noopener">ADExplorer</a></li>
+<li><a href="https://github.com/cyberark/ACLight" target="_blank" rel="noopener">ACLight</a></li>
+<li><a href="https://blogs.technet.microsoft.com/pfesweplat/2013/05/13/take-control-over-ad-permissions-and-the-ad-acl-scanner-tool/" target="_blank" rel="noopener">AD ACL Scanner</a></li>
+</ul>
+<h2 id="0x01-用户组成员"><a href="#0x01-用户组成员" class="headerlink" title="0x01 用户组成员"></a>0x01 用户组成员</h2><p>常见的 SID 列表：<a href="https://support.microsoft.com/en-us/help/243330/well-known-security-identifiers-in-windows-operating-systems" target="_blank" rel="noopener">well-known-security-identifiers-in-windows-operating-systems</a></p>
+<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/dn579255%28v=ws.11%29" target="_blank" rel="noopener">具有默认权限提升的用户组成员</a>:</p>
+<table>
+<thead>
+<tr>
+<th>Default Security Group</th>
+<th>SID/RID</th>
+<th align="center">Windows Server 2012 R2</th>
+<th align="center">Windows Server 2012</th>
+<th align="center">Windows Server 2008 R2</th>
+<th align="center">Windows Server 2008</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Account Operators</td>
+<td>S-1-5-32-548</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Administrators</td>
+<td>S-1-5-32-544</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Allowed RODC Password Replication Group</td>
+<td>S-1-5-21-&lt;domain&gt;-571</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Backup Operators</td>
+<td>S-1-5-32-551</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Certificate Service DCOM Access</td>
+<td>S-1-5-32-&lt;domain&gt;-574</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Cert Publishers</td>
+<td>S-1-5-&lt;domain&gt;-517</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Distributed COM Users</td>
+<td>S-1-5-32-562</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>DnsAdmins</td>
+<td>S-1-5-21-&lt;domain&gt;-1102</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Domain Admins</td>
+<td>S-1-5-&lt;domain&gt;-512</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Enterprise Admins</td>
+<td>S-1-5-21-&lt;root_domain&gt;-519</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Event Log Readers</td>
+<td>S-1-5-32-573</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Group Policy Creators Owners</td>
+<td>S-1-5-&lt;domain&gt;-520</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Hyper-V Administrators</td>
+<td>S-1-5-32-578</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td>Pre–Windows 2000 Compatible Access</td>
+<td>S-1-5-32-554</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Print Operators</td>
+<td>S-1-5-32-550</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Protected Users</td>
+<td>S-1-5-21-&lt;domain&gt;-525</td>
+<td align="center">Yes</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td>Remote Desktop Users</td>
+<td>S-1-5-32-555</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Schema Admins</td>
+<td>S-1-5-<root domain>-518</root></td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>Server Operators</td>
+<td>S-1-5-32-549</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+</tr>
+<tr>
+<td>WinRMRemoteWMIUsers_</td>
+<td>S-1-5-21-&lt;domain&gt;-1000</td>
+<td align="center">Yes</td>
+<td align="center">Yes</td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+</tbody></table>
+<h2 id="0x02-Active-Directory-Groups-with-Privileged-Rights-on-Computers"><a href="#0x02-Active-Directory-Groups-with-Privileged-Rights-on-Computers" class="headerlink" title="0x02 Active Directory Groups with Privileged Rights on Computers"></a>0x02 Active Directory Groups with Privileged Rights on Computers</h2><p>大多数组织使用组策略将 Active Directory 组添加到计算机上的本地组中（通常为管理员组）</p>
+<p>使用PowerView，我们可以轻松发现在工作站和服务器上具有管理权限的AD组（这是非常典型的用例）</p>
+<p>GPO: “Add Server Admins to Local Administrator Group”<br>Local Group: Administrators<br>AD Group: Server Admins (SID is shown in the example)</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/6fee1744/2019-06-15-15606103131873.png" alt="-w694"></p>
+<p>GPO: “Add Workstation Admins to Local Administrator Group”<br>Local Group: Administrators<br>AD Group: Workstation Admins (SID is shown in the example)</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/6fee1744/2019-06-15-15606103266456.png" alt="-w736"></p>
+<h2 id="0x03-ACLs"><a href="#0x03-ACLs" class="headerlink" title="0x03 ACLs"></a>0x03 ACLs</h2><p>与文件系统相似，Active Directory objects 也具有权限系统</p>
+<p>这些权限被称为 Access Control Lists (ACLs)，通过一种名为 Security Descriptor Definition Language (SDDL) 隐晦的格式设置对象的权限</p>
+<p>SDDL 在 DACL 和 SACL 中使用 <a href="https://docs.microsoft.com/zh-cn/windows/desktop/SecAuthZ/ace-strings" target="_blank" rel="noopener">ACE 链表</a>作为<code>安全描述符</code>字符串的一部分</p>
+<p><code>D:PAI(D;OICI;FA;;;BG)(A;OICI;FA;;;BA)(A;OICIIO;FA;;;CO)(A;OICI;FA;;;SY)(A;OICI;FA;;;BU)</code></p>
+<p>每条 ACE 对应的语法</p>
+<p><code>ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;(resource_attribute)</code></p>
+<p>具体的各个参数值可在通过<a href="https://docs.microsoft.com/zh-cn/windows/desktop/SecAuthZ/ace-strings#fields" target="_blank" rel="noopener">此页面</a>查询，在页面最下方官方也给出一些简单的例子方便理解</p>
+<h3 id="AdminSDHolder"><a href="#AdminSDHolder" class="headerlink" title="AdminSDHolder"></a>AdminSDHolder</h3><p>在 AD ACLs 中，有一个被系统容器成为<code>AdminSDHolder</code>的对象，它的存在只有一个目的：成为域中具有高级权限的对象(及其成员)的权限模板对象</p>
+<h4 id="Security-Descriptor-propagator-SDProp"><a href="#Security-Descriptor-propagator-SDProp" class="headerlink" title="Security Descriptor propagator (SDProp)"></a>Security Descriptor propagator (SDProp)</h4><p>SDProp Protected Objects (Windows Server 2008 &amp; Windows Server 2008 R2):</p>
+<ul>
+<li>Account Operators</li>
+<li>Administrator</li>
+<li>Administrators</li>
+<li>Backup Operators</li>
+<li>Domain Admins</li>
+<li>Domain Controllers</li>
+<li>Enterprise Admins</li>
+<li>Krbtgt</li>
+<li>Print Operators</li>
+<li>Read-only Domain Controllers</li>
+<li>Replicator</li>
+<li>Schema Admins</li>
+<li>Server Operators</li>
+</ul>
+<p>每隔 60 分钟，PDC模拟器会运行一个进程来列举这些受保护的对象及其成员，并标记在<code>AdminSDHolder</code>中配置的权限(并将 admin 属性设置为 1)，由此来确保特权用户组、账号得到保护</p>
+<hr>
+<p>保持 AD 对象的自定义权限是非常困难的，以下就是一个例子</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/6fee1744/2019-06-15-15605899180207.png" alt="-w1280"></p>
+<p>这个 OU 委托中存在一个很严重的问题，具有完全控制权限的 Domain Computers 被授权给了此 OU 所有的对象及继承它的对象</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/6fee1744/2019-06-15-15605909843212.png" alt="-w1356"></p>
+<hr>
+<p>攻击者对以下 ACLs 中<code>提供特权操作</code>的权限最感兴趣：</p>
+<ul>
+<li>Replicating Directory Changes All</li>
+<li>Replicating Directory Changes (DS-Replication-Get-Changes)</li>
+<li>GenericAll: GenericAll = Full Control</li>
+<li>GenericWrite: Provides write access to all properties.</li>
+<li>WriteDACL: Provides the ability to modify security on an object which can lead to Full Control of the object.</li>
+<li>Self:  Provides the ability to perform validated writes.</li>
+<li>WriteOwner:: Provides the ability to take ownership of an object. The owner of an object can gain full control rights on the object.</li>
+<li>WriteProperty: Typically paired with specific attribute/property information.</li>
+<li>CreateChild: Provides the ability to create an object of a specified type (or “All”).</li>
+<li>DeleteChild: Provides the ability to delete an object of a specified type (or “All”).</li>
+<li>Extended Right: This is an interesting one because if provides additional rights beyond the obvious.</li>
+</ul>
+<h2 id="SID-History"><a href="#SID-History" class="headerlink" title="SID History"></a>SID History</h2><p>简单地说，SID历史记录用于确保账户在从两个域A、B中迁移时，在 SID 改变后，通过将旧的 SID 映射到新的 SID 后，保证账户仍能在迁出的域A中继续访问</p>
+<h3 id="SID-History-Injection"><a href="#SID-History-Injection" class="headerlink" title="SID History Injection"></a><a href="https://adsecurity.org/?p=1772" target="_blank" rel="noopener">SID History Injection</a></h3><p>注意，SID 历史在同一个域中的作用与 SID 同一个林的跨多个域中是相同的，这意味着 DomainA 中的常规用户可以包含 DomainA SIDs，如果其中 SID 用于特权账户或组，那么一个常规用户就可以拥有域管理员权限而不需要成为该域管理员组的成员</p>
+<hr>
+<p><strong>案例：劫权五分钟</strong></p>
+<p>Mimikatz 提供将 SID History 注入任意用户账户(需要 Domain Admin 或者等效的权限)，如下中，攻击者创建一个用户账户<code>bobafett</code>，并将域中默认管理账户<code>ADSAdministrator</code>(RID 500)注入到账户 SID History属性中</p>
+<blockquote>
+<p>SID: S-1-5-21-domain-500<br>Name: Administrator<br>Description: A user account for the system administrator. By default, it is the only user account that is given full control over the system.</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/6fee1744/2019-06-15-15605969925670.png" alt="-w495"></p>
+<p>当用户bobafett登录时，所有与之相关的 SID 都会被添加到用户 token 中，用于确定对资源的访问权限</p>
+<p>这些 SIDs 包括</p>
+<ul>
+<li>用户 SID</li>
+<li>用户所在组 SID</li>
+<li>SID 历史记录中的 SID</li>
+</ul>
+<p>通过命令<code>Get-ADUser</code>可以看到虽然账户bobafett在 SIDHistory 中已经拥有了ADSAdministrator 账户 SID，但是在 MemberOf 却没有任何组成员身份</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/6fee1744/2019-06-15-15605978197251.png" alt="-w387"></p>
+<h4 id="快速攻击"><a href="#快速攻击" class="headerlink" title="快速攻击"></a>快速攻击</h4><p>检测 SID 历史记录账户用于提权的最佳方法是枚举所有具有 SID 历史记录属性的用户的数据，并标记包含同一个域中的 SID 的账户</p>
+<pre class=" language-powershell"><code class="language-powershell"><span class="token comment" spellcheck="true">#Detect Same Domain SID History</span>
+> <span class="token function">Import-Module</span> ActiveDirectory
+<span class="token namespace">[string]</span><span class="token variable">$DomainSID</span> = <span class="token punctuation">(</span><span class="token punctuation">(</span>Get<span class="token operator">-</span>ADDomain<span class="token punctuation">)</span><span class="token punctuation">.</span>DomainSID<span class="token punctuation">.</span>Value<span class="token punctuation">)</span>
+
+> Get<span class="token operator">-</span>ADUser <span class="token operator">-</span><span class="token keyword">Filter</span> SIDHistory <span class="token operator">-Like</span> <span class="token string">"*"</span> <span class="token operator">-</span>Properties SIDHistory <span class="token punctuation">|</span> `
+Where <span class="token punctuation">{</span> <span class="token variable">$_</span><span class="token punctuation">.</span>SIDHistory <span class="token operator">-Like</span> <span class="token string">"<span class="token variable">$DomainSID</span>-*"</span> <span class="token punctuation">}</span></code></pre>
+<p>*注意：在具有多个域的林中，建议在林中的每个域以及每个受信任的域或林中查找管理组 SID(和成员账户 SID)</p>
+<h4 id="攻击快速检测"><a href="#攻击快速检测" class="headerlink" title="攻击快速检测"></a>攻击快速检测</h4><p>Configure sub-category auditing under Account Management,  “Audit User Account Management” (success) on Domain Controllers for the following event ids:</p>
+<ul>
+<li>4765 将 SID 历史记录添加到一个账户中</li>
+<li>4766 尝试将 SID 历史记录添加到账户的失败事件</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/6fee1744/2019-06-15-15605994854623.jpg" alt></p>
+<h2 id="Group-Policy-Permissions"><a href="#Group-Policy-Permissions" class="headerlink" title="Group Policy Permissions"></a>Group Policy Permissions</h2><p>组策略权限用于在在Active Directory中创建，配置和链接组策略对象(GPO)。将GPO链接到OU时，GPO中的设置将应用于该OU中的相应对象(用户/计算机)</p>
+<p>如果在链接到该域的组策略上配置了自定义权限，并且攻击者获得对具有修改访问权限的帐户的访问权限，则该域可能会被入侵</p>
+<p>PowerView 提供一种快速扫描所有域的 GPO 权限的方法</p>
+<pre class=" language-powershell"><code class="language-powershell">> Get<span class="token operator">-</span>NetGPO <span class="token punctuation">|</span> <span class="token operator">%</span><span class="token punctuation">{</span>Get<span class="token operator">-</span>ObjectAcl <span class="token operator">-</span>ResolveGUIDs <span class="token operator">-</span>Name <span class="token variable">$_</span><span class="token punctuation">.</span>Name<span class="token punctuation">}</span></code></pre>
+<h3 id="Abusing-GPO-Permissions"><a href="#Abusing-GPO-Permissions" class="headerlink" title="Abusing GPO Permissions"></a>Abusing GPO Permissions</h3><p>内容学习中，待丰富…</p>
+<p><a href="http://www.harmj0y.net/blog/redteaming/abusing-gpo-permissions/" target="_blank" rel="noopener">http://www.harmj0y.net/blog/redteaming/abusing-gpo-permissions/</a></p>
+<h2 id="User-Rights-Assignment"><a href="#User-Rights-Assignment" class="headerlink" title="User Rights Assignment"></a>User Rights Assignment</h2><p>用户权限分配经常在计算机 GPO 中进行配置，并且定义了计算机的几个权限</p>
+<p>域控制器通常被用于在应用于域控制器容器中的默认域控制器策略中进行用户权限分配，分析与域控制器链接的GPO，可以提供DC和域被提升权限的安全主体的有关的有用信息</p>
+<ul>
+<li>SeTrustedCredManAccessPrivilege：访问凭据管理器作为受信任的呼叫者</li>
+<li>SeNetworkLogonRight：从网络访问此计算机</li>
+<li>SeTcbPrivilege：作为操作系统的一部分</li>
+<li>SeMachineAccountPrivilege：将工作站添加到域</li>
+<li>SeIncreaseQuotaPrivilege：调整进程的内存配额</li>
+<li>SeInteractiveLogonRight：允许本地登录</li>
+<li>SeRemoteInteractiveLogonRight：允许通过远程桌面服务登录</li>
+<li>SeBackupPrivilege：备份文件和目录</li>
+<li>SeChangeNotifyPrivilege：绕过遍历检查</li>
+<li>SeSystemtimePrivilege：更改系统时间</li>
+<li>SeTimeZonePrivilege：更改时区</li>
+<li>SeCreatePagefilePrivilege：创建页面文件</li>
+<li>SeCreateTokenPrivilege：创建一个令牌对象</li>
+<li>SeCreateGlobalPrivilege：创建全局对象</li>
+<li>SeCreatePermanentPrivilege：创建永久共享对象</li>
+<li>SeCreateSymbolicLinkPrivilege：创建符号链接</li>
+<li>SeDebugPrivilege：调试程序</li>
+<li>SeDenyNetworkLogonRight：拒绝从网络访问此计算机</li>
+<li>SeDenyBatchLogonRight：拒绝作为批处理作业登录</li>
+<li>SeDenyServiceLogonRight：拒绝作为服务登录</li>
+<li>SeDenyInteractiveLogonRight：拒绝本地登录</li>
+<li>SeDenyRemoteInteractiveLogonRight：拒绝通过远程桌面服务登录</li>
+<li>SeEnableDelegationPrivilege：启用计算机和用户帐户以进行授权</li>
+<li>SeRemoteShutdownPrivilege：从远程系统强制关闭</li>
+<li>SeAuditPrivilege：生成安全审核</li>
+<li>SeImpersonatePrivilege：认证后模拟客户端</li>
+<li>SeIncreaseWorkingSetPrivilege：增加一个进程工作集</li>
+<li>SeIncreaseBasePriorityPrivilege：增加调度优先级</li>
+<li>SeLoadDriverPrivilege：加载和卸载设备驱动程序</li>
+<li>SeLockMemoryPrivilege：在内存中锁定页面</li>
+<li>SeBatchLogonRight：作为批处理作业登录</li>
+<li>SeServiceLogonRight：作为服务登录</li>
+<li>SeSecurityPrivilege：管理审核和安全日志</li>
+<li>SeRelabelPrivilege：修改对象标签</li>
+<li>SeSystemEnvironmentPrivilege：修改固件环境值</li>
+<li>SeManageVolumePrivilege：执行卷维护任务</li>
+<li>SeProfileSingleProcessPrivilege：配置文件单进程</li>
+<li>SeSystemProfilePrivilege：配置文件系统性能</li>
+<li>SeUndockPrivilege：从工作站中移除电脑</li>
+<li>SeAssignPrimaryTokenPrivilege：替换进程级令牌</li>
+<li>SeRestorePrivilege：恢复文件和目录</li>
+<li>SeShutdownPrivilege：关闭系统</li>
+<li>SeSyncAgentPrivilege：同步目录服务数据</li>
+<li>SeTakeOwnershipPrivilege：获取文件或其他对象的所有权</li>
+</ul>
+<hr>
+<p>在这里有很多有趣的策略(特别是适用于域控制器的GPO):</p>
+<ul>
+<li>Allow logon locally &amp; Allow logon over Remote Desktop Services - 允许本地登录并允许登录远程桌面服务：提供登录权限</li>
+<li>Manage auditing and security log - 管理审核和安全日志：提供查看事件日志中的所有事件（包括安全事件）并清除事件日志的功能<ul>
+<li>有趣的点：Exchange Server 需要这样的权限，这意味着如果攻击者在Exchange服务器上获得系统权限，则可以清除域控制器上的安全日志<br>↳ CVE-2018-8581：<a href="https://www.anquanke.com/post/id/170199" target="_blank" rel="noopener">https://www.anquanke.com/post/id/170199</a></li>
+</ul>
+</li>
+<li>Synchronize directory service data - 同步目录服务数据 ：”此策略设置确定了哪些用户和组具有同步所有目录服务数据的权限，而不管对象和属性的保护。使用LDAP目录同步（dirsync）服务需要此权限。域控制器本身就具有此用户权限，因为同步过程是在域控制器上的系统帐户的上下文中运行。”<br>↳ 这意味着在域控制器上对此用户的访问权限可能能够运行DCSync<br>&nbsp;&nbsp;&nbsp;&nbsp;↳ 黄金票据：<a href="https://www.cnblogs.com/KevinGeorge/p/10463527.html" target="_blank" rel="noopener">https://www.cnblogs.com/KevinGeorge/p/10463527.html</a></li>
+<li>Enable computer and user accounts to be trusted for delegation - 允许计算机和用户帐户被委托进行授权：提供在域中的计算机和用户上配置委派的功能。<ul>
+<li>有趣的点：这提供了在计算机或用户帐户上设置Kerberos委派的功能。</li>
+</ul>
+</li>
+<li>Impersonate a client after authentication - 验证后模仿一个客户端：这个看起来是一些很有趣的东西，它可以…<br>↳ msf 中的 getsystem 原理：<a href="https://www.anquanke.com/post/id/87292" target="_blank" rel="noopener">https://www.anquanke.com/post/id/87292</a></li>
+<li>Take ownership of files or other objects - 取得文件或其他对象的所有权：Administrators 仅有。任意用户拥有此权限后，可忽视任意对象所设置的权限而直接获取其所有权，并可进行任意修改，但可能导致暴露数据、数据报错、拒绝服务</li>
+<li>Load and Unload Device Drivers - 加载或卸载设备驱动器：”设备驱动程序在高权限运行代码。具有’加载和卸载设备驱动程序’用户权限的用户可能会无意中安装伪装成设备驱动程序的恶意软件。管理员应该小心谨慎，只安装带有经过验证的数字签名的驱动程序。”</li>
+</ul>
+<h2 id="检查步骤"><a href="#检查步骤" class="headerlink" title="检查步骤"></a>检查步骤</h2><ul>
+<li>枚举默认组(包括子组)的组成员，确定需要什么权限并删除其他不需要的权限</li>
+<li>扫描 Active Directory (特别是OU和安全组) 中的自定义委派</li>
+<li>扫描具有 SID History 的帐户(仅在从一个域到另一个域的主动迁移期间才会需要)</li>
+<li>查看域控制器、服务器和工作站的GPO中的用户权限分配</li>
+<li>查看将 AD 组添加到本地组的 GPO，并确保仍然需要这些本地组，并且权限级别是适当的</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li>Scanning for Active Directory Privileges &amp; Privileged Accounts : <a href="https://adsecurity.org/?p=3658" target="_blank" rel="noopener">https://adsecurity.org/?p=3658</a></li>
+<li>Sneaky Active Directory Persistence #14: SID History : <a href="https://adsecurity.org/?p=1772" target="_blank" rel="noopener">https://adsecurity.org/?p=1772</a></li>
+</ol>
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://blog.sari3l.com">Sariel.D</a>
+            <p>原文链接：<a href="https://blog.sari3l.com/posts/6fee1744/">https://blog.sari3l.com/posts/6fee1744/</a>
+            <p>发表日期：<a href="https://blog.sari3l.com/posts/6fee1744/">June 15th 2019, 10:59:36 pm</a>
+            <p>更新日期：<a href="https://blog.sari3l.com/posts/6fee1744/">July 6th 2020, 5:44:56 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/posts/8dea0d95/" title= "Sqlmap --os-shell 原理简析">
+                    <div class="nextTitle">Sqlmap --os-shell 原理简析</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/posts/caf0d20c/" title= "RCTF 2019 WEB writeup">
+                    <div class="prevTitle">RCTF 2019 WEB writeup</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- gitalk评论 -->
+
+    <!-- utteranc评论 -->
+
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:master@mail.sari3l.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="https://github.com/sari3l" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="https://www.instagram.com/x3rias" class="iconfont-archer instagram" target="_blank" title=instagram></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title=rss></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00-Tools"><span class="toc-number">1.</span> <span class="toc-text">0x00 Tools</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-用户组成员"><span class="toc-number">2.</span> <span class="toc-text">0x01 用户组成员</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-Active-Directory-Groups-with-Privileged-Rights-on-Computers"><span class="toc-number">3.</span> <span class="toc-text">0x02 Active Directory Groups with Privileged Rights on Computers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-ACLs"><span class="toc-number">4.</span> <span class="toc-text">0x03 ACLs</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#AdminSDHolder"><span class="toc-number">4.1.</span> <span class="toc-text">AdminSDHolder</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Security-Descriptor-propagator-SDProp"><span class="toc-number">4.1.1.</span> <span class="toc-text">Security Descriptor propagator (SDProp)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SID-History"><span class="toc-number">5.</span> <span class="toc-text">SID History</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SID-History-Injection"><span class="toc-number">5.1.</span> <span class="toc-text">SID History Injection</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#快速攻击"><span class="toc-number">5.1.1.</span> <span class="toc-text">快速攻击</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#攻击快速检测"><span class="toc-number">5.1.2.</span> <span class="toc-text">攻击快速检测</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Group-Policy-Permissions"><span class="toc-number">6.</span> <span class="toc-text">Group Policy Permissions</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Abusing-GPO-Permissions"><span class="toc-number">6.1.</span> <span class="toc-text">Abusing GPO Permissions</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#User-Rights-Assignment"><span class="toc-number">7.</span> <span class="toc-text">User Rights Assignment</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#检查步骤"><span class="toc-number">8.</span> <span class="toc-text">检查步骤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">9.</span> <span class="toc-text">参考资料</span></a></li></ol> -->
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00-Tools"><span class="toc-text">0x00 Tools</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-用户组成员"><span class="toc-text">0x01 用户组成员</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-Active-Directory-Groups-with-Privileged-Rights-on-Computers"><span class="toc-text">0x02 Active Directory Groups with Privileged Rights on Computers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-ACLs"><span class="toc-text">0x03 ACLs</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#AdminSDHolder"><span class="toc-text">AdminSDHolder</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Security-Descriptor-propagator-SDProp"><span class="toc-text">Security Descriptor propagator (SDProp)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SID-History"><span class="toc-text">SID History</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SID-History-Injection"><span class="toc-text">SID History Injection</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#快速攻击"><span class="toc-text">快速攻击</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#攻击快速检测"><span class="toc-text">攻击快速检测</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Group-Policy-Permissions"><span class="toc-text">Group Policy Permissions</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Abusing-GPO-Permissions"><span class="toc-text">Abusing GPO Permissions</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#User-Rights-Assignment"><span class="toc-text">User Rights Assignment</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#检查步骤"><span class="toc-text">检查步骤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-text">参考资料</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 74
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/9a92d107/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/fd03bf87/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/df08045a/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/26</span><a class="archive-post-title" href= "/posts/787c7e6c/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/55ea3bd4/" >Shiro-055 分析&回显</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/18</span><a class="archive-post-title" href= "/posts/6712089c/" >深信服 EDR RCE 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/04</span><a class="archive-post-title" href= "/posts/c5e878c3/" >CobaltStrike Argue 原理 - 翻译文</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span><a class="archive-post-title" href= "/posts/afd91327/" >Github Page 加速</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/posts/76ce816c/" >CobaltStrike 破解步骤</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/b7ea5c49/" >一道题回顾智能合约 Coverage</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/06</span><a class="archive-post-title" href= "/posts/58a67794/" >F5 BIG-IP RCE简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/17</span><a class="archive-post-title" href= "/posts/608d18f0/" >用友NC反序列化 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/14</span><a class="archive-post-title" href= "/posts/d4fb29f2/" >Pwnable.kr 之 Toddler's Bottle</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/01</span><a class="archive-post-title" href= "/posts/ecb4dfa2/" >Weblogic T3 协议学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/20</span><a class="archive-post-title" href= "/posts/e32c5d3e/" >CVE-2020-2551 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/12</span><a class="archive-post-title" href= "/posts/fa80d225/" >CVE-2020-2555 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href= "/posts/91ba290f/" >Java 反弹 Shell</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/26</span><a class="archive-post-title" href= "/posts/56fcf5d8/" >Thinkphp 5.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/22</span><a class="archive-post-title" href= "/posts/7d9ef63e/" >CVE-2020-1938（Ghost Cat）简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/17</span><a class="archive-post-title" href= "/posts/2cc5b12d/" >JDBC Deserialization</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/f0f80c65/" >Abusing MySQL clients RCE</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/f33694e6/" >2020 All is New</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/25</span><a class="archive-post-title" href= "/posts/418c3786/" >对 Cookie 的一点学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/18</span><a class="archive-post-title" href= "/posts/1e8439b5/" >HTTP Smuggling Attack 随笔</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/10</span><a class="archive-post-title" href= "/posts/b61194b/" >ThinkPHP 6.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/07</span><a class="archive-post-title" href= "/posts/4457d4a3/" >ThinkPHP 5.1.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/a3557ae1/" >记</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/9622f295/" >Mysql 注入基础小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/03</span><a class="archive-post-title" href= "/posts/a62f29f1/" >XSS with ServiceWorkers</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/66ad34dc/" >CSP 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href= "/posts/13977d3a/" >SVG with HTML Parsing</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/06</span><a class="archive-post-title" href= "/posts/76496c2b/" >Fastjson 新反序列化漏洞解析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/16</span><a class="archive-post-title" href= "/posts/85fdfb64/" >SSRF 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/d8415c32/" >Discuz! ML 3.x 命令执行简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/10</span><a class="archive-post-title" href= "/posts/fb0090e/" >Redis Rce 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span><a class="archive-post-title" href= "/posts/8dea0d95/" >Sqlmap --os-shell 原理简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/15</span><a class="archive-post-title" href= "/posts/6fee1744/" >Active Directory Recon 初步学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span><a class="archive-post-title" href= "/posts/caf0d20c/" >RCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/09</span><a class="archive-post-title" href= "/posts/73ecd8cc/" >Jenkins CVE-2018-1000861 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/07</span><a class="archive-post-title" href= "/posts/65a5a87a/" >*CTF 2019 homebrewEvtLoop</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/27</span><a class="archive-post-title" href= "/posts/243b6098/" >Web(CTF)中的密码学 (一)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href= "/posts/7a31e713/" >Abusing MySQL Clients 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/12</span><a class="archive-post-title" href= "/posts/8e809579/" >DDCTF 2019 部分 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/30</span><a class="archive-post-title" href= "/posts/6fdffa73/" >0CTF/TCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span><a class="archive-post-title" href= "/posts/1b4ade61/" >JSONP Content-Type 简单Fuzz</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/10</span><a class="archive-post-title" href= "/posts/469de5e6/" >JNDI/LADP 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/07</span><a class="archive-post-title" href= "/posts/284d4995/" >Fastjson 反序列化漏洞研究</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/06</span><a class="archive-post-title" href= "/posts/fdaf04b/" >SMTP 25 端口测试记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/06</span><a class="archive-post-title" href= "/posts/9b1f3ba/" >pyppeteer 学习记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/31</span><a class="archive-post-title" href= "/posts/4ffb62e5/" >Python 多线程、多进程、协程(未完结)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/29</span><a class="archive-post-title" href= "/posts/83241730/" >Frida —— WeChat(二) 🧧</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/25</span><a class="archive-post-title" href= "/posts/b11f7440/" >动态调试 with smali</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href= "/posts/76594cbe/" >Nexus 解决显示 “无法访问互联网”</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/19</span><a class="archive-post-title" href= "/posts/5da99ec5/" >Frida —— WeChat(一) 🎲</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/d55cdeb2/" >Frida —— 初体验</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/446263e2/" >关系爬虫 —— Weibo</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/27a5d990/" >2019 All For One</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/30</span><a class="archive-post-title" href= "/posts/9dafb9a3/" >OpenCV 初接触</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/24</span><a class="archive-post-title" href= "/posts/2fefc8f7/" >验证码破解系列 —— 数美</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/21</span><a class="archive-post-title" href= "/posts/f8004910/" >Chrome Extensions —— fir.im Downloader 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span><a class="archive-post-title" href= "/posts/fedef51/" >XXE 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/posts/90979812/" >Burp Extensions —— RSA Plugin 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span><a class="archive-post-title" href= "/posts/81dfbfaf/" >CODE BREAKING</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/23</span><a class="archive-post-title" href= "/posts/4a17b156/" >Hello World</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/08</span><a class="archive-post-title" href= "/posts/970fcb23/" >OGNL Payload</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span><a class="archive-post-title" href= "/posts/d34dbe44/" >s2-016 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span><a class="archive-post-title" href= "/posts/626780ce/" >s2-032 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/617314e9/" >s2-033 & s2-037 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href= "/posts/9cab2514/" >s2-045 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/17</span><a class="archive-post-title" href= "/posts/e0ca00cf/" >s2-046 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/16</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/11</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/09</span><a class="archive-post-title" href= "/posts/dd92b54a/" >s2-053 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span><a class="archive-post-title" href= "/posts/c43e3a51/" >s2-057 漏洞分析</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="ctf"><span class="iconfont-archer">&#xe606;</span>ctf</span>
+    
+        <span class="sidebar-tag-name" data-tags="writeup"><span class="iconfont-archer">&#xe606;</span>writeup</span>
+    
+        <span class="sidebar-tag-name" data-tags="随笔"><span class="iconfont-archer">&#xe606;</span>随笔</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
+    
+        <span class="sidebar-tag-name" data-tags="内网"><span class="iconfont-archer">&#xe606;</span>内网</span>
+    
+        <span class="sidebar-tag-name" data-tags="RedTeam"><span class="iconfont-archer">&#xe606;</span>RedTeam</span>
+    
+        <span class="sidebar-tag-name" data-tags="Burp suite"><span class="iconfont-archer">&#xe606;</span>Burp suite</span>
+    
+        <span class="sidebar-tag-name" data-tags="coding"><span class="iconfont-archer">&#xe606;</span>coding</span>
+    
+        <span class="sidebar-tag-name" data-tags="extension"><span class="iconfont-archer">&#xe606;</span>extension</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="Tomcat"><span class="iconfont-archer">&#xe606;</span>Tomcat</span>
+    
+        <span class="sidebar-tag-name" data-tags="LFI"><span class="iconfont-archer">&#xe606;</span>LFI</span>
+    
+        <span class="sidebar-tag-name" data-tags="RCE"><span class="iconfont-archer">&#xe606;</span>RCE</span>
+    
+        <span class="sidebar-tag-name" data-tags="Weblogic"><span class="iconfont-archer">&#xe606;</span>Weblogic</span>
+    
+        <span class="sidebar-tag-name" data-tags="Deserialize"><span class="iconfont-archer">&#xe606;</span>Deserialize</span>
+    
+        <span class="sidebar-tag-name" data-tags="Chrome"><span class="iconfont-archer">&#xe606;</span>Chrome</span>
+    
+        <span class="sidebar-tag-name" data-tags="cobaltstirke"><span class="iconfont-archer">&#xe606;</span>cobaltstirke</span>
+    
+        <span class="sidebar-tag-name" data-tags="Discuz"><span class="iconfont-archer">&#xe606;</span>Discuz</span>
+    
+        <span class="sidebar-tag-name" data-tags="F5"><span class="iconfont-archer">&#xe606;</span>F5</span>
+    
+        <span class="sidebar-tag-name" data-tags="CVE-2020-5902"><span class="iconfont-archer">&#xe606;</span>CVE-2020-5902</span>
+    
+        <span class="sidebar-tag-name" data-tags="漏洞分析"><span class="iconfont-archer">&#xe606;</span>漏洞分析</span>
+    
+        <span class="sidebar-tag-name" data-tags="fastjson"><span class="iconfont-archer">&#xe606;</span>fastjson</span>
+    
+        <span class="sidebar-tag-name" data-tags="Frida"><span class="iconfont-archer">&#xe606;</span>Frida</span>
+    
+        <span class="sidebar-tag-name" data-tags="java"><span class="iconfont-archer">&#xe606;</span>java</span>
+    
+        <span class="sidebar-tag-name" data-tags="jenkins"><span class="iconfont-archer">&#xe606;</span>jenkins</span>
+    
+        <span class="sidebar-tag-name" data-tags="SQLi"><span class="iconfont-archer">&#xe606;</span>SQLi</span>
+    
+        <span class="sidebar-tag-name" data-tags="Redis"><span class="iconfont-archer">&#xe606;</span>Redis</span>
+    
+        <span class="sidebar-tag-name" data-tags="struts"><span class="iconfont-archer">&#xe606;</span>struts</span>
+    
+        <span class="sidebar-tag-name" data-tags="SSRF"><span class="iconfont-archer">&#xe606;</span>SSRF</span>
+    
+        <span class="sidebar-tag-name" data-tags="ThinkPHP"><span class="iconfont-archer">&#xe606;</span>ThinkPHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="xss"><span class="iconfont-archer">&#xe606;</span>xss</span>
+    
+        <span class="sidebar-tag-name" data-tags="XXE"><span class="iconfont-archer">&#xe606;</span>XXE</span>
+    
+        <span class="sidebar-tag-name" data-tags="OpenCV"><span class="iconfont-archer">&#xe606;</span>OpenCV</span>
+    
+        <span class="sidebar-tag-name" data-tags="智能合约"><span class="iconfont-archer">&#xe606;</span>智能合约</span>
+    
+        <span class="sidebar-tag-name" data-tags="spider"><span class="iconfont-archer">&#xe606;</span>spider</span>
+    
+        <span class="sidebar-tag-name" data-tags="smali"><span class="iconfont-archer">&#xe606;</span>smali</span>
+    
+        <span class="sidebar-tag-name" data-tags="hw2020"><span class="iconfont-archer">&#xe606;</span>hw2020</span>
+    
+        <span class="sidebar-tag-name" data-tags="深信服"><span class="iconfont-archer">&#xe606;</span>深信服</span>
+    
+        <span class="sidebar-tag-name" data-tags="0day"><span class="iconfont-archer">&#xe606;</span>0day</span>
+    
+        <span class="sidebar-tag-name" data-tags="CAPTCHA"><span class="iconfont-archer">&#xe606;</span>CAPTCHA</span>
+    
+        <span class="sidebar-tag-name" data-tags="pwn"><span class="iconfont-archer">&#xe606;</span>pwn</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="编程"><span class="iconfont-archer">&#xe60a;</span>编程</span>
+    
+        <span class="sidebar-category-name" data-categories="代码审计"><span class="iconfont-archer">&#xe60a;</span>代码审计</span>
+    
+        <span class="sidebar-category-name" data-categories="Pentest"><span class="iconfont-archer">&#xe60a;</span>Pentest</span>
+    
+        <span class="sidebar-category-name" data-categories="渗透"><span class="iconfont-archer">&#xe60a;</span>渗透</span>
+    
+        <span class="sidebar-category-name" data-categories="逆向"><span class="iconfont-archer">&#xe60a;</span>逆向</span>
+    
+        <span class="sidebar-category-name" data-categories="其他"><span class="iconfont-archer">&#xe60a;</span>其他</span>
+    
+        <span class="sidebar-category-name" data-categories="验证码"><span class="iconfont-archer">&#xe60a;</span>验证码</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Sariel.D"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(n){n.imageLazyLoadSetting.processImages=o;var i=n.imageLazyLoadSetting.isSPA,r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function o(){i&&(r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")));for(var t,e,a=0;a<r.length;a++)t=r[a],e=void 0,0<=(e=t.getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(n.innerHeight||document.documentElement.clientHeight)&&function(){var t,e,n,i,o=r[a];t=o,e=function(){r=r.filter(function(t){return o!==t})},n=new Image,i=t.getAttribute("data-original"),n.onload=function(){t.src=i,e&&e()},n.src=i}()}o(),n.addEventListener("scroll",function(){var t,e;t=o,e=n,clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(e)},500)})}(this);</script></body>
+</html>
+
+

