@@ -369,6 +369,50 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href = "/posts/e0ca00cf/" >
+            
+                <span>s2-046 漏洞分析</span>
+        </a>
+        <div class="abstract-content">
+            影响版本：
+Struts 2.3.5 - Struts 2.3.31Struts 2.5 - Struts 2.5.10
+漏洞产生原因主要在于使用Jakarta插件处理文件上传操作，对content-length以及filename处理
+【占坑】分析基于2.3.30，貌似高版本触发点不太一样，原理大致相同
+0x01 踩坑按照参考资料1部署就可以了
+0x02 分析跟进分析
+这里看了很多分析，最后感觉还是按处理类来辨析更好
+
+i. JakartaMultiPartRequest
+主要是利用空字节解析错误抛出错误，在对错误信息本地化时候造成了命令执行
+
+
+项目配置
+ P.S. 此配置其实可以不...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/10/17</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "java">java</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "struts">struts</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href = "/posts/2b51554f/" >
             
                 <span>s2-048 漏洞分析</span>
@@ -1721,9 +1765,20 @@ idea生成maven项目，在pom.xml中添加依赖
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 74
+        Total : 75
         </div>
         <!-- search  -->
         
@@ -1733,6 +1788,20 @@ idea生成maven项目，在pom.xml中添加依赖
     
     
     
+    
+    <div class="archive-year"> 2021 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/posts/9e42d867/" >Log4shell 小记</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
@@ -2208,11 +2277,11 @@ idea生成maven项目，在pom.xml中添加依赖
     
         <span class="sidebar-tag-name" data-tags="深信服"><span class="iconfont-archer">&#xe606;</span>深信服</span>
     
-        <span class="sidebar-tag-name" data-tags="0day"><span class="iconfont-archer">&#xe606;</span>0day</span>
-    
         <span class="sidebar-tag-name" data-tags="CAPTCHA"><span class="iconfont-archer">&#xe606;</span>CAPTCHA</span>
     
         <span class="sidebar-tag-name" data-tags="pwn"><span class="iconfont-archer">&#xe606;</span>pwn</span>
+    
+        <span class="sidebar-tag-name" data-tags="Nday"><span class="iconfont-archer">&#xe606;</span>Nday</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>

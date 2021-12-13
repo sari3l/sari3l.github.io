@@ -1,0 +1,2533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="Sariel.D">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Sariel.D">
+    
+    <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="">
+    <meta name="description" content="好久没更新博客了~">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Log4shell 小记">
+<meta property="og:url" content="https://blog.sari3l.com/posts/9e42d867/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="好久没更新博客了~">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="article:published_time" content="2021-12-13T17:32:35.000Z">
+<meta property="article:modified_time" content="2021-12-13T17:39:42.472Z">
+<meta property="article:author" content="Sariel.D">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    
+    <link rel="alternate" href="/atom.xml" title="Learning Man&#39;s Blog" type="application/atom+xml">
+    
+    <title>Log4shell 小记 · Learning Man</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/css/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/favicon.ico" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io@latest/scripts/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-129685149-2', 'auto');
+        ga('send', 'pageview');
+    </script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="stylesheet" href="/css/prism-funky.css" type="text/css"></head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Learning Man&#39;s Blog</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">Log4shell 小记</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Learning Man's Blog</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            Log4shell 小记
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">1.9k</span>阅读时长: <span class="post-count reading-time">8 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2021/12/14</span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <!--<img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        -->
+        <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <blockquote>
+<p>由于传播、利用此文所提供的信息而造成的任何直接或者间接的后果及损失，均由使用者本人负责，文章作者不为此承担任何责任。</p>
+</blockquote>
+<h2 id="version-lt-2-15-0-rc1"><a href="#version-lt-2-15-0-rc1" class="headerlink" title="version &lt; 2.15.0-rc1"></a>version &lt; 2.15.0-rc1</h2><h3 id="commit-分析"><a href="#commit-分析" class="headerlink" title="commit 分析"></a>commit 分析</h3><p>首先根据这两个commits 基本可以确定最终是通过lookup执行了JNDI攻击</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9e42d867/272ead80ffed4144b536829a1312aac9.png" alt="272ead80ffed4144b536829a1312aac9"></p>
+<p>LOG4J2-3198中可以发现一丝端倪</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9e42d867/9f77e65bf41448d9b8394bd5ba3c8775.png" alt="9f77e65bf41448d9b8394bd5ba3c8775"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9e42d867/0a0bb15def3c40a38a9ff873ade0ae24.png" alt="0a0bb15def3c40a38a9ff873ade0ae24"></p>
+<p>通过这两段diff，基本确认就是在MessagePatternConverter通过触发lookup形成了漏洞</p>
+<p>另外可见官方<code>Lookups</code><a href="https://logging.apache.org/log4j/log4j-2.3/manual/lookups.html#JndiLookup" target="_blank" rel="noopener">文档</a>，这里大概知道怎么构造触发</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9e42d867/fc3a53e4edf6417db5f0833067a6dba8.png" alt="fc3a53e4edf6417db5f0833067a6dba8"></p>
+<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>首先经过<code>org.apache.logging.log4j.spi.AbstractLogger#logIfEnabled</code>，在这里isEnabled的作用是比较配置文件中Root设定的最低记录信息等级，确认是否需要记录，等级对应在<code>org.apache.logging.log4j.spi.StandardLevel</code>，数字越大记录越全</p>
+<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Override</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">logIfEnabled</span><span class="token punctuation">(</span><span class="token keyword">final</span> String fqcn<span class="token punctuation">,</span> <span class="token keyword">final</span> Level level<span class="token punctuation">,</span> <span class="token keyword">final</span> Marker marker<span class="token punctuation">,</span> <span class="token keyword">final</span> String message<span class="token punctuation">,</span>
+        <span class="token keyword">final</span> Throwable t<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isEnabled</span><span class="token punctuation">(</span>level<span class="token punctuation">,</span> marker<span class="token punctuation">,</span> message<span class="token punctuation">,</span> t<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">logMessage</span><span class="token punctuation">(</span>fqcn<span class="token punctuation">,</span> level<span class="token punctuation">,</span> marker<span class="token punctuation">,</span> message<span class="token punctuation">,</span> t<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>之后通过默认工厂类构造msg，(这里可能会有隐患，详见：<strong>关于自定义 log4j2.messageFactory</strong> 一节</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">static</span> MessageFactory2 <span class="token function">createDefaultMessageFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+        <span class="token keyword">final</span> MessageFactory result <span class="token operator">=</span> DEFAULT_MESSAGE_FACTORY_CLASS<span class="token punctuation">.</span><span class="token function">newInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token function">narrow</span><span class="token punctuation">(</span>result<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">final</span> InstantiationException <span class="token operator">|</span> IllegalAccessException e<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>执行到<code>org.apache.logging.log4j.core.layout.PatternLayout.PatternSerializer#toSerializable</code>，这里会根据配置解析出的转换器进行数据的格式化并将内容填充到buffer</p>
+<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Override</span>
+<span class="token keyword">public</span> StringBuilder <span class="token function">toSerializable</span><span class="token punctuation">(</span><span class="token keyword">final</span> LogEvent event<span class="token punctuation">,</span> <span class="token keyword">final</span> StringBuilder buffer<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">final</span> <span class="token keyword">int</span> len <span class="token operator">=</span> formatters<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> len<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        formatters<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">format</span><span class="token punctuation">(</span>event<span class="token punctuation">,</span> buffer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>replace <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">// creates temporary objects</span>
+        String str <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        str <span class="token operator">=</span> replace<span class="token punctuation">.</span><span class="token function">format</span><span class="token punctuation">(</span>str<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        buffer<span class="token punctuation">.</span><span class="token function">setLength</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        buffer<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>str<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> buffer<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>当formatter为<code>org.apache.logging.log4j.core.pattern.MessagePatternConverter#format</code>时，如果<code>noLookups</code>未开启，则会尝试通过<code>replace</code>根据表达式替换信息</p>
+<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Override</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">format</span><span class="token punctuation">(</span><span class="token keyword">final</span> LogEvent event<span class="token punctuation">,</span> <span class="token keyword">final</span> StringBuilder toAppendTo<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">final</span> Message msg <span class="token operator">=</span> event<span class="token punctuation">.</span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>msg <span class="token keyword">instanceof</span> <span class="token class-name">StringBuilderFormattable</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+        <span class="token keyword">final</span> <span class="token keyword">boolean</span> doRender <span class="token operator">=</span> textRenderer <span class="token operator">!=</span> null<span class="token punctuation">;</span>
+        <span class="token keyword">final</span> StringBuilder workingBuilder <span class="token operator">=</span> doRender <span class="token operator">?</span> <span class="token keyword">new</span> <span class="token class-name">StringBuilder</span><span class="token punctuation">(</span><span class="token number">80</span><span class="token punctuation">)</span> <span class="token operator">:</span> toAppendTo<span class="token punctuation">;</span>
+
+        <span class="token keyword">final</span> <span class="token keyword">int</span> offset <span class="token operator">=</span> workingBuilder<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>msg <span class="token keyword">instanceof</span> <span class="token class-name">MultiFormatStringBuilderFormattable</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token punctuation">}</span>
+
+        <span class="token comment" spellcheck="true">// TODO can we optimize this?</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>config <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>noLookups<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> offset<span class="token punctuation">;</span> i <span class="token operator">&lt;</span> workingBuilder<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>workingBuilder<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string">'$'</span> <span class="token operator">&amp;&amp;</span> workingBuilder<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string">'{'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token keyword">final</span> String value <span class="token operator">=</span> workingBuilder<span class="token punctuation">.</span><span class="token function">substring</span><span class="token punctuation">(</span>offset<span class="token punctuation">,</span> workingBuilder<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    workingBuilder<span class="token punctuation">.</span><span class="token function">setLength</span><span class="token punctuation">(</span>offset<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    workingBuilder<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getStrSubstitutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span>event<span class="token punctuation">,</span> value<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>doRender<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            textRenderer<span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span>workingBuilder<span class="token punctuation">,</span> toAppendTo<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>msg <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>最后实际由<code>org.apache.logging.log4j.core.lookup.StrSubstitutor#substitute</code>进行替换操作<br>由<code>org.apache.logging.log4j.core.lookup.StrSubstitutor#resolveVariable</code>执行lookup表达式</p>
+<p>并通过前缀判断进入到对应协议解析<br><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9e42d867/7c2e017a39584e83a011826291233312.png" alt="7c2e017a39584e83a011826291233312"></p>
+<p>后面就是常规JNDI利用，不再赘述（仅支持JAVA、LDAP、LDAPS协议头</p>
+<h3 id="自定义-log4j2-messageFactory"><a href="#自定义-log4j2-messageFactory" class="headerlink" title="自定义 log4j2.messageFactory"></a>自定义 log4j2.messageFactory</h3><p>首先msg通过<code>messageFactory.newMessage(message)</code>产生，默认是</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/*
+* (non-Javadoc)
+*
+* @see org.apache.logging.log4j.message.MessageFactory#newMessage(java.lang.String)
+*/</span>
+<span class="token annotation punctuation">@Override</span>
+<span class="token keyword">public</span> Message <span class="token function">newMessage</span><span class="token punctuation">(</span><span class="token keyword">final</span> String message<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">SimpleMessage</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>在记录event时，会通过<code>org.apache.logging.log4j.core.impl.MutableLogEvent#setMessage</code>尝试提取msg信息，这里比较关键</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setMessage</span><span class="token punctuation">(</span><span class="token keyword">final</span> Message msg<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>msg <span class="token keyword">instanceof</span> <span class="token class-name">ReusableMessage</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">final</span> ReusableMessage reusable <span class="token operator">=</span> <span class="token punctuation">(</span>ReusableMessage<span class="token punctuation">)</span> msg<span class="token punctuation">;</span>
+        reusable<span class="token punctuation">.</span><span class="token function">formatTo</span><span class="token punctuation">(</span><span class="token function">getMessageTextForWriting</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>messageFormat <span class="token operator">=</span> msg<span class="token punctuation">.</span><span class="token function">getFormat</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>parameters <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            parameters <span class="token operator">=</span> reusable<span class="token punctuation">.</span><span class="token function">swapParameters</span><span class="token punctuation">(</span>parameters<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            parameterCount <span class="token operator">=</span> reusable<span class="token punctuation">.</span><span class="token function">getParameterCount</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>message <span class="token operator">=</span> InternalAsyncUtil<span class="token punctuation">.</span><span class="token function">makeMessageImmutable</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> Message <span class="token function">makeMessageImmutable</span><span class="token punctuation">(</span><span class="token keyword">final</span> Message msg<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">// if the Message instance is reused, there is no point in freezing its message here</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>msg <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token function">canFormatMessageInBackground</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            msg<span class="token punctuation">.</span><span class="token function">getFormattedMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// LOG4J2-763: ask message to makeMessageImmutable parameters</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> msg<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span></code></pre>
+<p>以及后面开始执行格式化<code>org.apache.logging.log4j.core.pattern.MessagePatternConverter#format</code>时注意第二部分，会直接无视lookup是否开启，尝试执行替换</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9e42d867/03ee5f0b5af94c3e8e5e8a27471fcd56.png" alt="03ee5f0b5af94c3e8e5e8a27471fcd56"></p>
+<p>所以关键点在控制以下两点的返回</p>
+<ol>
+<li>messageFactory.newMessage(message) - 返回非继承 ReusableMessage（默认factory为ReusableMessageFactory）</li>
+<li>msg.getFormattedMessage() - 返回非继承 StringBuilderFormattable、MultiformatMessage</li>
+</ol>
+<p>所以如何控制呢，其实很简单(<strong>两种方法单用、组合都可以</strong>)</p>
+<ol>
+<li>getLogger时指定工厂类，只要不是上面提到的Message对应Factory即可（尤其开发喜欢自定义的工厂类</li>
+<li>看情况使用多参构造，只要messageFactory.newMessage(message) 不返回SimpleMessage实例</li>
+</ol>
+<p>很容易构造相关场景，这里暂不提供</p>
+<h2 id="version-2-15-0-rc1"><a href="#version-2-15-0-rc1" class="headerlink" title="version == 2.15.0-rc1"></a>version == 2.15.0-rc1</h2><p>这个版本出现了bypass，也是提供了现实案例：官方的补丁不一定安全</p>
+<h3 id="commit-分析-1"><a href="#commit-分析-1" class="headerlink" title="commit 分析"></a>commit 分析</h3><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9e42d867/ea42bbc5f05a4cf796789b7e2e8a83af.png" alt="ea42bbc5f05a4cf796789b7e2e8a83af"></p>
+<p>很明显，通过异常报错绕过了一些限制，导致直接不安全的lookup（为什么需要这么绕过呢，因为JndiManager初始化时通过设置allowedProtocols与allowedHosts还有allowedClasses基本限制了ldap(s)的利用</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9e42d867/b6fa61e593f945e89278b35ed553e256.png" alt="b6fa61e593f945e89278b35ed553e256"></p>
+<p>另外注意到LOG4J2-3198在MessagePatternConverter创建实例时新增了判断，默认是SimpleMessagePatternConverter，如果格式化字符带有{lookup}选项时，则通过FormattedMessagePatternConverter创建</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9e42d867/e712a600e6704c79ace4033855eaef8a.png" alt="e712a600e6704c79ace4033855eaef8a"></p>
+<h3 id="分析-1"><a href="#分析-1" class="headerlink" title="分析"></a>分析</h3><p>通过一样的PoC，一直进入到MessagePatternConverter，这里发生了变化，原来的MessagePatternConverter.format全部通过新分配的XXXConverter.format实现，由于配置了lookup选项，所以交由<code>org.apache.logging.log4j.core.pattern.MessagePatternConverter.LookupMessagePatternConverter#format</code>进行格式化（原来的MessagePatternConverter.format的修改也导致无法通过自定义factory进行绕过的风险</p>
+<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Override</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">format</span><span class="token punctuation">(</span><span class="token keyword">final</span> LogEvent event<span class="token punctuation">,</span> <span class="token keyword">final</span> StringBuilder toAppendTo<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> start <span class="token operator">=</span> toAppendTo<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    delegate<span class="token punctuation">.</span><span class="token function">format</span><span class="token punctuation">(</span>event<span class="token punctuation">,</span> toAppendTo<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> indexOfSubstitution <span class="token operator">=</span> toAppendTo<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span><span class="token string">"${"</span><span class="token punctuation">,</span> start<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>indexOfSubstitution <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        config<span class="token punctuation">.</span><span class="token function">getStrSubstitutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">replaceIn</span><span class="token punctuation">(</span>event<span class="token punctuation">,</span> toAppendTo<span class="token punctuation">,</span> indexOfSubstitution<span class="token punctuation">,</span> toAppendTo<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> indexOfSubstitution<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>最终一路进入到，可以看到如果想要触发异常，需要<code>URI(name)</code>异常，这里就很好操作了（坏字符、空格…</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">synchronized</span> <span class="token operator">&lt;</span>T<span class="token operator">></span> T <span class="token function">lookup</span><span class="token punctuation">(</span><span class="token keyword">final</span> String name<span class="token punctuation">)</span> <span class="token keyword">throws</span> NamingException <span class="token punctuation">{</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+        URI uri <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">URI</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>uri<span class="token punctuation">.</span><span class="token function">getScheme</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">URISyntaxException</span> ex<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">// This is OK.</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span>T<span class="token punctuation">)</span> <span class="token keyword">this</span><span class="token punctuation">.</span>context<span class="token punctuation">.</span><span class="token function">lookup</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<h2 id="关于触发条件"><a href="#关于触发条件" class="headerlink" title="关于触发条件"></a>关于触发条件</h2><h3 id="lt-2-15-0-rc1"><a href="#lt-2-15-0-rc1" class="headerlink" title="&lt; 2.15.0-rc1"></a>&lt; 2.15.0-rc1</h3><p>在<code>org.apache.logging.log4j.core.pattern.PatternParser#finalizeConverter</code></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9e42d867/2a3f499fe1f44d88a6c9ff825232bc6d.png" alt="2a3f499fe1f44d88a6c9ff825232bc6d"></p>
+<p>很明显，需要进入到<code>org.apache.logging.log4j.core.pattern.MessagePatternConverter#MessagePatternConverter</code>这个类需要有特征转换标记<code>%m %msg %message</code>之一，转换标记在各个Converter中通过修饰符定义</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9e42d867/e99ceba45b5f4d52b932574d174ff07d.png" alt="e99ceba45b5f4d52b932574d174ff07d"></p>
+<p>而默认在 <code>org.apache.logging.log4j.core.config.DefaultConfiguration#DEFAULT_PATTERN</code><br>定义有</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">final</span> String DEFAULT_PATTERN <span class="token operator">=</span> <span class="token string">"%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"</span><span class="token punctuation">;</span></code></pre>
+<p>当然如果开发自己写有配置文档，但是不带特征标记，也无法触发（但是谁会不记录msg呢？</p>
+<h3 id="gt-2-15-0-rc1"><a href="#gt-2-15-0-rc1" class="headerlink" title="&gt;= 2.15.0-rc1"></a>&gt;= 2.15.0-rc1</h3><p>根据 <code>LOG4J2-3198 - Log4j2 no longer formats lookups in messages by default</code> 中的修改内容可以看到，启用lookup需要在占位符后添加<code>{lookups}</code>声明（选项）才可执行lookup解析</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9e42d867/cf1ca4fd61824f459280a9acfd0825e1.png" alt="cf1ca4fd61824f459280a9acfd0825e1"></p>
+<p>所以需要配置类似有</p>
+<pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>PatternLayout</span> <span class="token attr-name">pattern</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>%d{HH:mm:ss} %msg{lookups}%n<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span></code></pre>
+<h2 id="修补方案"><a href="#修补方案" class="headerlink" title="修补方案"></a>修补方案</h2><h3 id="标准方案"><a href="#标准方案" class="headerlink" title="标准方案"></a>标准方案</h3><ol>
+<li>设置<code>log4j2.formatMsgNoLookups=True</code><ul>
+<li>在 &lt;2.15.0-rc1 之前，使用自定义factory实际有很大隐患，可能导致绕过</li>
+</ul>
+</li>
+<li>升级至<code>2.15.0-rc2</code><ul>
+<li>可能需要升级JDK</li>
+</ul>
+</li>
+</ol>
+<h3 id="非标准方案"><a href="#非标准方案" class="headerlink" title="非标准方案"></a>非标准方案</h3><h4 id="PLUGIN-CACHE-FILE"><a href="#PLUGIN-CACHE-FILE" class="headerlink" title="PLUGIN_CACHE_FILE"></a>PLUGIN_CACHE_FILE</h4><p><strong>首先直接上结论：删除<code>META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat</code>里对应JNDI字符串即可</strong></p>
+<p>通过上面知道strLookupMap中存有允许的前缀及对应处理类，而其在<code>org.apache.logging.log4j.core.lookup.Interpolator#Interpolator</code>中初始化有（看起来是这里</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">// [LOG4J2-703] We might be on Android</span>
+    strLookupMap<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>LOOKUP_KEY_JNDI<span class="token punctuation">,</span>
+        Loader<span class="token punctuation">.</span><span class="token function">newCheckedInstanceOf</span><span class="token punctuation">(</span><span class="token string">"org.apache.logging.log4j.core.lookup.JndiLookup"</span><span class="token punctuation">,</span> StrLookup<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">final</span> LinkageError <span class="token operator">|</span> Exception e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">handleError</span><span class="token punctuation">(</span>LOOKUP_KEY_JNDI<span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>而在<code>org.apache.logging.log4j.core.config.AbstractConfiguration</code> 初始化有</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">final</span> StrLookup tempLookup <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Interpolator</span><span class="token punctuation">(</span>propertyMap<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">private</span> <span class="token keyword">final</span> StrSubstitutor subst <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StrSubstitutor</span><span class="token punctuation">(</span>tempLookup<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>而实际最后是在这里填充可处理对象</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9e42d867/08c804856ef5414497721122dd3b1cd3.png" alt="08c804856ef5414497721122dd3b1cd3"></p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setVariableResolver</span><span class="token punctuation">(</span><span class="token keyword">final</span> StrLookup variableResolver<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>variableResolver <span class="token keyword">instanceof</span> <span class="token class-name">ConfigurationAware</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">this</span><span class="token punctuation">.</span>configuration <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token punctuation">(</span><span class="token punctuation">(</span>ConfigurationAware<span class="token punctuation">)</span> variableResolver<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setConfiguration</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>configuration<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>variableResolver <span class="token operator">=</span> variableResolver<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>而configuration最终通过<code>org.apache.logging.log4j.core.config.plugins.util.PluginRegistry#decodeCacheFiles</code>缓存文件获取加载类</p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9e42d867/d7273e6a7ae448deb7e99d27b7d8f425.png" alt="d7273e6a7ae448deb7e99d27b7d8f425"></p>
+<p>所以删除<code>META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat</code>里对应JNDI字符串即可</p>
+<h4 id="其他魔法"><a href="#其他魔法" class="headerlink" title="其他魔法"></a>其他魔法</h4><p>各种临时性的hook或者卸载对甲方来说并不实用，在此不表</p>
+<h2 id="官方GIT时间线"><a href="#官方GIT时间线" class="headerlink" title="官方GIT时间线"></a>官方GIT时间线</h2><table>
+<thead>
+<tr>
+<th>时间</th>
+<th>行为</th>
+<th>链接</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2021年12月5日 GMT+8 下午12:00</td>
+<td>限制JNDI</td>
+<td><a href="https://github.com/apache/logging-log4j2/commit/d82b47c6fae9c15fcb183170394d5f1a01ac02d3" target="_blank" rel="noopener">LOG4J2-3201 - Limit the protocols JNDI can use by default. Limit the servers and classes that can be accessed via LDAP.</a></td>
+</tr>
+<tr>
+<td>2021年12月5日 GMT+8 下午3:20</td>
+<td>默认nolookup</td>
+<td><a href="https://github.com/apache/logging-log4j2/commit/04637dd9102175f765cfad349de0c2a63c279ac3" target="_blank" rel="noopener">LOG4J2-3198 - Log4j2 no longer formats lookups in messages by default</a></td>
+</tr>
+<tr>
+<td>2021年12月10日 GMT+8 上午2:18</td>
+<td>修复rc1异常绕过</td>
+<td><a href="https://github.com/apache/logging-log4j2/commit/c2b07e37995004555c211cdf0bb169d6a6a6f96b" target="_blank" rel="noopener">Handle URI exception</a></td>
+</tr>
+<tr>
+<td>2021年12月12日 GMT+8 上午7:05</td>
+<td>默认禁用JNDI</td>
+<td><a href="https://github.com/apache/logging-log4j2/commit/44569090f1cf1e92c711fb96dfd18cd7dccc72ea" target="_blank" rel="noopener">LOG4J2-3208 - Disable JNDI by default</a></td>
+</tr>
+<tr>
+<td>2021年12月13日 GMT+8 下午1:32</td>
+<td>删除Message Lookups</td>
+<td><a href="https://github.com/apache/logging-log4j2/commit/27972043b76c9645476f561c5adc483dec6d3f5d" target="_blank" rel="noopener">LOG4J2-3211 - Remove Messge Lookups</a> <br>(开发急的…英文都打错了)</td>
+</tr>
+</tbody></table>
+<h3 id="附言说说1-x版本"><a href="#附言说说1-x版本" class="headerlink" title="附言说说1.x版本"></a>附言说说1.x版本</h3><p>看有说要注意 log4j 一代可能也有安全问题，翻了下源码感觉实在没什么可说的，这么显式的lookup下还能出问题，纯属开发背锅，炒作这个版本的都是蛮无聊的人</p>
+<p>– 毕 –</p>
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://blog.sari3l.com">Sariel.D</a>
+            <p>原文链接：<a href="https://blog.sari3l.com/posts/9e42d867/">https://blog.sari3l.com/posts/9e42d867/</a>
+            <p>发表日期：<a href="https://blog.sari3l.com/posts/9e42d867/">十二月 14日 2021, 1:32:35 凌晨</a>
+            <p>更新日期：<a href="https://blog.sari3l.com/posts/9e42d867/">December 14th 2021, 1:39:42 am</a>
+            <p>版权声明：本文采用<a rel="license noopener" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/posts/9a92d107/" title= "🔐">
+                    <div class="prevTitle">🔐</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- gitalk评论 -->
+
+    <!-- utteranc评论 -->
+
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:master@mail.sari3l.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="https://github.com/sari3l" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="https://www.instagram.com/x3rias" class="iconfont-archer instagram" target="_blank" title=instagram></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title=rss></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#version-lt-2-15-0-rc1"><span class="toc-number">1.</span> <span class="toc-text">version &lt; 2.15.0-rc1</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#commit-分析"><span class="toc-number">1.1.</span> <span class="toc-text">commit 分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分析"><span class="toc-number">1.2.</span> <span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#自定义-log4j2-messageFactory"><span class="toc-number">1.3.</span> <span class="toc-text">自定义 log4j2.messageFactory</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#version-2-15-0-rc1"><span class="toc-number">2.</span> <span class="toc-text">version &#x3D;&#x3D; 2.15.0-rc1</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#commit-分析-1"><span class="toc-number">2.1.</span> <span class="toc-text">commit 分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分析-1"><span class="toc-number">2.2.</span> <span class="toc-text">分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于触发条件"><span class="toc-number">3.</span> <span class="toc-text">关于触发条件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#lt-2-15-0-rc1"><span class="toc-number">3.1.</span> <span class="toc-text">&lt; 2.15.0-rc1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gt-2-15-0-rc1"><span class="toc-number">3.2.</span> <span class="toc-text">&gt;&#x3D; 2.15.0-rc1</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#修补方案"><span class="toc-number">4.</span> <span class="toc-text">修补方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#标准方案"><span class="toc-number">4.1.</span> <span class="toc-text">标准方案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#非标准方案"><span class="toc-number">4.2.</span> <span class="toc-text">非标准方案</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#PLUGIN-CACHE-FILE"><span class="toc-number">4.2.1.</span> <span class="toc-text">PLUGIN_CACHE_FILE</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#其他魔法"><span class="toc-number">4.2.2.</span> <span class="toc-text">其他魔法</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#官方GIT时间线"><span class="toc-number">5.</span> <span class="toc-text">官方GIT时间线</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#附言说说1-x版本"><span class="toc-number">5.1.</span> <span class="toc-text">附言说说1.x版本</span></a></li></ol></li></ol> -->
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#version-lt-2-15-0-rc1"><span class="toc-text">version &lt; 2.15.0-rc1</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#commit-分析"><span class="toc-text">commit 分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分析"><span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#自定义-log4j2-messageFactory"><span class="toc-text">自定义 log4j2.messageFactory</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#version-2-15-0-rc1"><span class="toc-text">version &#x3D;&#x3D; 2.15.0-rc1</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#commit-分析-1"><span class="toc-text">commit 分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分析-1"><span class="toc-text">分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于触发条件"><span class="toc-text">关于触发条件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#lt-2-15-0-rc1"><span class="toc-text">&lt; 2.15.0-rc1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gt-2-15-0-rc1"><span class="toc-text">&gt;&#x3D; 2.15.0-rc1</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#修补方案"><span class="toc-text">修补方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#标准方案"><span class="toc-text">标准方案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#非标准方案"><span class="toc-text">非标准方案</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#PLUGIN-CACHE-FILE"><span class="toc-text">PLUGIN_CACHE_FILE</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#其他魔法"><span class="toc-text">其他魔法</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#官方GIT时间线"><span class="toc-text">官方GIT时间线</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#附言说说1-x版本"><span class="toc-text">附言说说1.x版本</span></a></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 75
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2021 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/posts/9e42d867/" >Log4shell 小记</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/9a92d107/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href= "/posts/fd03bf87/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/df08045a/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/26</span><a class="archive-post-title" href= "/posts/787c7e6c/" >🔐</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/55ea3bd4/" >Shiro-055 分析&回显</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/18</span><a class="archive-post-title" href= "/posts/6712089c/" >深信服 EDR RCE 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/04</span><a class="archive-post-title" href= "/posts/c5e878c3/" >CobaltStrike Argue 原理 - 翻译文</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span><a class="archive-post-title" href= "/posts/afd91327/" >Github Page 加速</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/posts/76ce816c/" >CobaltStrike 破解步骤</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/b7ea5c49/" >一道题回顾智能合约 Coverage</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/06</span><a class="archive-post-title" href= "/posts/58a67794/" >F5 BIG-IP RCE简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/17</span><a class="archive-post-title" href= "/posts/608d18f0/" >用友NC反序列化 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/14</span><a class="archive-post-title" href= "/posts/d4fb29f2/" >Pwnable.kr 之 Toddler's Bottle</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/01</span><a class="archive-post-title" href= "/posts/ecb4dfa2/" >Weblogic T3 协议学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/20</span><a class="archive-post-title" href= "/posts/e32c5d3e/" >CVE-2020-2551 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/12</span><a class="archive-post-title" href= "/posts/fa80d225/" >CVE-2020-2555 简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href= "/posts/91ba290f/" >Java 反弹 Shell</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/26</span><a class="archive-post-title" href= "/posts/56fcf5d8/" >Thinkphp 5.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/22</span><a class="archive-post-title" href= "/posts/7d9ef63e/" >CVE-2020-1938（Ghost Cat）简单分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/17</span><a class="archive-post-title" href= "/posts/2cc5b12d/" >JDBC Deserialization</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/f0f80c65/" >Abusing MySQL clients RCE</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/f33694e6/" >2020 All is New</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/25</span><a class="archive-post-title" href= "/posts/418c3786/" >对 Cookie 的一点学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/18</span><a class="archive-post-title" href= "/posts/1e8439b5/" >HTTP Smuggling Attack 随笔</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/10</span><a class="archive-post-title" href= "/posts/b61194b/" >ThinkPHP 6.0.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/07</span><a class="archive-post-title" href= "/posts/4457d4a3/" >ThinkPHP 5.1.x 反序列化简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/a3557ae1/" >记</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/posts/9622f295/" >Mysql 注入基础小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/03</span><a class="archive-post-title" href= "/posts/a62f29f1/" >XSS with ServiceWorkers</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/23</span><a class="archive-post-title" href= "/posts/66ad34dc/" >CSP 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href= "/posts/13977d3a/" >SVG with HTML Parsing</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/06</span><a class="archive-post-title" href= "/posts/76496c2b/" >Fastjson 新反序列化漏洞解析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/16</span><a class="archive-post-title" href= "/posts/85fdfb64/" >SSRF 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/posts/d8415c32/" >Discuz! ML 3.x 命令执行简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/10</span><a class="archive-post-title" href= "/posts/fb0090e/" >Redis Rce 简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span><a class="archive-post-title" href= "/posts/8dea0d95/" >Sqlmap --os-shell 原理简析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/15</span><a class="archive-post-title" href= "/posts/6fee1744/" >Active Directory Recon 初步学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span><a class="archive-post-title" href= "/posts/caf0d20c/" >RCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/09</span><a class="archive-post-title" href= "/posts/73ecd8cc/" >Jenkins CVE-2018-1000861 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/07</span><a class="archive-post-title" href= "/posts/65a5a87a/" >*CTF 2019 homebrewEvtLoop</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/27</span><a class="archive-post-title" href= "/posts/243b6098/" >Web(CTF)中的密码学 (一)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href= "/posts/7a31e713/" >Abusing MySQL Clients 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/12</span><a class="archive-post-title" href= "/posts/8e809579/" >DDCTF 2019 部分 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/30</span><a class="archive-post-title" href= "/posts/6fdffa73/" >0CTF/TCTF 2019 WEB writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span><a class="archive-post-title" href= "/posts/1b4ade61/" >JSONP Content-Type 简单Fuzz</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/10</span><a class="archive-post-title" href= "/posts/469de5e6/" >JNDI/LADP 学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/07</span><a class="archive-post-title" href= "/posts/284d4995/" >Fastjson 反序列化漏洞研究</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/06</span><a class="archive-post-title" href= "/posts/fdaf04b/" >SMTP 25 端口测试记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/06</span><a class="archive-post-title" href= "/posts/9b1f3ba/" >pyppeteer 学习记录</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/31</span><a class="archive-post-title" href= "/posts/4ffb62e5/" >Python 多线程、多进程、协程(未完结)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/29</span><a class="archive-post-title" href= "/posts/83241730/" >Frida —— WeChat(二) 🧧</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/25</span><a class="archive-post-title" href= "/posts/b11f7440/" >动态调试 with smali</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href= "/posts/76594cbe/" >Nexus 解决显示 “无法访问互联网”</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/19</span><a class="archive-post-title" href= "/posts/5da99ec5/" >Frida —— WeChat(一) 🎲</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/16</span><a class="archive-post-title" href= "/posts/d55cdeb2/" >Frida —— 初体验</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/446263e2/" >关系爬虫 —— Weibo</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/posts/27a5d990/" >2019 All For One</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/30</span><a class="archive-post-title" href= "/posts/9dafb9a3/" >OpenCV 初接触</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/24</span><a class="archive-post-title" href= "/posts/2fefc8f7/" >验证码破解系列 —— 数美</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/21</span><a class="archive-post-title" href= "/posts/f8004910/" >Chrome Extensions —— fir.im Downloader 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span><a class="archive-post-title" href= "/posts/fedef51/" >XXE 小结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/posts/90979812/" >Burp Extensions —— RSA Plugin 编写</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span><a class="archive-post-title" href= "/posts/81dfbfaf/" >CODE BREAKING</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/23</span><a class="archive-post-title" href= "/posts/4a17b156/" >Hello World</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/08</span><a class="archive-post-title" href= "/posts/970fcb23/" >OGNL Payload</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span><a class="archive-post-title" href= "/posts/d34dbe44/" >s2-016 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span><a class="archive-post-title" href= "/posts/626780ce/" >s2-032 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/31</span><a class="archive-post-title" href= "/posts/617314e9/" >s2-033 & s2-037 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href= "/posts/9cab2514/" >s2-045 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/17</span><a class="archive-post-title" href= "/posts/e0ca00cf/" >s2-046 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/16</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/11</span><a class="archive-post-title" href= "/posts/2b51554f/" >s2-048 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/09</span><a class="archive-post-title" href= "/posts/dd92b54a/" >s2-053 漏洞分析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span><a class="archive-post-title" href= "/posts/c43e3a51/" >s2-057 漏洞分析</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="ctf"><span class="iconfont-archer">&#xe606;</span>ctf</span>
+    
+        <span class="sidebar-tag-name" data-tags="writeup"><span class="iconfont-archer">&#xe606;</span>writeup</span>
+    
+        <span class="sidebar-tag-name" data-tags="随笔"><span class="iconfont-archer">&#xe606;</span>随笔</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
+    
+        <span class="sidebar-tag-name" data-tags="内网"><span class="iconfont-archer">&#xe606;</span>内网</span>
+    
+        <span class="sidebar-tag-name" data-tags="RedTeam"><span class="iconfont-archer">&#xe606;</span>RedTeam</span>
+    
+        <span class="sidebar-tag-name" data-tags="Burp suite"><span class="iconfont-archer">&#xe606;</span>Burp suite</span>
+    
+        <span class="sidebar-tag-name" data-tags="coding"><span class="iconfont-archer">&#xe606;</span>coding</span>
+    
+        <span class="sidebar-tag-name" data-tags="extension"><span class="iconfont-archer">&#xe606;</span>extension</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="Tomcat"><span class="iconfont-archer">&#xe606;</span>Tomcat</span>
+    
+        <span class="sidebar-tag-name" data-tags="LFI"><span class="iconfont-archer">&#xe606;</span>LFI</span>
+    
+        <span class="sidebar-tag-name" data-tags="RCE"><span class="iconfont-archer">&#xe606;</span>RCE</span>
+    
+        <span class="sidebar-tag-name" data-tags="Weblogic"><span class="iconfont-archer">&#xe606;</span>Weblogic</span>
+    
+        <span class="sidebar-tag-name" data-tags="Deserialize"><span class="iconfont-archer">&#xe606;</span>Deserialize</span>
+    
+        <span class="sidebar-tag-name" data-tags="Chrome"><span class="iconfont-archer">&#xe606;</span>Chrome</span>
+    
+        <span class="sidebar-tag-name" data-tags="cobaltstirke"><span class="iconfont-archer">&#xe606;</span>cobaltstirke</span>
+    
+        <span class="sidebar-tag-name" data-tags="Discuz"><span class="iconfont-archer">&#xe606;</span>Discuz</span>
+    
+        <span class="sidebar-tag-name" data-tags="F5"><span class="iconfont-archer">&#xe606;</span>F5</span>
+    
+        <span class="sidebar-tag-name" data-tags="CVE-2020-5902"><span class="iconfont-archer">&#xe606;</span>CVE-2020-5902</span>
+    
+        <span class="sidebar-tag-name" data-tags="漏洞分析"><span class="iconfont-archer">&#xe606;</span>漏洞分析</span>
+    
+        <span class="sidebar-tag-name" data-tags="fastjson"><span class="iconfont-archer">&#xe606;</span>fastjson</span>
+    
+        <span class="sidebar-tag-name" data-tags="Frida"><span class="iconfont-archer">&#xe606;</span>Frida</span>
+    
+        <span class="sidebar-tag-name" data-tags="java"><span class="iconfont-archer">&#xe606;</span>java</span>
+    
+        <span class="sidebar-tag-name" data-tags="jenkins"><span class="iconfont-archer">&#xe606;</span>jenkins</span>
+    
+        <span class="sidebar-tag-name" data-tags="SQLi"><span class="iconfont-archer">&#xe606;</span>SQLi</span>
+    
+        <span class="sidebar-tag-name" data-tags="Redis"><span class="iconfont-archer">&#xe606;</span>Redis</span>
+    
+        <span class="sidebar-tag-name" data-tags="struts"><span class="iconfont-archer">&#xe606;</span>struts</span>
+    
+        <span class="sidebar-tag-name" data-tags="SSRF"><span class="iconfont-archer">&#xe606;</span>SSRF</span>
+    
+        <span class="sidebar-tag-name" data-tags="ThinkPHP"><span class="iconfont-archer">&#xe606;</span>ThinkPHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="xss"><span class="iconfont-archer">&#xe606;</span>xss</span>
+    
+        <span class="sidebar-tag-name" data-tags="XXE"><span class="iconfont-archer">&#xe606;</span>XXE</span>
+    
+        <span class="sidebar-tag-name" data-tags="OpenCV"><span class="iconfont-archer">&#xe606;</span>OpenCV</span>
+    
+        <span class="sidebar-tag-name" data-tags="智能合约"><span class="iconfont-archer">&#xe606;</span>智能合约</span>
+    
+        <span class="sidebar-tag-name" data-tags="spider"><span class="iconfont-archer">&#xe606;</span>spider</span>
+    
+        <span class="sidebar-tag-name" data-tags="smali"><span class="iconfont-archer">&#xe606;</span>smali</span>
+    
+        <span class="sidebar-tag-name" data-tags="hw2020"><span class="iconfont-archer">&#xe606;</span>hw2020</span>
+    
+        <span class="sidebar-tag-name" data-tags="深信服"><span class="iconfont-archer">&#xe606;</span>深信服</span>
+    
+        <span class="sidebar-tag-name" data-tags="CAPTCHA"><span class="iconfont-archer">&#xe606;</span>CAPTCHA</span>
+    
+        <span class="sidebar-tag-name" data-tags="pwn"><span class="iconfont-archer">&#xe606;</span>pwn</span>
+    
+        <span class="sidebar-tag-name" data-tags="Nday"><span class="iconfont-archer">&#xe606;</span>Nday</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="编程"><span class="iconfont-archer">&#xe60a;</span>编程</span>
+    
+        <span class="sidebar-category-name" data-categories="代码审计"><span class="iconfont-archer">&#xe60a;</span>代码审计</span>
+    
+        <span class="sidebar-category-name" data-categories="Pentest"><span class="iconfont-archer">&#xe60a;</span>Pentest</span>
+    
+        <span class="sidebar-category-name" data-categories="渗透"><span class="iconfont-archer">&#xe60a;</span>渗透</span>
+    
+        <span class="sidebar-category-name" data-categories="逆向"><span class="iconfont-archer">&#xe60a;</span>逆向</span>
+    
+        <span class="sidebar-category-name" data-categories="其他"><span class="iconfont-archer">&#xe60a;</span>其他</span>
+    
+        <span class="sidebar-category-name" data-categories="验证码"><span class="iconfont-archer">&#xe60a;</span>验证码</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Sariel.D"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(n){n.imageLazyLoadSetting.processImages=o;var i=n.imageLazyLoadSetting.isSPA,r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function o(){i&&(r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")));for(var t,e,a=0;a<r.length;a++)t=r[a],e=void 0,0<=(e=t.getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(n.innerHeight||document.documentElement.clientHeight)&&function(){var t,e,n,i,o=r[a];t=o,e=function(){r=r.filter(function(t){return o!==t})},n=new Image,i=t.getAttribute("data-original"),n.onload=function(){t.src=i,e&&e()},n.src=i}()}o(),n.addEventListener("scroll",function(){var t,e;t=o,e=n,clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(e)},500)})}(this);</script></body>
+</html>
+
+
