@@ -369,6 +369,48 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href = "/posts/a62f29f1/" >
+            
+                <span>XSS with ServiceWorkers</span>
+        </a>
+        <div class="abstract-content">
+            前述持久化 XSS 的常见姿势有
+
+with CSRF Inject
+opener hijack
+
+window.opener.location="javascript:alert('Xss')";void(0);
+
+link hijack
+
+for (i = 0; i &lt; document.links.length; i++) {
+    document.links[i].οnclick = function () {
+        x = window.open(this.href);
+        setTimeout(function () {
+           ...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/09/03</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "xss">xss</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href = "/posts/66ad34dc/" >
             
                 <span>CSP 小结</span>
@@ -610,37 +652,6 @@
         <a class="post-tag" href="javascript:void(0);" data-tags = "ctf">ctf</a>
     
         <a class="post-tag" href="javascript:void(0);" data-tags = "writeup">writeup</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/posts/73ecd8cc/" >
-            
-                <span>Jenkins CVE-2018-1000861 学习</span>
-        </a>
-        <div class="abstract-content">
-            <p>orange 大佬的博客总是很有学习意义，膜</p>
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/09</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "java">java</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "jenkins">jenkins</a>
     
 </div>
             
@@ -1853,9 +1864,26 @@
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 75
+        Total : 76
         </div>
         <!-- search  -->
         
@@ -1868,6 +1896,11 @@
     
     <div class="archive-year"> 2021 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/27</span><a class="archive-post-title" href= "/posts/91764dea/" >CodeQL 学习小记</a>
+        </li>
     
     
         <li class="archive-post-item">

@@ -369,6 +369,42 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href = "/posts/9cab2514/" >
+            
+                <span>s2-045 漏洞分析</span>
+        </a>
+        <div class="abstract-content">
+            影响版本：
+Struts 2.3.5 - Struts 2.3.31Struts 2.5 - Struts 2.5.10
+漏洞产生原因主要在于使用Jakarta插件处理文件上传操作，对content-type处理
+【占坑】分析基于2.3.30，貌似高版本触发点不太一样，原理大致相同
+0x01 踩坑No, no I don’t give a… anymore.
+0x02 分析跟进分析struct 使用java ee中的Filter去拦截请求，并实现自己的功能。也就是说，用户所发出的请求，首先会在org.apache.struts2.dispatcher.ng.filter中的StrutsP...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/10/26</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "java">java</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "struts">struts</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href = "/posts/e0ca00cf/" >
             
                 <span>s2-046 漏洞分析</span>
@@ -1776,9 +1812,26 @@ idea生成maven项目，在pom.xml中添加依赖
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 75
+        Total : 76
         </div>
         <!-- search  -->
         
@@ -1791,6 +1844,11 @@ idea生成maven项目，在pom.xml中添加依赖
     
     <div class="archive-year"> 2021 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/27</span><a class="archive-post-title" href= "/posts/91764dea/" >CodeQL 学习小记</a>
+        </li>
     
     
         <li class="archive-post-item">
