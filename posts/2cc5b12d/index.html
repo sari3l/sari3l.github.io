@@ -26,13 +26,13 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="伪装 Mysql 真有趣">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
 <meta property="article:published_time" content="2020-01-17T11:42:17.000Z">
 <meta property="article:modified_time" content="2020-07-06T09:45:17.435Z">
 <meta property="article:author" content="Sariel.D">
@@ -40,7 +40,7 @@
 <meta property="article:tag" content="RCE">
 <meta property="article:tag" content="Deserialize">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <link rel="icon" href="/assets/favicon.ico">
@@ -512,12 +512,12 @@
   )
 </script>
 
-            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
             <div class="container container-unloaded">
                 <main class="main post-page">
     <article class="article-entry">
         <p>在 <a href="https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-jdbc-url-format.html" target="_blank" rel="noopener">JDBC URL 语法</a>中，是可以类似于 get 设置请求<a href="https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-configuration-properties.html" target="_blank" rel="noopener">属性</a>的</p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2cc5b12d/15792595186616.jpg" alt="-w283"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2cc5b12d/15792595186616.jpg" alt="-w283"></p>
 <p>在这里有两个影响此漏洞的关键属性</p>
 <table>
 <thead>
@@ -541,13 +541,13 @@
 <li><code>autoDeserialize</code>在遇到 blob 类型会执行反序列化</li>
 </ul>
 <h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>通过简单的调试，可以看到在ServerStatusDiffInterceptor 拦截器进行预处理时，会查询服务器 session 状态</p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2cc5b12d/15792599910076.jpg" alt="-w1031"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2cc5b12d/15792599910076.jpg" alt="-w1031"></p>
 <p>之后分别读取 key 和 value 存放到 map 中</p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2cc5b12d/15792600601748.jpg" alt="-w1078"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2cc5b12d/15792600601748.jpg" alt="-w1078"></p>
 <p>可以看到，当数据类型为 BLOB 时，且 autoDeserialize 开启情况下，就会读取数据流并执行反序列化</p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2cc5b12d/15788858814632.jpg" alt="-w1502"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2cc5b12d/15788858814632.jpg" alt="-w1502"></p>
 <p>跟入实际流程，发现会先后触发 preProcess 以及 postProcess，所以会请求”SHOW SESSION STATUS”两次</p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2cc5b12d/15792610322507.jpg" alt="-w813"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2cc5b12d/15792610322507.jpg" alt="-w813"></p>
 <p>那么触发条件就是复写<code>show session status</code>，在 mysql 中有一个插件叫做<code>rewrite</code>，在5.7.6开始支持<code>Query Rewrite</code>,能够将符合对应pattern的SQL语句进行重写</p>
 <p>但实际上，由于目标语句的特殊性，是没有办法重写的</p>
 <pre class=" language-shell"><code class="language-shell">mysql> insert into query_rewrite.rewrite_rules (pattern, replacement) values ('show session status', 'select 1,2');
@@ -562,7 +562,7 @@ ERROR 1644 (45000): Loading of some rule(s) failed.</code></pre>
 </ol>
 <p>后者在内网没有可控 mysql 情况下会很好用，毕竟前者动作太大了还要临时编译</p>
 <h2 id="Poc"><a href="#Poc" class="headerlink" title="Poc"></a>Poc</h2><p>测试查看流量时候需要开启<code>useSSL=false</code>，否则是加密的数据包</p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2cc5b12d/15791829419663.jpg" alt="-w1896"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2cc5b12d/15791829419663.jpg" alt="-w1896"></p>
 <p>当然也可以使用 socket + ssl 伪装 mysql 服务端(懒得写==没试过)</p>
 <pre class=" language-python"><code class="language-python"><span class="token comment" spellcheck="true"># coding : utf-8</span>
 <span class="token keyword">import</span> socket
@@ -624,7 +624,7 @@ conn <span class="token operator">=</span> None
     <span class="token keyword">except</span> Exception <span class="token keyword">as</span> e<span class="token punctuation">:</span>
         <span class="token comment" spellcheck="true"># print('waiting...')</span>
         conn <span class="token operator">=</span> None</code></pre>
-<h3 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h3><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2cc5b12d/2020-01-17%2017.21.30.gif" alt="2020-01-17 17.21.30"></p>
+<h3 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h3><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2cc5b12d/2020-01-17%2017.21.30.gif" alt="2020-01-17 17.21.30"></p>
 <h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
 <li><a href="https://i.blackhat.com/eu-19/Thursday/eu-19-Zhang-New-Exploit-Technique-In-Java-Deserialization-Attack.pdf" target="_blank" rel="noopener">New Exploit Technique In Java Deserialization Attack</a></li>
 <li><a href="https://xz.aliyun.com/t/7067" target="_blank" rel="noopener">mysql jdbc 反序列化漏洞测试</a></li>
@@ -1948,6 +1948,12 @@ conn <span class="token operator">=</span> None
         
         
         
+        
+        
+        
+        
+        
+        
     
     
     
@@ -2463,6 +2469,16 @@ conn <span class="token operator">=</span> None
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
         
+            <span class="sidebar-tag-name" data-tags="Mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                Mysql
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="RCE">
+                <span class="iconfont-archer">&#xe606;</span>
+                RCE
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="ctf">
                 <span class="iconfont-archer">&#xe606;</span>
                 ctf
@@ -2478,11 +2494,6 @@ conn <span class="token operator">=</span> None
                 随笔
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Mysql">
-                <span class="iconfont-archer">&#xe606;</span>
-                Mysql
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="内网">
                 <span class="iconfont-archer">&#xe606;</span>
                 内网
@@ -2491,6 +2502,16 @@ conn <span class="token operator">=</span> None
             <span class="sidebar-tag-name" data-tags="RedTeam">
                 <span class="iconfont-archer">&#xe606;</span>
                 RedTeam
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="代码审计">
+                <span class="iconfont-archer">&#xe606;</span>
+                代码审计
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="PHP">
+                <span class="iconfont-archer">&#xe606;</span>
+                PHP
             </span>
         
             <span class="sidebar-tag-name" data-tags="Burp suite">
@@ -2508,14 +2529,14 @@ conn <span class="token operator">=</span> None
                 extension
             </span>
         
-            <span class="sidebar-tag-name" data-tags="代码审计">
+            <span class="sidebar-tag-name" data-tags="Weblogic">
                 <span class="iconfont-archer">&#xe606;</span>
-                代码审计
+                Weblogic
             </span>
         
-            <span class="sidebar-tag-name" data-tags="PHP">
+            <span class="sidebar-tag-name" data-tags="Deserialize">
                 <span class="iconfont-archer">&#xe606;</span>
-                PHP
+                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Tomcat">
@@ -2526,21 +2547,6 @@ conn <span class="token operator">=</span> None
             <span class="sidebar-tag-name" data-tags="LFI">
                 <span class="iconfont-archer">&#xe606;</span>
                 LFI
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="RCE">
-                <span class="iconfont-archer">&#xe606;</span>
-                RCE
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Weblogic">
-                <span class="iconfont-archer">&#xe606;</span>
-                Weblogic
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Deserialize">
-                <span class="iconfont-archer">&#xe606;</span>
-                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Chrome">
@@ -2556,6 +2562,11 @@ conn <span class="token operator">=</span> None
             <span class="sidebar-tag-name" data-tags="Discuz">
                 <span class="iconfont-archer">&#xe606;</span>
                 Discuz
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="CodeQL">
+                <span class="iconfont-archer">&#xe606;</span>
+                CodeQL
             </span>
         
             <span class="sidebar-tag-name" data-tags="F5">
@@ -2598,14 +2609,14 @@ conn <span class="token operator">=</span> None
                 SQLi
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Redis">
-                <span class="iconfont-archer">&#xe606;</span>
-                Redis
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="struts">
                 <span class="iconfont-archer">&#xe606;</span>
                 struts
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Redis">
+                <span class="iconfont-archer">&#xe606;</span>
+                Redis
             </span>
         
             <span class="sidebar-tag-name" data-tags="SSRF">
@@ -2618,24 +2629,19 @@ conn <span class="token operator">=</span> None
                 ThinkPHP
             </span>
         
-            <span class="sidebar-tag-name" data-tags="xss">
-                <span class="iconfont-archer">&#xe606;</span>
-                xss
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="XXE">
                 <span class="iconfont-archer">&#xe606;</span>
                 XXE
             </span>
         
+            <span class="sidebar-tag-name" data-tags="xss">
+                <span class="iconfont-archer">&#xe606;</span>
+                xss
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="OpenCV">
                 <span class="iconfont-archer">&#xe606;</span>
                 OpenCV
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="智能合约">
-                <span class="iconfont-archer">&#xe606;</span>
-                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="spider">
@@ -2648,14 +2654,24 @@ conn <span class="token operator">=</span> None
                 smali
             </span>
         
-            <span class="sidebar-tag-name" data-tags="hw2020">
+            <span class="sidebar-tag-name" data-tags="智能合约">
                 <span class="iconfont-archer">&#xe606;</span>
-                hw2020
+                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="深信服">
                 <span class="iconfont-archer">&#xe606;</span>
                 深信服
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Nday">
+                <span class="iconfont-archer">&#xe606;</span>
+                Nday
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="hw2020">
+                <span class="iconfont-archer">&#xe606;</span>
+                hw2020
             </span>
         
             <span class="sidebar-tag-name" data-tags="CAPTCHA">
@@ -2666,16 +2682,6 @@ conn <span class="token operator">=</span> None
             <span class="sidebar-tag-name" data-tags="pwn">
                 <span class="iconfont-archer">&#xe606;</span>
                 pwn
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Nday">
-                <span class="iconfont-archer">&#xe606;</span>
-                Nday
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="CodeQL">
-                <span class="iconfont-archer">&#xe606;</span>
-                CodeQL
             </span>
         
     </div>
@@ -2689,14 +2695,14 @@ conn <span class="token operator">=</span> None
         <div class="sidebar-panel-categories">
     <div class="sidebar-categories-name">
     
-        <span class="sidebar-category-name" data-categories="编程">
-            <span class="iconfont-archer">&#xe60a;</span>
-            编程
-        </span>
-    
         <span class="sidebar-category-name" data-categories="代码审计">
             <span class="iconfont-archer">&#xe60a;</span>
             代码审计
+        </span>
+    
+        <span class="sidebar-category-name" data-categories="编程">
+            <span class="iconfont-archer">&#xe60a;</span>
+            编程
         </span>
     
         <span class="sidebar-category-name" data-categories="Pentest">
@@ -2767,7 +2773,22 @@ conn <span class="token operator">=</span> None
         
         <!-- mermaid -->
         
-    <script>
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
             window.imageLazyLoadSetting = {
                 isSPA: false,
                 processImages: null,

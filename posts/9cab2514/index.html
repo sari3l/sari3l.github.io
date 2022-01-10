@@ -26,18 +26,18 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="影响版本： Struts 2.3.5 - Struts 2.3.31Struts 2.5 - Struts 2.5.10 漏洞产生原因主要在于使用Jakarta插件处理文件上传操作，对content-type处理 【占坑】分析基于2.3.30，貌似高版本触发点不太一样，原理大致相同 0x01 踩坑No, no I don’t give a… anymore. 0x02 分析跟进分析struct 使">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
 <meta property="article:published_time" content="2018-10-26T07:40:55.000Z">
 <meta property="article:modified_time" content="2020-08-01T13:16:46.852Z">
 <meta property="article:author" content="Sariel.D">
 <meta property="article:tag" content="java">
 <meta property="article:tag" content="struts">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <link rel="icon" href="/assets/favicon.ico">
@@ -507,7 +507,7 @@
   )
 </script>
 
-            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
             <div class="container container-unloaded">
                 <main class="main post-page">
     <article class="article-entry">
@@ -519,7 +519,7 @@
 <h2 id="0x02-分析"><a href="#0x02-分析" class="headerlink" title="0x02 分析"></a>0x02 分析</h2><h3 id="跟进分析"><a href="#跟进分析" class="headerlink" title="跟进分析"></a>跟进分析</h3><p>struct 使用java ee中的Filter去拦截请求，并实现自己的功能。也就是说，用户所发出的请求，首先会在<code>org.apache.struts2.dispatcher.ng.filter</code>中的<code>StrutsPrepareAndExecuteFilter</code>类去执行（即web.xml中配置的filter）。首先执行类中的doFilter方法。这个方法是自动调用的，在这里可以struct拦截用户的请求，并实现自己的业务代码。</p>
 <ol>
 <li><p>执行prepare.wrapRequest()</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9cab2514/15399360406293.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/9cab2514/15399360406293.jpg" alt></p>
 </li>
 <li><p>跟进可见调用dispatcher.wrapRequest()</p>
 <pre class=" language-java"><code class="language-java"> <span class="token keyword">public</span> HttpServletRequest <span class="token function">wrapRequest</span><span class="token punctuation">(</span>HttpServletRequest oldRequest<span class="token punctuation">)</span> <span class="token keyword">throws</span> ServletException <span class="token punctuation">{</span>
@@ -538,12 +538,12 @@
 <blockquote>
 <p>在这里，并没去区分是什么http方法，也就是说，get方法强行包含一个带有恶意代码的content-type头，也会执行到这里的。首先判断一下是否为null和是否包含multipart/form-data。如果不包含，也就是get方法和post表单提交，则执行else里面的内容。如果包含，也就是说可能有文件上传，则执行if里面的内容。</p>
 </blockquote>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9cab2514/15399369036059.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/9cab2514/15399369036059.jpg" alt></p>
 </li>
 <li><p>这里会通过getMultiPartRequest获取默认的解析器</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9cab2514/15399380843568.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/9cab2514/15399380843568.jpg" alt></p>
 <p> 而默认的就是jakarta，对应即为JakartaMultiPartRequest</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9cab2514/15399381136835.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/9cab2514/15399381136835.jpg" alt></p>
 </li>
 <li><p>跟进MultiPartRequestWrapper实例化，通过multi.parse开始解析即JakartaMultiPartRequest.parse</p>
 <pre class=" language-java"><code class="language-java"> <span class="token keyword">public</span> <span class="token function">MultiPartRequestWrapper</span><span class="token punctuation">(</span>MultiPartRequest multiPartRequest<span class="token punctuation">,</span> HttpServletRequest request<span class="token punctuation">,</span> String saveDir<span class="token punctuation">,</span> LocaleProvider provider<span class="token punctuation">,</span> <span class="token keyword">boolean</span> disableRequestAttributeValueStackLookup<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -603,7 +603,7 @@
  <span class="token punctuation">}</span></code></pre>
 </li>
 <li><p>跟进发现此处主要解析各个文件并保存到列表里</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/9cab2514/15399387508931.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/9cab2514/15399387508931.jpg" alt></p>
 </li>
 <li><p>跟进到FileItemIteratorImpl，这里会调用JakartaMultiPartRequest.getContentType()，在if判断时候，会判断是否以multipart开头，可以在前加任意字符(包括<code>00</code>)即可进入else抛出异常</p>
 <blockquote>
@@ -1976,6 +1976,12 @@ Content-Type: %{#context['com.opensymphony.xwork2.dispatcher.HttpServletResponse
         
         
         
+        
+        
+        
+        
+        
+        
     
     
     
@@ -2491,6 +2497,16 @@ Content-Type: %{#context['com.opensymphony.xwork2.dispatcher.HttpServletResponse
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
         
+            <span class="sidebar-tag-name" data-tags="Mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                Mysql
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="RCE">
+                <span class="iconfont-archer">&#xe606;</span>
+                RCE
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="ctf">
                 <span class="iconfont-archer">&#xe606;</span>
                 ctf
@@ -2506,11 +2522,6 @@ Content-Type: %{#context['com.opensymphony.xwork2.dispatcher.HttpServletResponse
                 随笔
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Mysql">
-                <span class="iconfont-archer">&#xe606;</span>
-                Mysql
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="内网">
                 <span class="iconfont-archer">&#xe606;</span>
                 内网
@@ -2519,6 +2530,16 @@ Content-Type: %{#context['com.opensymphony.xwork2.dispatcher.HttpServletResponse
             <span class="sidebar-tag-name" data-tags="RedTeam">
                 <span class="iconfont-archer">&#xe606;</span>
                 RedTeam
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="代码审计">
+                <span class="iconfont-archer">&#xe606;</span>
+                代码审计
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="PHP">
+                <span class="iconfont-archer">&#xe606;</span>
+                PHP
             </span>
         
             <span class="sidebar-tag-name" data-tags="Burp suite">
@@ -2536,14 +2557,14 @@ Content-Type: %{#context['com.opensymphony.xwork2.dispatcher.HttpServletResponse
                 extension
             </span>
         
-            <span class="sidebar-tag-name" data-tags="代码审计">
+            <span class="sidebar-tag-name" data-tags="Weblogic">
                 <span class="iconfont-archer">&#xe606;</span>
-                代码审计
+                Weblogic
             </span>
         
-            <span class="sidebar-tag-name" data-tags="PHP">
+            <span class="sidebar-tag-name" data-tags="Deserialize">
                 <span class="iconfont-archer">&#xe606;</span>
-                PHP
+                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Tomcat">
@@ -2554,21 +2575,6 @@ Content-Type: %{#context['com.opensymphony.xwork2.dispatcher.HttpServletResponse
             <span class="sidebar-tag-name" data-tags="LFI">
                 <span class="iconfont-archer">&#xe606;</span>
                 LFI
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="RCE">
-                <span class="iconfont-archer">&#xe606;</span>
-                RCE
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Weblogic">
-                <span class="iconfont-archer">&#xe606;</span>
-                Weblogic
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Deserialize">
-                <span class="iconfont-archer">&#xe606;</span>
-                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Chrome">
@@ -2584,6 +2590,11 @@ Content-Type: %{#context['com.opensymphony.xwork2.dispatcher.HttpServletResponse
             <span class="sidebar-tag-name" data-tags="Discuz">
                 <span class="iconfont-archer">&#xe606;</span>
                 Discuz
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="CodeQL">
+                <span class="iconfont-archer">&#xe606;</span>
+                CodeQL
             </span>
         
             <span class="sidebar-tag-name" data-tags="F5">
@@ -2626,14 +2637,14 @@ Content-Type: %{#context['com.opensymphony.xwork2.dispatcher.HttpServletResponse
                 SQLi
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Redis">
-                <span class="iconfont-archer">&#xe606;</span>
-                Redis
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="struts">
                 <span class="iconfont-archer">&#xe606;</span>
                 struts
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Redis">
+                <span class="iconfont-archer">&#xe606;</span>
+                Redis
             </span>
         
             <span class="sidebar-tag-name" data-tags="SSRF">
@@ -2646,24 +2657,19 @@ Content-Type: %{#context['com.opensymphony.xwork2.dispatcher.HttpServletResponse
                 ThinkPHP
             </span>
         
-            <span class="sidebar-tag-name" data-tags="xss">
-                <span class="iconfont-archer">&#xe606;</span>
-                xss
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="XXE">
                 <span class="iconfont-archer">&#xe606;</span>
                 XXE
             </span>
         
+            <span class="sidebar-tag-name" data-tags="xss">
+                <span class="iconfont-archer">&#xe606;</span>
+                xss
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="OpenCV">
                 <span class="iconfont-archer">&#xe606;</span>
                 OpenCV
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="智能合约">
-                <span class="iconfont-archer">&#xe606;</span>
-                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="spider">
@@ -2676,14 +2682,24 @@ Content-Type: %{#context['com.opensymphony.xwork2.dispatcher.HttpServletResponse
                 smali
             </span>
         
-            <span class="sidebar-tag-name" data-tags="hw2020">
+            <span class="sidebar-tag-name" data-tags="智能合约">
                 <span class="iconfont-archer">&#xe606;</span>
-                hw2020
+                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="深信服">
                 <span class="iconfont-archer">&#xe606;</span>
                 深信服
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Nday">
+                <span class="iconfont-archer">&#xe606;</span>
+                Nday
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="hw2020">
+                <span class="iconfont-archer">&#xe606;</span>
+                hw2020
             </span>
         
             <span class="sidebar-tag-name" data-tags="CAPTCHA">
@@ -2694,16 +2710,6 @@ Content-Type: %{#context['com.opensymphony.xwork2.dispatcher.HttpServletResponse
             <span class="sidebar-tag-name" data-tags="pwn">
                 <span class="iconfont-archer">&#xe606;</span>
                 pwn
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Nday">
-                <span class="iconfont-archer">&#xe606;</span>
-                Nday
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="CodeQL">
-                <span class="iconfont-archer">&#xe606;</span>
-                CodeQL
             </span>
         
     </div>
@@ -2717,14 +2723,14 @@ Content-Type: %{#context['com.opensymphony.xwork2.dispatcher.HttpServletResponse
         <div class="sidebar-panel-categories">
     <div class="sidebar-categories-name">
     
-        <span class="sidebar-category-name" data-categories="编程">
-            <span class="iconfont-archer">&#xe60a;</span>
-            编程
-        </span>
-    
         <span class="sidebar-category-name" data-categories="代码审计">
             <span class="iconfont-archer">&#xe60a;</span>
             代码审计
+        </span>
+    
+        <span class="sidebar-category-name" data-categories="编程">
+            <span class="iconfont-archer">&#xe60a;</span>
+            编程
         </span>
     
         <span class="sidebar-category-name" data-categories="Pentest">
@@ -2795,7 +2801,22 @@ Content-Type: %{#context['com.opensymphony.xwork2.dispatcher.HttpServletResponse
         
         <!-- mermaid -->
         
-    <script>
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
             window.imageLazyLoadSetting = {
                 isSPA: false,
                 processImages: null,

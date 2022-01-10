@@ -26,22 +26,22 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="影响版本： Struts 2.1.2 - Struts 2.3.33Struts 2.5 - Struts 2.5.12 漏洞产生原因主要在于对于xml文件的反序列化 0x01 又见踩坑终于不是部署时候的坑了，这回的坑在于了解struts.xml中的配置信息  此漏洞在于rest插件，所以部署rest-showcase即可  几个小tips:  marshal: 从非文本格式到文本格式的数据转化，">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
 <meta property="article:published_time" content="2018-10-11T04:13:55.000Z">
 <meta property="article:modified_time" content="2020-08-01T13:17:12.663Z">
 <meta property="article:author" content="Sariel.D">
 <meta property="article:tag" content="java">
 <meta property="article:tag" content="struts">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <link rel="icon" href="/assets/favicon.ico">
@@ -511,7 +511,7 @@
   )
 </script>
 
-            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
             <div class="container container-unloaded">
                 <main class="main post-page">
     <article class="article-entry">
@@ -536,7 +536,7 @@
      &lt;/package&gt;
  &lt;/struts&gt;</code></pre></li>
 <li><p>继承的<code>rest-default</code>配置位于<code>struts2-rest-plugin-2.5.8.jar!/struts-plugin.xml</code></p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2b51554f/15392451137133.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2b51554f/15392451137133.jpg" alt></p>
 <p> 其中关键的配置信息如下，需要理清其中的调用关系</p>
 <pre class=" language-xml"><code class="language-xml"> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>struts</span><span class="token punctuation">></span></span>
 
@@ -577,19 +577,19 @@
 <li><p>通过上面的配置信息，关键在于会调用<code>rest</code>拦截器，通过对传入的数据包的content-type进行分析，然后使用对用的类进行内容解析</p>
 </li>
 <li><p>首先进入拦截器<code>org.apache.struts2.rest.ContentTypeInterceptor</code>，在第一个断点通过解析content-type然后返相应handler，并在第二个断点进行转化</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2b51554f/15395908148639.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2b51554f/15395908148639.jpg" alt></p>
 </li>
 <li><p>toObject将Reader对象中的内容转换成target对象</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2b51554f/15395912497597.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2b51554f/15395912497597.jpg" alt></p>
 </li>
 <li><p>到达start开始解析xml内容，type对应顶层标签，即java.util.Map，然后进入convertAnother</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2b51554f/15396580395773.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2b51554f/15396580395773.jpg" alt></p>
 </li>
 <li><p>convertAnother，第一个断点查找该类对应的具体实现类(跟入后会调用<code>defaultImplementationOf</code>，很奇怪，官方文档看不到对这个的详细解释)，将java.util.Map转为java.util.HashMap类，然后在第二个断点去找相应的转化器为<code>MapConverter</code></p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2b51554f/15396583967099.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2b51554f/15396583967099.jpg" alt></p>
 </li>
 <li><p>然后进入转化器的unmarshal方法进行内容解析</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2b51554f/15396588734928.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2b51554f/15396588734928.jpg" alt></p>
 </li>
 <li><p>之后利用populateMap真正开始解析内容，期间会调用putCurrentEntryIntoMap再调用readItem读取<code>键值</code>，readItem内调用上面的convertAnother，实现深层遍历。</p>
 <pre class=" language-java"><code class="language-java"> <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">populateMap</span><span class="token punctuation">(</span>HierarchicalStreamReader reader<span class="token punctuation">,</span> UnmarshallingContext context<span class="token punctuation">,</span> Map map<span class="token punctuation">,</span> Map target<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -620,7 +620,7 @@
 <blockquote>
 <p>key对象的转换过程只是一个填充对象字段的过程，不涉及命令执行。</p>
 </blockquote>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2b51554f/15396613870269.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2b51554f/15396613870269.jpg" alt></p>
 </li>
 </ol>
 <h4 id="ii-命令执行"><a href="#ii-命令执行" class="headerlink" title="ii. 命令执行"></a>ii. 命令执行</h4><ol>
@@ -716,7 +716,7 @@
  <span class="token punctuation">}</span></code></pre>
 </li>
 <li><p>因为<code>ostart == ofinish == 0</code>所以调用getMoreData()</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2b51554f/15396689176772.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2b51554f/15396689176772.jpg" alt></p>
 <pre class=" language-java"><code class="language-java"> <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">read</span><span class="token punctuation">(</span><span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> var1<span class="token punctuation">,</span> <span class="token keyword">int</span> var2<span class="token punctuation">,</span> <span class="token keyword">int</span> var3<span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>
      <span class="token keyword">int</span> var4<span class="token punctuation">;</span>
      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>ostart <span class="token operator">>=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>ofinish<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -770,7 +770,7 @@
  <span class="token punctuation">}</span></code></pre>
 </li>
 <li><p>进入后，经过一系列判断，最后调用serviceIterator.next()方法。(P.S. 这里有些奇怪，如果在前面某些地方打了断点后，servicelterator.next就会为null，导致无法进入方法)</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/2b51554f/15396729683163.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/2b51554f/15396729683163.jpg" alt></p>
 </li>
 </ol>
 <ol start="10">
@@ -2171,6 +2171,12 @@ java -cp target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.XStream ImageIO <sp
         
         
         
+        
+        
+        
+        
+        
+        
     
     
     
@@ -2686,6 +2692,16 @@ java -cp target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.XStream ImageIO <sp
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
         
+            <span class="sidebar-tag-name" data-tags="Mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                Mysql
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="RCE">
+                <span class="iconfont-archer">&#xe606;</span>
+                RCE
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="ctf">
                 <span class="iconfont-archer">&#xe606;</span>
                 ctf
@@ -2701,11 +2717,6 @@ java -cp target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.XStream ImageIO <sp
                 随笔
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Mysql">
-                <span class="iconfont-archer">&#xe606;</span>
-                Mysql
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="内网">
                 <span class="iconfont-archer">&#xe606;</span>
                 内网
@@ -2714,6 +2725,16 @@ java -cp target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.XStream ImageIO <sp
             <span class="sidebar-tag-name" data-tags="RedTeam">
                 <span class="iconfont-archer">&#xe606;</span>
                 RedTeam
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="代码审计">
+                <span class="iconfont-archer">&#xe606;</span>
+                代码审计
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="PHP">
+                <span class="iconfont-archer">&#xe606;</span>
+                PHP
             </span>
         
             <span class="sidebar-tag-name" data-tags="Burp suite">
@@ -2731,14 +2752,14 @@ java -cp target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.XStream ImageIO <sp
                 extension
             </span>
         
-            <span class="sidebar-tag-name" data-tags="代码审计">
+            <span class="sidebar-tag-name" data-tags="Weblogic">
                 <span class="iconfont-archer">&#xe606;</span>
-                代码审计
+                Weblogic
             </span>
         
-            <span class="sidebar-tag-name" data-tags="PHP">
+            <span class="sidebar-tag-name" data-tags="Deserialize">
                 <span class="iconfont-archer">&#xe606;</span>
-                PHP
+                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Tomcat">
@@ -2749,21 +2770,6 @@ java -cp target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.XStream ImageIO <sp
             <span class="sidebar-tag-name" data-tags="LFI">
                 <span class="iconfont-archer">&#xe606;</span>
                 LFI
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="RCE">
-                <span class="iconfont-archer">&#xe606;</span>
-                RCE
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Weblogic">
-                <span class="iconfont-archer">&#xe606;</span>
-                Weblogic
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Deserialize">
-                <span class="iconfont-archer">&#xe606;</span>
-                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Chrome">
@@ -2779,6 +2785,11 @@ java -cp target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.XStream ImageIO <sp
             <span class="sidebar-tag-name" data-tags="Discuz">
                 <span class="iconfont-archer">&#xe606;</span>
                 Discuz
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="CodeQL">
+                <span class="iconfont-archer">&#xe606;</span>
+                CodeQL
             </span>
         
             <span class="sidebar-tag-name" data-tags="F5">
@@ -2821,14 +2832,14 @@ java -cp target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.XStream ImageIO <sp
                 SQLi
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Redis">
-                <span class="iconfont-archer">&#xe606;</span>
-                Redis
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="struts">
                 <span class="iconfont-archer">&#xe606;</span>
                 struts
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Redis">
+                <span class="iconfont-archer">&#xe606;</span>
+                Redis
             </span>
         
             <span class="sidebar-tag-name" data-tags="SSRF">
@@ -2841,24 +2852,19 @@ java -cp target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.XStream ImageIO <sp
                 ThinkPHP
             </span>
         
-            <span class="sidebar-tag-name" data-tags="xss">
-                <span class="iconfont-archer">&#xe606;</span>
-                xss
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="XXE">
                 <span class="iconfont-archer">&#xe606;</span>
                 XXE
             </span>
         
+            <span class="sidebar-tag-name" data-tags="xss">
+                <span class="iconfont-archer">&#xe606;</span>
+                xss
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="OpenCV">
                 <span class="iconfont-archer">&#xe606;</span>
                 OpenCV
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="智能合约">
-                <span class="iconfont-archer">&#xe606;</span>
-                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="spider">
@@ -2871,14 +2877,24 @@ java -cp target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.XStream ImageIO <sp
                 smali
             </span>
         
-            <span class="sidebar-tag-name" data-tags="hw2020">
+            <span class="sidebar-tag-name" data-tags="智能合约">
                 <span class="iconfont-archer">&#xe606;</span>
-                hw2020
+                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="深信服">
                 <span class="iconfont-archer">&#xe606;</span>
                 深信服
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Nday">
+                <span class="iconfont-archer">&#xe606;</span>
+                Nday
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="hw2020">
+                <span class="iconfont-archer">&#xe606;</span>
+                hw2020
             </span>
         
             <span class="sidebar-tag-name" data-tags="CAPTCHA">
@@ -2889,16 +2905,6 @@ java -cp target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.XStream ImageIO <sp
             <span class="sidebar-tag-name" data-tags="pwn">
                 <span class="iconfont-archer">&#xe606;</span>
                 pwn
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Nday">
-                <span class="iconfont-archer">&#xe606;</span>
-                Nday
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="CodeQL">
-                <span class="iconfont-archer">&#xe606;</span>
-                CodeQL
             </span>
         
     </div>
@@ -2912,14 +2918,14 @@ java -cp target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.XStream ImageIO <sp
         <div class="sidebar-panel-categories">
     <div class="sidebar-categories-name">
     
-        <span class="sidebar-category-name" data-categories="编程">
-            <span class="iconfont-archer">&#xe60a;</span>
-            编程
-        </span>
-    
         <span class="sidebar-category-name" data-categories="代码审计">
             <span class="iconfont-archer">&#xe60a;</span>
             代码审计
+        </span>
+    
+        <span class="sidebar-category-name" data-categories="编程">
+            <span class="iconfont-archer">&#xe60a;</span>
+            编程
         </span>
     
         <span class="sidebar-category-name" data-categories="Pentest">
@@ -2990,7 +2996,22 @@ java -cp target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.XStream ImageIO <sp
         
         <!-- mermaid -->
         
-    <script>
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
             window.imageLazyLoadSetting = {
                 isSPA: false,
                 processImages: null,

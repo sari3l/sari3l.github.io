@@ -26,16 +26,16 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="写这篇文章是因二向箔的弹窗挑战赛(开放中)，发现对 svg 在 xss 中里的利用知之甚少，学习 more(其实就是老生常谈)">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
 <meta property="article:published_time" content="2019-08-07T06:40:17.000Z">
 <meta property="article:modified_time" content="2020-07-06T09:45:08.861Z">
 <meta property="article:author" content="Sariel.D">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <link rel="icon" href="/assets/favicon.ico">
@@ -495,7 +495,7 @@
   )
 </script>
 
-            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
             <div class="container container-unloaded">
                 <main class="main post-page">
     <article class="article-entry">
@@ -524,9 +524,9 @@
 <p>剩下内容可见参考资料[1]一篇很好的文章</p>
 <h3 id="HTML-script-parse"><a href="#HTML-script-parse" class="headerlink" title="HTML script parse"></a>HTML script parse</h3><p>html词法解析文档：<a href="https://html.spec.whatwg.org/multipage/parsing.html#parsing-html-fragments" target="_blank" rel="noopener">html parsing</a></p>
 <p>在接收到 script 标签后，进入<a href="https://html.spec.whatwg.org/multipage/parsing.html#script-data-state" target="_blank" rel="noopener">script data state(脚本数据状态)</a></p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/13977d3a/2019-08-07-15651562539916.jpg" alt="-w554"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/13977d3a/2019-08-07-15651562539916.jpg" alt="-w554"></p>
 <p>继续往下跟随，会发现怎么都无法进入<a href="https://html.spec.whatwg.org/multipage/parsing.html#character-reference-state" target="_blank" rel="noopener"><code>Character reference state(字符引用状态)</code></a>，即无法解析被实体化编码后的内容</p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/13977d3a/2019-08-07-15651567212204.jpg" alt="-w617"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/13977d3a/2019-08-07-15651567212204.jpg" alt="-w617"></p>
 <blockquote>
 <p>簡單總結一下，當&#60;script&gt;沒有做編碼時，會將script整體作爲一個token釋放，然後就會進入script data state狀態；但是如果編碼後，就會將script看成文本，拆成一個一個字符釋放（轉義後爲s作爲token釋放，又進入字符引用狀態，繼續轉義後爲c作爲token釋放，……，最後是t），所以到最後也沒進入script data state狀態，也就是沒有執行環境。</p>
 </blockquote>
@@ -536,19 +536,19 @@
 </blockquote>
 <p>那肯定就会有人问为什么 Unicode 编码可以呢<br>因为这又涉及了 <a href="http://117.128.6.32/cache/www.ecma-international.org/publications/files/ECMA-ST/Ecma-262.pdf?ich_args2=470-07135322043300_9d592f131db3624ff4f3224ba98b8dbb_10001002_9c896229d6c6f6d39538518939a83798_9084acb2faa7391a16252898db1a4d90" target="_blank" rel="noopener">JavaScript 标准</a>(JavaScript 是由 Ecma 标准化的，标准叫 ECMAScript)</p>
 <p>这里可以看到 JS 允许<strong>标识符名称</strong>使用 Unicode 字符，支持Unicode转义字符<code>\u000A\u000B</code>，但不支持Unicode转义序列串<code>\u000A000B</code>，具体规则可以去看一下</p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/13977d3a/2019-08-07-15651571988350.jpg" alt="-w753"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/13977d3a/2019-08-07-15651571988350.jpg" alt="-w753"></p>
 <p>这样就能理解为什么下面的代码会执行了</p>
 <pre class=" language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">></span></span><span class="token script language-javascript">\u0061\u006c\u0065\u0072\<span class="token function">u0074</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span></code></pre>
 <p>实际感觉多读读标准文档理解渲染机制就能解决很多问题</p>
 <h3 id="script-in-svg"><a href="#script-in-svg" class="headerlink" title="script in svg"></a><a href="https://www.w3.org/TR/SVG11/script.html#ScriptElement" target="_blank" rel="noopener">script in svg</a></h3><p>简单看一下就大致能明白主体意思</p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/13977d3a/2019-08-07-15650996267940.jpg" alt="-w1593"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/13977d3a/2019-08-07-15650996267940.jpg" alt="-w1593"></p>
 <h2 id="为什么实体编码会被解析"><a href="#为什么实体编码会被解析" class="headerlink" title="为什么实体编码会被解析"></a>为什么实体编码会被解析</h2><p>经过查找后，发现还存在一个 vxml，形式上和 svg 有些类似，但是在 vxml-script 中的 Html 实体编码就不会被解析出来</p>
 <p>如果说 &#60;svg&gt; 是满足 xml 和 svg，利用 svg 支持 script，xml 支持实体编码，那么为什么类似的&#60;vxml&gt;不行呢？</p>
 <p>在 html 解析文档中可以看到这个内容，当 script 标签节点出现在 svg 节点时，会挂起 html解析并根据 svg 标准进行进一步解析，这就导致了实体引用被解码</p>
 <blockquote>
 <p>html解析 -&gt; 发现svg-script -&gt; svg(xml)解析 -&gt; html解析继续</p>
 </blockquote>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/13977d3a/2019-08-07-15651618669288.jpg" alt="-w1306"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/13977d3a/2019-08-07-15651618669288.jpg" alt="-w1306"></p>
 <h2 id="挑战赛答案"><a href="#挑战赛答案" class="headerlink" title="挑战赛答案"></a>挑战赛答案</h2><p><a href="https://rozna.reqresp.io/uti?name=%3Csvg%3E%26%2334%3B%3balert%26%2340%3bdocument.cookie)%3b%26%2334%3B" target="_blank" rel="noopener">https://rozna.reqresp.io/uti?name=%3Csvg%3E%26%2334%3B%3balert%26%2340%3bdocument.cookie)%3b%26%2334%3B</a></p>
 <h2 id="延伸"><a href="#延伸" class="headerlink" title="延伸"></a>延伸</h2><p>Content-Type：application/xml</p>
 <pre class=" language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">xmlns</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>http://www.w3.org/2000/svg<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token script language-javascript">alert<span class="token operator">&amp;</span>#<span class="token number">40</span><span class="token punctuation">;</span><span class="token number">1</span><span class="token punctuation">)</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span></code></pre>
@@ -1875,6 +1875,12 @@
         
         
         
+        
+        
+        
+        
+        
+        
     
     
     
@@ -2390,6 +2396,16 @@
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
         
+            <span class="sidebar-tag-name" data-tags="Mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                Mysql
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="RCE">
+                <span class="iconfont-archer">&#xe606;</span>
+                RCE
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="ctf">
                 <span class="iconfont-archer">&#xe606;</span>
                 ctf
@@ -2405,11 +2421,6 @@
                 随笔
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Mysql">
-                <span class="iconfont-archer">&#xe606;</span>
-                Mysql
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="内网">
                 <span class="iconfont-archer">&#xe606;</span>
                 内网
@@ -2418,6 +2429,16 @@
             <span class="sidebar-tag-name" data-tags="RedTeam">
                 <span class="iconfont-archer">&#xe606;</span>
                 RedTeam
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="代码审计">
+                <span class="iconfont-archer">&#xe606;</span>
+                代码审计
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="PHP">
+                <span class="iconfont-archer">&#xe606;</span>
+                PHP
             </span>
         
             <span class="sidebar-tag-name" data-tags="Burp suite">
@@ -2435,14 +2456,14 @@
                 extension
             </span>
         
-            <span class="sidebar-tag-name" data-tags="代码审计">
+            <span class="sidebar-tag-name" data-tags="Weblogic">
                 <span class="iconfont-archer">&#xe606;</span>
-                代码审计
+                Weblogic
             </span>
         
-            <span class="sidebar-tag-name" data-tags="PHP">
+            <span class="sidebar-tag-name" data-tags="Deserialize">
                 <span class="iconfont-archer">&#xe606;</span>
-                PHP
+                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Tomcat">
@@ -2453,21 +2474,6 @@
             <span class="sidebar-tag-name" data-tags="LFI">
                 <span class="iconfont-archer">&#xe606;</span>
                 LFI
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="RCE">
-                <span class="iconfont-archer">&#xe606;</span>
-                RCE
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Weblogic">
-                <span class="iconfont-archer">&#xe606;</span>
-                Weblogic
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Deserialize">
-                <span class="iconfont-archer">&#xe606;</span>
-                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Chrome">
@@ -2483,6 +2489,11 @@
             <span class="sidebar-tag-name" data-tags="Discuz">
                 <span class="iconfont-archer">&#xe606;</span>
                 Discuz
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="CodeQL">
+                <span class="iconfont-archer">&#xe606;</span>
+                CodeQL
             </span>
         
             <span class="sidebar-tag-name" data-tags="F5">
@@ -2525,14 +2536,14 @@
                 SQLi
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Redis">
-                <span class="iconfont-archer">&#xe606;</span>
-                Redis
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="struts">
                 <span class="iconfont-archer">&#xe606;</span>
                 struts
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Redis">
+                <span class="iconfont-archer">&#xe606;</span>
+                Redis
             </span>
         
             <span class="sidebar-tag-name" data-tags="SSRF">
@@ -2545,24 +2556,19 @@
                 ThinkPHP
             </span>
         
-            <span class="sidebar-tag-name" data-tags="xss">
-                <span class="iconfont-archer">&#xe606;</span>
-                xss
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="XXE">
                 <span class="iconfont-archer">&#xe606;</span>
                 XXE
             </span>
         
+            <span class="sidebar-tag-name" data-tags="xss">
+                <span class="iconfont-archer">&#xe606;</span>
+                xss
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="OpenCV">
                 <span class="iconfont-archer">&#xe606;</span>
                 OpenCV
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="智能合约">
-                <span class="iconfont-archer">&#xe606;</span>
-                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="spider">
@@ -2575,14 +2581,24 @@
                 smali
             </span>
         
-            <span class="sidebar-tag-name" data-tags="hw2020">
+            <span class="sidebar-tag-name" data-tags="智能合约">
                 <span class="iconfont-archer">&#xe606;</span>
-                hw2020
+                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="深信服">
                 <span class="iconfont-archer">&#xe606;</span>
                 深信服
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Nday">
+                <span class="iconfont-archer">&#xe606;</span>
+                Nday
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="hw2020">
+                <span class="iconfont-archer">&#xe606;</span>
+                hw2020
             </span>
         
             <span class="sidebar-tag-name" data-tags="CAPTCHA">
@@ -2593,16 +2609,6 @@
             <span class="sidebar-tag-name" data-tags="pwn">
                 <span class="iconfont-archer">&#xe606;</span>
                 pwn
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Nday">
-                <span class="iconfont-archer">&#xe606;</span>
-                Nday
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="CodeQL">
-                <span class="iconfont-archer">&#xe606;</span>
-                CodeQL
             </span>
         
     </div>
@@ -2616,14 +2622,14 @@
         <div class="sidebar-panel-categories">
     <div class="sidebar-categories-name">
     
-        <span class="sidebar-category-name" data-categories="编程">
-            <span class="iconfont-archer">&#xe60a;</span>
-            编程
-        </span>
-    
         <span class="sidebar-category-name" data-categories="代码审计">
             <span class="iconfont-archer">&#xe60a;</span>
             代码审计
+        </span>
+    
+        <span class="sidebar-category-name" data-categories="编程">
+            <span class="iconfont-archer">&#xe60a;</span>
+            编程
         </span>
     
         <span class="sidebar-category-name" data-categories="Pentest">
@@ -2694,7 +2700,22 @@
         
         <!-- mermaid -->
         
-    <script>
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
             window.imageLazyLoadSetting = {
                 isSPA: false,
                 processImages: null,

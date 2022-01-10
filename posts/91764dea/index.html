@@ -26,18 +26,18 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="全世界都在学CodeQL？">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
 <meta property="article:published_time" content="2021-12-27T13:23:51.000Z">
 <meta property="article:modified_time" content="2021-12-30T07:01:03.558Z">
 <meta property="article:author" content="Sariel.D">
 <meta property="article:tag" content="CodeQL">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <link rel="icon" href="/assets/favicon.ico">
@@ -505,7 +505,7 @@
   )
 </script>
 
-            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
             <div class="container container-unloaded">
                 <main class="main post-page">
     <article class="article-entry">
@@ -629,13 +629,13 @@ from MyTaintTraking conf<span class="token punctuation">,</span> DataFlow2<span 
 where conf<span class="token punctuation">.</span><span class="token function">hasFlowPath</span><span class="token punctuation">(</span>source<span class="token punctuation">,</span> sink<span class="token punctuation">)</span>
 select sink<span class="token punctuation">.</span><span class="token function">getNode</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> source<span class="token punctuation">,</span> sink<span class="token punctuation">,</span> <span class="token string">"JNDI lookup might include name from $@."</span><span class="token punctuation">,</span> source<span class="token punctuation">.</span><span class="token function">getNode</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">"this user input"</span></code></pre>
 <h3 id="IV-分析结果"><a href="#IV-分析结果" class="headerlink" title="IV. 分析结果"></a>IV. 分析结果</h3><p>最后成功执行会有 alerts 信息，本次有三条，但实际是两条链，中间因为有<code>if...else...</code>结构导致 Path 看起来多，结果中的 Path 从上到下即是从 source 到 sink 的过程</p>
-<h4 id="JndiObjectFactory"><a href="#JndiObjectFactory" class="headerlink" title="JndiObjectFactory"></a>JndiObjectFactory</h4><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91764dea/16403289987343.jpg" alt></p>
+<h4 id="JndiObjectFactory"><a href="#JndiObjectFactory" class="headerlink" title="JndiObjectFactory"></a>JndiObjectFactory</h4><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/91764dea/16403289987343.jpg" alt></p>
 <p>对应 Payload</p>
 <pre class=" language-json"><code class="language-json"><span class="token punctuation">{</span>
     <span class="token property">"@type"</span><span class="token operator">:</span> <span class="token string">"org.apache.shiro.jndi.JndiObjectFactory"</span><span class="token punctuation">,</span>
     <span class="token property">"resourceName"</span><span class="token operator">:</span> <span class="token string">"ldap://xxxx"</span>
 <span class="token punctuation">}</span></code></pre>
-<h4 id="JndiRealmFactory"><a href="#JndiRealmFactory" class="headerlink" title="JndiRealmFactory"></a>JndiRealmFactory</h4><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91764dea/16403290786878.jpg" alt></p>
+<h4 id="JndiRealmFactory"><a href="#JndiRealmFactory" class="headerlink" title="JndiRealmFactory"></a>JndiRealmFactory</h4><p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/91764dea/16403290786878.jpg" alt></p>
 <p>对应 Payload</p>
 <pre class=" language-json"><code class="language-json"><span class="token punctuation">{</span>
     <span class="token property">"@type"</span><span class="token operator">:</span> <span class="token string">"org.apache.shiro.realm.jndi.JndiRealmFactory"</span><span class="token punctuation">,</span>
@@ -681,17 +681,17 @@ from MyTaintTest conf<span class="token punctuation">,</span> DataFlow2<span cla
 where conf<span class="token punctuation">.</span><span class="token function">hasFlowPath</span><span class="token punctuation">(</span>source<span class="token punctuation">,</span> sink<span class="token punctuation">)</span>
 select sink<span class="token punctuation">.</span><span class="token function">getNode</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> source<span class="token punctuation">,</span> sink<span class="token punctuation">,</span> <span class="token string">"from $@"</span><span class="token punctuation">,</span> source<span class="token punctuation">.</span><span class="token function">getNode</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">"this user input"</span></code></pre>
 <p>得出的结果实际卡在 AbstractRememberMeManager，说明向上的 source 断了</p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91764dea/16402412852020.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/91764dea/16402412852020.jpg" alt></p>
 <h3 id="优化-Source"><a href="#优化-Source" class="headerlink" title="优化 Source"></a>优化 Source</h3><p>按大佬给的 RemoteFlowSource（至于它本身代表什么稍后再说）作为 source，上面的代码基本不动，只是修改 isSource 判断逻辑</p>
 <pre class=" language-java"><code class="language-java">override predicate <span class="token function">isSource</span> <span class="token punctuation">(</span>DataFlow<span class="token operator">:</span><span class="token operator">:</span>Node node<span class="token punctuation">)</span> <span class="token punctuation">{</span>
     node <span class="token keyword">instanceof</span> <span class="token class-name">RemoteFlowSource</span>
 <span class="token punctuation">}</span></code></pre>
 <p>可以看到 Path 直接跟到了 SimpleCookie，基本上达到了入口点的位置，中间的变量传递也帮我们识别解决了</p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91764dea/16402422156249.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/91764dea/16402422156249.jpg" alt></p>
 <h4 id="RemoteFlowSource"><a href="#RemoteFlowSource" class="headerlink" title="RemoteFlowSource"></a>RemoteFlowSource</h4><p>代码位于<code>/java/ql/lib/semmle/code/java/dataflow/FlowSources.qll</code>，主要识别各种可用于污染跟踪的流源</p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91764dea/16402488817802.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/91764dea/16402488817802.jpg" alt></p>
 <p>因为有很多子类，不好确定到底是哪个类型触发的，将输出改为<code>source.getNode().getAQlClass()</code>我们能获取到以下内容，可以知道关键在于<code>ExternalRemoteFlowSource</code></p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/91764dea/16402468069276.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/91764dea/16402468069276.jpg" alt></p>
 <h4 id="ExternalRemoteFlowSource"><a href="#ExternalRemoteFlowSource" class="headerlink" title="ExternalRemoteFlowSource"></a>ExternalRemoteFlowSource</h4><p>定义很简单，主要是 sourceNode 方法</p>
 <pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">class</span> <span class="token class-name">ExternalRemoteFlowSource</span> <span class="token keyword">extends</span> <span class="token class-name">RemoteFlowSource</span> <span class="token punctuation">{</span>
   <span class="token function">ExternalRemoteFlowSource</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token function">sourceNode</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> <span class="token string">"remote"</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
@@ -2067,6 +2067,12 @@ The `kind` column is a tag that can be referenced from QL to determine to which 
         
         
         
+        
+        
+        
+        
+        
+        
     
     
     
@@ -2582,6 +2588,16 @@ The `kind` column is a tag that can be referenced from QL to determine to which 
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
         
+            <span class="sidebar-tag-name" data-tags="Mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                Mysql
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="RCE">
+                <span class="iconfont-archer">&#xe606;</span>
+                RCE
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="ctf">
                 <span class="iconfont-archer">&#xe606;</span>
                 ctf
@@ -2597,11 +2613,6 @@ The `kind` column is a tag that can be referenced from QL to determine to which 
                 随笔
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Mysql">
-                <span class="iconfont-archer">&#xe606;</span>
-                Mysql
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="内网">
                 <span class="iconfont-archer">&#xe606;</span>
                 内网
@@ -2610,6 +2621,16 @@ The `kind` column is a tag that can be referenced from QL to determine to which 
             <span class="sidebar-tag-name" data-tags="RedTeam">
                 <span class="iconfont-archer">&#xe606;</span>
                 RedTeam
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="代码审计">
+                <span class="iconfont-archer">&#xe606;</span>
+                代码审计
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="PHP">
+                <span class="iconfont-archer">&#xe606;</span>
+                PHP
             </span>
         
             <span class="sidebar-tag-name" data-tags="Burp suite">
@@ -2627,14 +2648,14 @@ The `kind` column is a tag that can be referenced from QL to determine to which 
                 extension
             </span>
         
-            <span class="sidebar-tag-name" data-tags="代码审计">
+            <span class="sidebar-tag-name" data-tags="Weblogic">
                 <span class="iconfont-archer">&#xe606;</span>
-                代码审计
+                Weblogic
             </span>
         
-            <span class="sidebar-tag-name" data-tags="PHP">
+            <span class="sidebar-tag-name" data-tags="Deserialize">
                 <span class="iconfont-archer">&#xe606;</span>
-                PHP
+                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Tomcat">
@@ -2645,21 +2666,6 @@ The `kind` column is a tag that can be referenced from QL to determine to which 
             <span class="sidebar-tag-name" data-tags="LFI">
                 <span class="iconfont-archer">&#xe606;</span>
                 LFI
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="RCE">
-                <span class="iconfont-archer">&#xe606;</span>
-                RCE
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Weblogic">
-                <span class="iconfont-archer">&#xe606;</span>
-                Weblogic
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Deserialize">
-                <span class="iconfont-archer">&#xe606;</span>
-                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Chrome">
@@ -2675,6 +2681,11 @@ The `kind` column is a tag that can be referenced from QL to determine to which 
             <span class="sidebar-tag-name" data-tags="Discuz">
                 <span class="iconfont-archer">&#xe606;</span>
                 Discuz
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="CodeQL">
+                <span class="iconfont-archer">&#xe606;</span>
+                CodeQL
             </span>
         
             <span class="sidebar-tag-name" data-tags="F5">
@@ -2717,14 +2728,14 @@ The `kind` column is a tag that can be referenced from QL to determine to which 
                 SQLi
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Redis">
-                <span class="iconfont-archer">&#xe606;</span>
-                Redis
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="struts">
                 <span class="iconfont-archer">&#xe606;</span>
                 struts
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Redis">
+                <span class="iconfont-archer">&#xe606;</span>
+                Redis
             </span>
         
             <span class="sidebar-tag-name" data-tags="SSRF">
@@ -2737,24 +2748,19 @@ The `kind` column is a tag that can be referenced from QL to determine to which 
                 ThinkPHP
             </span>
         
-            <span class="sidebar-tag-name" data-tags="xss">
-                <span class="iconfont-archer">&#xe606;</span>
-                xss
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="XXE">
                 <span class="iconfont-archer">&#xe606;</span>
                 XXE
             </span>
         
+            <span class="sidebar-tag-name" data-tags="xss">
+                <span class="iconfont-archer">&#xe606;</span>
+                xss
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="OpenCV">
                 <span class="iconfont-archer">&#xe606;</span>
                 OpenCV
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="智能合约">
-                <span class="iconfont-archer">&#xe606;</span>
-                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="spider">
@@ -2767,14 +2773,24 @@ The `kind` column is a tag that can be referenced from QL to determine to which 
                 smali
             </span>
         
-            <span class="sidebar-tag-name" data-tags="hw2020">
+            <span class="sidebar-tag-name" data-tags="智能合约">
                 <span class="iconfont-archer">&#xe606;</span>
-                hw2020
+                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="深信服">
                 <span class="iconfont-archer">&#xe606;</span>
                 深信服
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Nday">
+                <span class="iconfont-archer">&#xe606;</span>
+                Nday
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="hw2020">
+                <span class="iconfont-archer">&#xe606;</span>
+                hw2020
             </span>
         
             <span class="sidebar-tag-name" data-tags="CAPTCHA">
@@ -2785,16 +2801,6 @@ The `kind` column is a tag that can be referenced from QL to determine to which 
             <span class="sidebar-tag-name" data-tags="pwn">
                 <span class="iconfont-archer">&#xe606;</span>
                 pwn
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Nday">
-                <span class="iconfont-archer">&#xe606;</span>
-                Nday
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="CodeQL">
-                <span class="iconfont-archer">&#xe606;</span>
-                CodeQL
             </span>
         
     </div>
@@ -2808,14 +2814,14 @@ The `kind` column is a tag that can be referenced from QL to determine to which 
         <div class="sidebar-panel-categories">
     <div class="sidebar-categories-name">
     
-        <span class="sidebar-category-name" data-categories="编程">
-            <span class="iconfont-archer">&#xe60a;</span>
-            编程
-        </span>
-    
         <span class="sidebar-category-name" data-categories="代码审计">
             <span class="iconfont-archer">&#xe60a;</span>
             代码审计
+        </span>
+    
+        <span class="sidebar-category-name" data-categories="编程">
+            <span class="iconfont-archer">&#xe60a;</span>
+            编程
         </span>
     
         <span class="sidebar-category-name" data-categories="Pentest">
@@ -2886,7 +2892,22 @@ The `kind` column is a tag that can be referenced from QL to determine to which 
         
         <!-- mermaid -->
         
-    <script>
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
             window.imageLazyLoadSetting = {
                 isSPA: false,
                 processImages: null,

