@@ -265,15 +265,13 @@
     
     <!-- 谷歌统计  -->
     
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-129685149-2"></script>
         <script>
-            (function (i, s, o, g, r, a, m) {
-                i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
-                (i[r].q = i[r].q || []).push(arguments)
-                }, i[r].l = 1 * new Date(); a = s.createElement(o),
-                m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
-            })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
-            ga('create', 'UA-129685149-2', 'auto');
-            ga('send', 'pageview');
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'UA-129685149-2');
         </script>
     
 <meta name="generator" content="Hexo 4.2.1"><link rel="stylesheet" href="/css/prism-funky.css" type="text/css"></head>
@@ -759,6 +757,21 @@ $$<span class="token punctuation">;</span>
         <div class="post-comment">
             <!-- 来必力 City 版安装代码 -->
 
+    <div id="lv-container" data-id="city" data-uid= MTAyMC81NTE3NS8zMTY0Mg==>
+        <script type="text/javascript">
+            (function (d, s) {
+                var j, e = d.getElementsByTagName(s)[0];
+                if (typeof LivereTower === 'function') { return; }
+                j = d.createElement(s);
+                j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+                j.async = true;
+
+                e.parentNode.insertBefore(j, e);
+            })(document, 'script');
+        </script>
+        <noscript>为正常使用来必力评论功能请激活 JavaScript</noscript>
+    </div>
+
 
             
 
@@ -808,13 +821,6 @@ $$<span class="token punctuation">;</span>
             
         
     
-        
-            
-                <span class="iconfont-archer wechat" title=wechat>
-                    
-                    <img class="profile-qr" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/wechat.jpeg" />
-                </span>
-            
         
     
         

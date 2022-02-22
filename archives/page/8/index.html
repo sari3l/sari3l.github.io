@@ -209,15 +209,13 @@
     
     <!-- 谷歌统计  -->
     
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-129685149-2"></script>
         <script>
-            (function (i, s, o, g, r, a, m) {
-                i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
-                (i[r].q = i[r].q || []).push(arguments)
-                }, i[r].l = 1 * new Date(); a = s.createElement(o),
-                m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
-            })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
-            ga('create', 'UA-129685149-2', 'auto');
-            ga('send', 'pageview');
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'UA-129685149-2');
         </script>
     
 <meta name="generator" content="Hexo 4.2.1"><link rel="stylesheet" href="/css/prism-funky.css" type="text/css"></head>
@@ -790,13 +788,6 @@ idea生成maven项目，在pom.xml中添加依赖
             
         
     
-        
-            
-                <span class="iconfont-archer wechat" title=wechat>
-                    
-                    <img class="profile-qr" src="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/loading.gif" data-original="https://cdn.jsdelivr.net/gh/sari3l/sari3l.github.io/assets/wechat.jpeg" />
-                </span>
-            
         
     
         
