@@ -454,6 +454,54 @@
             
         
         <article class="index-post">
+            <a class="abstract-title" href="/posts/626780ce/">
+                
+                <span class="abstract-title-text">s2-032 漏洞分析</span>
+            </a>
+            <div class="abstract-content">
+                影响版本
+Struts 2.3.20 - Struts Struts 2.3.28（2.3.20.3和2.3.24.3除外）
+吐槽：这个漏洞其实和S2-016差不多。
+0x01 土亢
+v2.3.20因该是误报，可能开发时候没注意写死了DefaultActionMapper.allowDynamicMethodCalls == false，恰好避免了漏洞 XD 
+
+需要开启动态代码调试
+ &lt;constant name="struts.enable.DynamicMethodInvocation" value="true"/>
+
+
+0x02 分析跟进分析
+在前期准备阶段进入Prepar...
+            </div>
+            <!-- read more -->
+            
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2020/08/01">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/11/02</span>
+                </div>
+                <!-- tags -->
+                
+                    <div class= abstract-tags >
+    
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="java">java</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="struts">struts</a>
+    
+</div>
+
+                
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+    
+        
+        
+        
+        
+            
+        
+        <article class="index-post">
             <a class="abstract-title" href="/posts/617314e9/">
                 
                 <span class="abstract-title-text">s2-033 &amp; s2-037 漏洞分析</span>
@@ -1351,7 +1399,30 @@ idea生成maven项目，在pom.xml中添加依赖
         
         
         
+        
+        
+        
+        
+        
     
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
         
         
@@ -2120,7 +2191,7 @@ idea生成maven项目，在pom.xml中添加依赖
     
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 77
+        Total : 78
         </div>
         <!-- search  -->
         
@@ -2130,6 +2201,21 @@ idea生成maven项目，在pom.xml中添加依赖
     
         
             
+            
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+            
+        
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/08</span>
+            <a class="archive-post-title" href="/posts/bc626227/">Confluence CVE-2022-26134 解析</a>
+        </li>
+    
+        
+            
+            
+                
+                </ul>
             
             <div class="archive-year"> 2021 </div>
             <ul class="year-list">
